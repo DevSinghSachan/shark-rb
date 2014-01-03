@@ -470,7 +470,7 @@ static VALUE method_export_feature_images(int number_of_arguments, VALUE* ruby_a
 
 extern "C"  {
 
-	void Init_shark() {
+	void Init_rb_shark() {
 
 		// Ruby methods for AutoEncoder
 		rb_define_singleton_method(rb_optimizer_klass, "autoencoder", (rb_method)method_autoencode, -1);

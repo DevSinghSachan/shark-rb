@@ -117,9 +117,9 @@ extout_prefix =
 target_prefix = 
 LOCAL_LIBS = 
 LIBS = $(LIBRUBYARG_SHARED) -lstdc++ -lboost_serialization-mt -lboost_thread-mt -lblas -lshark  -lpthread -ldl -lobjc 
-SRCS = Optimizer.cpp shark.cpp
-OBJS = Optimizer.o shark.o
-TARGET = shark
+SRCS = Optimizer.cpp rb_shark.cpp
+OBJS = Optimizer.o rb_shark.o
+TARGET = rb_shark
 DLLIB = $(TARGET).bundle
 EXTSTATIC = 
 STATIC_LIB = 
@@ -168,7 +168,7 @@ install-rb-default: pre-install-rb-default
 pre-install-rb: Makefile
 pre-install-rb-default: Makefile
 pre-install-rb-default:
-	$(ECHO) installing default shark libraries
+	$(ECHO) installing default rb_shark libraries
 ./.RUBYARCHDIR.time:
 	$(Q) $(MAKEDIRS) $(RUBYARCHDIR)
 	$(Q) $(TOUCH) $@
