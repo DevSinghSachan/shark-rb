@@ -12,6 +12,12 @@ Gem::Specification.new do |s|
   s.authors = ["Jonathan Raiman"]
   s.date = "2014-01-03"
   s.email = "jraiman@mit.edu"
+  s.extensions = ["ext/extconf.rb"]
+  s.files = [
+    "Rakefile",
+    "VERSION",
+    "shark-rb.gemspec"
+  ]
   s.homepage = "http://github.com/JonathanRaiman/shark_rb"
   s.require_paths = ["lib"]
   s.rubygems_version = "2.1.10"

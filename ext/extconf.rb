@@ -1,6 +1,6 @@
 # Loads mkmf which is used to make makefiles for Ruby extensions
 require 'mkmf'
-extension_name = 'shark'
+extension_name = 'rb_shark'
 dir_config(extension_name)
 
 have_header("ruby.h")
