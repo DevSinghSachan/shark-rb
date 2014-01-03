@@ -35,7 +35,7 @@ class Optimizer {
 		void setParameterVector(RealVector const &);
 		std::vector<shark::RealMatrix> eval(RealMatrix&);
 		void setData(shark::RegressionDataset);
-		Optimizer(int, int, bool, double, double, double);
+		Optimizer(int, int, double, double, double);
 		double errorValue();
 		void step();
 		~Optimizer();

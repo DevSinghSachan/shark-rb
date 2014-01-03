@@ -7,7 +7,6 @@ using namespace shark;
 Optimizer::Optimizer(
 	int    _visibleSize,
 	int    _hiddenSize,
-	bool   _normalize,
 	double _rho,
 	double _beta,
 	double _lambda):
@@ -80,10 +79,6 @@ void Optimizer::setData(shark::RegressionDataset data) {
 	regularizer = TwoNormRegularizer(error.numberOfVariables());
 	func.add(error);
 	func.add(lambda, regularizer);
-	// cout << "Model has: " << model.numberOfParameters() << " params."  << endl;
-	// cout << "Model has: " << model.numberOfNeurons()    << " neurons." << endl;
-	// cout << "Model has: " << model.inputSize()          << " inputs."  << endl;
-	// cout << "Model has: " << model.outputSize()         << " outputs." << endl;
 	this->setStartingPoint();
 	optimizer.init(func, model.parameterVector());
 	steps = 0;

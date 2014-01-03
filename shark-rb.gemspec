@@ -16,6 +16,14 @@ Gem::Specification.new do |s|
   s.files = [
     "Rakefile",
     "VERSION",
+    "ext/Makefile",
+    "ext/Optimizer.cpp",
+    "ext/Optimizer.h",
+    "ext/data/images.csv",
+    "ext/extconf.rb",
+    "ext/rb_shark.cpp",
+    "ext/shark.bundle",
+    "lib/shark-rb.rb",
     "shark-rb.gemspec"
   ]
   s.homepage = "http://github.com/JonathanRaiman/shark_rb"
