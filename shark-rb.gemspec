@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
     "ext/data/images.csv",
     "ext/extconf.rb",
     "ext/rb_shark.cpp",
-    "ext/shark.bundle",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/shark-rb.rb",
     "shark-rb.gemspec"

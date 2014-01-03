@@ -1,7 +1,10 @@
+require 'set'
 class Optimizer
 	module Autoencoder
 		class Text
 			attr_reader :autoencoder
+			attr_reader :vector
+			attr_reader :standard_vector
 			DefaultRho = 0.01 #Sparsity parameter
 			DefaultBeta = 3.0 #Regularization parameter
 			DefaultLambda = 0.0002  #Weight decay paramater
@@ -19,7 +22,7 @@ class Optimizer
 			end
 
 			def self.create_autoencoder_samples opts={}
-				vectors = Array.new(opts[:data].length, Array.new(opts[:vector].keys.length, 0.0))
+				vectors = Array.new(opts[:data].length).map {Array.new(opts[:vector].keys.length, 0.0)}
 				opts[:data].each_with_index do |sample, k|
 					sample.each do |keyword|
 						vectors[k][opts[:vector][keyword]] = 1.0
@@ -28,18 +31,21 @@ class Optimizer
 				vectors
 			end
 
-			def initiliaze(opts={})
-				@standard_vector     = self.create_text_sample_set_from_samples opts[:samples]
-				@autoencoder_vectors = self.create_autoencoder_samples :data => opts[:samples], :vector => @standard_vector
-				autoencoder_opts     = {
-					:data => @autoencoder_vectors,
-					:hidden_neurons => DefaultHiddenNeurons,
-					:rho => DefaultRho,
-					:lambda => DefaultLambda,
-					:beta => DefaultBeta
-				}
-				autoencoder_opts = opts.merge autoencoder_opts
-				@autoencoder = Optimizer.autoencoder autoencoder_opts
+			def initialize(opts={})
+				@standard_vector     = Optimizer::Autoencoder::Text.create_text_sample_set_from_samples opts[:samples]
+				samples = Optimizer::Autoencoder::Text.create_autoencoder_samples(:data => opts[:samples], :vector => @standard_vector)
+				puts samples.inspect
+				samples.each {|i| puts i.length}
+				@autoencoder_vectors = Optimizer.autoencoder.samples samples
+				# autoencoder_opts     = {
+				# 	:data => @autoencoder_vectors,
+				# 	:hidden_neurons => DefaultHiddenNeurons,
+				# 	:rho => DefaultRho,
+				# 	:lambda => DefaultLambda,
+				# 	:beta => DefaultBeta
+				# }
+				# autoencoder_opts = opts.merge autoencoder_opts
+				# @autoencoder = Optimizer.autoencoder autoencoder_opts
 			end
 
 			def train
@@ -52,8 +58,8 @@ class Optimizer
 
 			# build eval, parameters, etc...
 
-			alias :train :step
-			alias :error :solution
+			alias :step :train
+			alias :solution :error
 		end
 	end
 end

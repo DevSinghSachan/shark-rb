@@ -26,8 +26,10 @@ template<class Obtype> VALUE alloc_ob(VALUE self)
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 
+	cout << "okay" << endl;
 	int width = RARRAY_LEN(ary);
 	int height = RARRAY_LEN(rb_ary_entry(ary, 0));
+	cout << "height => " << height << endl;
 	std::vector<shark::RealVector> matrix;
 	for (int i=0;i<width;i++) {
 		shark::RealVector vector(height);
@@ -175,6 +177,11 @@ Samples::Samples(VALUE self, VALUE rb_data) {
 	Check_Type(rb_data, T_ARRAY);
 
 	std::vector<shark::RealVector> created_data = rb_ary_to_realvector(rb_data);
+
+	cout << "created_data.size() => " << created_data.size() << endl;
+	for (int i= 0;i < created_data.size();i++) {
+		cout << "created_data[i].size() => " << created_data[i].size() << endl;
+	}
 
 	shark::UnlabeledData<shark::RealVector> samples = shark::createDataFromRange(created_data);
 
