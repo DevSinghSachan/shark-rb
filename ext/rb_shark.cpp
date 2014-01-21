@@ -26,10 +26,8 @@ template<class Obtype> VALUE alloc_ob(VALUE self)
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 
-	cout << "okay" << endl;
 	int width = RARRAY_LEN(ary);
 	int height = RARRAY_LEN(rb_ary_entry(ary, 0));
-	cout << "height => " << height << endl;
 	std::vector<shark::RealVector> matrix;
 	for (int i=0;i<width;i++) {
 		shark::RealVector vector(height);
@@ -176,6 +174,8 @@ shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, i
 Samples::Samples(VALUE self, VALUE rb_data) {
 	Check_Type(rb_data, T_ARRAY);
 
+	cout << "arrived in Samples::Samples" << endl;
+
 	std::vector<shark::RealVector> created_data = rb_ary_to_realvector(rb_data);
 
 	cout << "created_data.size() => " << created_data.size() << endl;
@@ -209,23 +209,6 @@ std::vector<shark::RealVector> Samples::input () {
 	}
 	return my_input;
 }
-
-// void exportFeatureImages(const RealMatrix& W)
-// {
-// 	// Export the visualized features.
-// 	// Each row of W corresponds to a feature. Some normalization is done and
-// 	// then it is transformed into a psize x psize image.
-// 	boost::format filename("feature%d.pgm");
-
-// 	// Create feature images
-// 	for (size_t i = 0; i < W.size1(); ++i)
-// 	{
-// 		shark::RealVector img(W.size2());
-// 		for (size_t j = 0; j < W.size2(); ++j)
-// 			img(j) = W(i,j);
-// 		exportPGM((filename % i).str().c_str(), img, 8, 8, true);
-// 	}
-// }
 
 static VALUE method_get_samples(int number_of_arguments, VALUE* ruby_arguments, VALUE self)
 {
@@ -439,13 +422,7 @@ static VALUE method_autoencode_eval(VALUE self, VALUE sample) {
 	std::vector<shark::RealMatrix> samples = rb_ary_to_realmatrix(sample);
 
 	// convert sample to Realmatrix.
-	cout << "Size of samples => " << samples.size() << endl;
-	cout << "Size1 of samples[0] => " << samples[0].size1() << endl;
-	cout << "Size2 of samples[0] => " << samples[0].size2() << endl;
 	std::vector<shark::RealMatrix> evaluation = o->eval(samples[0]);
-
-	cout << "Size1 of evaluation[0] => " << evaluation[0].size1() << endl;
-	cout << "Size2 of evaluation[0] => " << evaluation[0].size2() << endl;
 
 	VALUE output_hash, rb_evaluation, rb_hidden_evaluation, rb_other_evaluation, rb_all_evaluation;
 

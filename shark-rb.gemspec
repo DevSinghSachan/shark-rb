@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-01-03"
+  s.date = "2014-01-21"
   s.description = "Shark C++ library bindings in Ruby."
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
     "ext/Optimizer.h",
     "ext/data/images.csv",
     "ext/extconf.rb",
+    "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/shark-rb.rb",
