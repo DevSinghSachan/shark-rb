@@ -174,22 +174,21 @@ shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, i
 Samples::Samples(VALUE self, VALUE rb_data) {
 	Check_Type(rb_data, T_ARRAY);
 
-	cout << "arrived in Samples::Samples" << endl;
+	// For debugging purposes 
+	/* cout << "arrived in Samples::Samples" << endl; */
 
 	std::vector<shark::RealVector> created_data = rb_ary_to_realvector(rb_data);
 
-	cout << "created_data.size() => " << created_data.size() << endl;
+	/*cout << "created_data.size() => " << created_data.size() << endl;
 	for (int i= 0;i < created_data.size();i++) {
 		cout << "created_data[i].size() => " << created_data[i].size() << endl;
-	}
+	}*/
 
 	shark::UnlabeledData<shark::RealVector> samples = shark::createDataFromRange(created_data);
 
 	data = RegressionDataset(samples, samples);
 	visibleSize = RARRAY_LEN(rb_ary_entry(rb_data, 0));
 }
-
-
 
 Samples::Samples(int numSamples, int height, int width) {
 	// Read the data

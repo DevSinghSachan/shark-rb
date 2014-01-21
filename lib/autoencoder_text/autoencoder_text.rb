@@ -83,11 +83,11 @@ class Optimizer
 													 :beta => opts[:beta]                     || DefaultBeta
 			end
 
-			def present
+			def present(cutoff=0)
 				parameters.each do |filter|
 					puts "\n{"
 					filter.each_pair do |k,v|
-						if v > 0
+						if v > cutoff
 							puts "    #{k} => #{v}"
 						end
 					end
