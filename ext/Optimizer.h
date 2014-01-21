@@ -48,6 +48,18 @@ class Optimizer {
 		void setStartingPoint();
 };
 
+class rb_RealVector {
+	public:
+		rb_RealVector(RealVector);
+		RealVector data;
+};
+class rb_UnlabeledData {
+	public:
+		rb_UnlabeledData(UnlabeledData<RealVector>);
+		UnlabeledData<RealVector> data;
+		std::vector<shark::RealVector> input ();
+};
+
 class Samples {
 	public:
 		int visibleSize;

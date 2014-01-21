@@ -11,10 +11,15 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
   s.date = "2014-01-21"
-  s.description = "Shark C++ library bindings in Ruby."
+  s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
+  s.extra_rdoc_files = [
+    "README.md"
+  ]
   s.files = [
+    "Makefile",
+    "README.md",
     "Rakefile",
     "VERSION",
     "ext/Makefile",
@@ -31,7 +36,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/JonathanRaiman/shark_rb"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "2.1.10"
+  s.rubygems_version = "2.1.11"
   s.summary = "Shark C++ library bindings in Ruby."
 end
 
