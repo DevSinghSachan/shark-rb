@@ -1,4 +1,6 @@
 #include "Optimizer.h"
+#include "rb_RealVector.h"
+#include "rb_UnlabeledData.h"
 
 using namespace std;
 using namespace shark;
@@ -123,6 +125,17 @@ VALUE method_realvector_multiply (VALUE self, VALUE multiplier) {
 		rb_RealVector *s;
 		Data_Get_Struct(self, rb_RealVector, s);
 		s->data = NUM2DBL(multiplier)*(s->data);
+	} else {
+		rb_raise(rb_eArgError, "Can only multiply RealVector by a number");
+	}
+	return self;
+}
+
+VALUE method_realvector_divide (VALUE self, VALUE multiplier) {
+	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+		rb_RealVector *s;
+		Data_Get_Struct(self, rb_RealVector, s);
+		s->data = (s->data) / NUM2DBL(multiplier);
 	} else {
 		rb_raise(rb_eArgError, "Can only multiply RealVector by a number");
 	}
@@ -256,12 +269,6 @@ shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, i
 	return samples;
 }
 
-rb_UnlabeledData::rb_UnlabeledData(UnlabeledData<RealVector> _data) {
-	data = _data;
-}
-rb_RealVector::rb_RealVector(RealVector _data) {
-	data = _data;
-}
 
 Samples::Samples(VALUE self, VALUE rb_data) {
 	Check_Type(rb_data, T_ARRAY);
@@ -296,15 +303,6 @@ std::vector<shark::RealVector> Samples::input () {
 	for (size_t i=0; i<data.numberOfElements(); i++)
 	{
 		RealVector output = data.element(i).input;
-		my_input[i] = output;
-	}
-	return my_input;
-}
-std::vector<shark::RealVector> rb_UnlabeledData::input () {
-	std::vector<shark::RealVector> my_input(data.numberOfElements());
-	for (size_t i=0; i<data.numberOfElements(); i++)
-	{
-		RealVector output(data.element(i));
 		my_input[i] = output;
 	}
 	return my_input;
@@ -644,6 +642,7 @@ extern "C"  {
 
 		rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
 		rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
+		rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
 		rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
 
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
@@ -653,10 +652,10 @@ extern "C"  {
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "shift", (rb_method)method_unlabeleddata_shift,1);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);
+		// rb_define_method(rb_optimizer_samples_klass, "truncate_and_rescale", (rb_method)method_samples_truncate_and_rescale,4);
 
 		/*rb_define_method(rb_optimizer_samples_klass, "truncate", (rb_method)method_samples_truncate,0);
 		rb_define_method(rb_optimizer_samples_klass, "truncate_and_rescale", (rb_method)method_samples_truncate_and_rescale,0);
-		rb_define_method(rb_optimizer_samples_klass, "variance", (rb_method)method_samples_get_variance,0);
 		
 		*/
 	}
