@@ -31,7 +31,9 @@ You must have the following installed to install this gem:
 	* Boost
 	* Blas
 	* Shark
-	* Ruby 1.9.3 (you can probably get away with a more recent one, but this one has such great support, why would you want to use something else?)
+	* Ruby 1.9.3*
+
+**(you can probably get away with a more recent one, but this one has such great support, why would you want to use something else?)*
 
 ## Usage ##
 
@@ -57,9 +59,12 @@ Here's the good part. Usage with text is dead simple:
 	encoder.present
 	#=> shows hidden neuron filters (clusters of features that are useful to recreate the input)
 
+
+
 ## Issues ##
 
 	??
+
 
 ## Next steps ##
 
