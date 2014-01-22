@@ -1,14 +1,6 @@
 require 'set'
 require 'ostruct'
 class Optimizer
-	class Samples
-	end
-	class RealVector
-	end
-	class UnlabeledData
-	end
-	class RegressionDataset
-	end
 	module Autoencoder
 		class Text
 			attr_reader :autoencoder
