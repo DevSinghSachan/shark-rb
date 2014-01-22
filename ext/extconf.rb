@@ -9,4 +9,7 @@ have_library("blas")
 have_library("boost_thread-mt")
 have_library("boost_serialization-mt")
 $libs = append_library($libs, "stdc++")
+
+# $srcs = Dir.glob(File.dirname(__FILE__) + "/*.cpp") +  Dir.glob(File.dirname(__FILE__) + "/*/*.cpp")
+
 create_makefile(extension_name)

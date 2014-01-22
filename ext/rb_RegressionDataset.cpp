@@ -7,7 +7,7 @@ using namespace shark;
 shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSamples, int height, int width) {
 	// Read images
 	shark::UnlabeledData<shark::RealVector> images;
-	import_csv(images, "data/images.csv");
+	import_csv(images, "../data/images.csv");
 
 	const unsigned int w = 512;//width of loaded image
 	const unsigned int h = 512;//height of loaded image

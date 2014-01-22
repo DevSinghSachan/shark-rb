@@ -16,6 +16,7 @@ VALUE rb_optimizer_samples_klass       = rb_define_class_under(rb_optimizer_klas
 VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klass, "RealVector", rb_cObject);
 VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
 VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
+VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -38,7 +39,87 @@ shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 	}
 	return vector;
 }
+RealMatrix rb_ary_to_realmatrix(VALUE ary) {
 
+	int width = RARRAY_LEN(ary);
+	int height = RARRAY_LEN(rb_ary_entry(ary, 0));
+	shark::RealMatrix matrix(height, width);
+		
+	for (int i=0;i<height;i++)
+		for (int j=0;j<width;j++)
+			matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));
+
+	return matrix;
+}
+
+RealMatrix rb_1d_ary_to_realmatrix(VALUE ary) {
+	int height = RARRAY_LEN(ary);
+	shark::RealMatrix matrix(1, height);
+	for (int i=0;i<height;i++)
+		matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));
+	return matrix;
+}
+
+std::vector<shark::RealMatrix> rb_ary_to_realmatrices(VALUE ary) {
+
+	std::vector<shark::RealMatrix> matrices;
+
+	if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
+		// 2D array
+		/*int width = RARRAY_LEN(ary);
+		int height = RARRAY_LEN(rb_ary_entry(ary, 0));
+		shark::RealMatrix matrix(height, width);
+		for (int i=0;i<height;i++)
+			for (int j=0;j<width;j++)
+				matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));*/
+		matrices.push_back(rb_ary_to_realmatrix(ary));
+	} else {
+		// 1D array
+		/*int height = RARRAY_LEN(ary);
+		shark::RealMatrix matrix(1, height);
+		for (int i=0;i<height;i++)
+			matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));*/
+		matrices.push_back(rb_1d_ary_to_realmatrix(ary));
+	}
+	
+	return matrices;
+}
+
+
+VALUE realmatrix_to_rb_ary(const RealMatrix& W) {
+	VALUE matrix = rb_ary_new2((int)W.size1());
+	for (size_t i = 0; i < W.size1(); ++i)
+	{
+		rb_ary_store(matrix, (int)i, rb_ary_new2((int) W.size2()));
+		for (size_t j = 0; j < W.size2(); ++j) {
+			// printf("W(%d,%d) = %f\n", (int)i, (int)j, W(i,j));
+			rb_ary_store(rb_ary_entry(matrix, (int)i), (int)j, rb_float_new(W(i,j)));
+		}
+	}
+	return matrix;
+}
+
+VALUE realmatrix_to_rb_ary(const RealMatrix& W, bool two_d_array) {
+	if (two_d_array == 1 && (W.size1() == 1 || W.size2() == 1)) {
+		VALUE matrix = rb_ary_new2((int)W.size1()*W.size2());
+		bool tall = W.size1() > W.size2() ? 1 : 0;
+		int length = tall ? W.size1() : W.size2();
+		for (size_t i = 0; i < length; ++i)
+			rb_ary_store(matrix, i, rb_float_new(tall ? W(i,0) : W(0,i)));
+		return matrix;
+	} else {
+		return realmatrix_to_rb_ary(W);
+	}
+	
+}
+
+VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
+	VALUE ary = rb_ary_new2((int)W.size());
+	for (int i = 0; i < W.size(); ++i) {
+		rb_ary_store(ary, i,realmatrix_to_rb_ary(W[i]));
+	}
+	return ary;
+}
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 	int width = RARRAY_LEN(ary);
@@ -147,6 +228,116 @@ VALUE method_unlabeleddata_initialize (int number_of_arguments, VALUE* ruby_argu
 	return self;
 }
 
+VALUE method_realmatrix_get_sqrt (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	m->data = sqrt(m->data);
+	return self;
+}
+VALUE method_realmatrix_to_ary (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	return realmatrix_to_rb_ary(m->data);
+}
+VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
+	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+		rb_RealMatrix *m;
+		Data_Get_Struct(self, rb_RealMatrix, m);
+		m->data = NUM2DBL(multiplier)*(m->data);
+	} else {
+		rb_raise(rb_eArgError, "Can only multiply RealMatrix by a number");
+	}
+	return self;
+}
+VALUE method_realmatrix_divide (VALUE self, VALUE divider) {
+	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+		rb_RealMatrix *m;
+		Data_Get_Struct(self, rb_RealMatrix, m);
+		m->data = (m->data) / NUM2DBL(divider);
+	} else {
+		rb_raise(rb_eArgError, "Can only divide RealMatrix by a number");
+	}
+	return self;
+}
+VALUE method_realmatrix_length (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	VALUE size = rb_ary_new2(2);
+	// number of rows
+	rb_ary_store(size, 0, INT2FIX((m->data).size1()));
+	// number of columns
+	rb_ary_store(size, 1, INT2FIX((m->data).size2()));
+	return size;
+}
+VALUE method_realmatrix_negate (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	return wrap_pointer<rb_RealMatrix>(
+		rb_optimizer_realvector_klass,
+		new rb_RealMatrix(-(m->data))
+	);
+}
+VALUE method_realmatrix_allocate (VALUE klass) {
+	return wrap_pointer<rb_RealMatrix>(
+			rb_optimizer_realmatrix_klass,
+			new rb_RealMatrix()
+			);
+}
+VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE dataset;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&dataset);
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+
+	if (TYPE(dataset) == T_ARRAY)
+		m->data = rb_ary_to_realmatrix(dataset);
+
+	return self;
+}
+
+VALUE method_realvector_multiply (VALUE self, VALUE multiplier) {
+	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+		rb_RealVector *s;
+		Data_Get_Struct(self, rb_RealVector, s);
+		s->data = NUM2DBL(multiplier)*(s->data);
+	} else {
+		rb_raise(rb_eArgError, "Can only multiply RealVector by a number");
+	}
+	return self;
+}
+
+VALUE method_realvector_get_sqrt (VALUE self) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	s->data = sqrt(s->data);
+	return self;
+}
+
+VALUE method_realvector_divide (VALUE self, VALUE divider) {
+	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+		rb_RealVector *s;
+		Data_Get_Struct(self, rb_RealVector, s);
+		s->data = (s->data) / NUM2DBL(divider);
+	} else {
+		rb_raise(rb_eArgError, "Can only divide RealVector by a number");
+	}
+	return self;
+}
+
+VALUE method_realvector_negate (VALUE self) {
+	rb_RealVector *v;
+	Data_Get_Struct(self, rb_RealVector, v);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(-(v->data))
+	);
+}
+
 VALUE method_realvector_to_ary (VALUE self) {
 	rb_RealVector *s;
 	Data_Get_Struct(self, rb_RealVector, s);
@@ -168,8 +359,8 @@ VALUE method_unlabeleddata_length (VALUE self) {
 VALUE method_realvector_allocate (VALUE klass) {
 	return wrap_pointer<rb_RealVector>(
 			rb_optimizer_realvector_klass,
-			new rb_RealVector(rb_ary_to_1d_realvector(rb_ary_new()))
-			);
+			new rb_RealVector()
+			);//new rb_RealVector(rb_ary_to_1d_realvector(rb_ary_new()))
 }
 
 VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
@@ -207,6 +398,15 @@ VALUE method_unlabeleddata_variance (VALUE self) {
 	);
 }
 
+VALUE method_unlabeleddata_covariance (VALUE self) {
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	return wrap_pointer<rb_RealMatrix>(
+		rb_optimizer_realmatrix_klass,
+		new rb_RealMatrix(covariance(s->data))
+	);
+}
+
 VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 	Check_Type(shift_vector, T_DATA);
 	rb_UnlabeledData *s;
@@ -218,34 +418,6 @@ VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 	return self;
 }
 
-VALUE method_realvector_multiply (VALUE self, VALUE multiplier) {
-	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
-		rb_RealVector *s;
-		Data_Get_Struct(self, rb_RealVector, s);
-		s->data = NUM2DBL(multiplier)*(s->data);
-	} else {
-		rb_raise(rb_eArgError, "Can only multiply RealVector by a number");
-	}
-	return self;
-}
-
-VALUE method_realvector_get_sqrt (VALUE self) {
-	rb_RealVector *s;
-	Data_Get_Struct(self, rb_RealVector, s);
-	s->data = sqrt(s->data);
-	return self;
-}
-
-VALUE method_realvector_divide (VALUE self, VALUE multiplier) {
-	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
-		rb_RealVector *s;
-		Data_Get_Struct(self, rb_RealVector, s);
-		s->data = (s->data) / NUM2DBL(multiplier);
-	} else {
-		rb_raise(rb_eArgError, "Can only multiply RealVector by a number");
-	}
-	return self;
-}
 
 
 VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
@@ -259,15 +431,6 @@ VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 	return self;
 }
 
-VALUE method_realvector_negate (VALUE self) {
-	rb_RealVector *v;
-	Data_Get_Struct(self, rb_RealVector, v);
-
-	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
-		new rb_RealVector(-(v->data))
-	);
-}
 
 VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE minY, VALUE newMin, VALUE newMax) {
 	Check_Type(minX, T_DATA);
@@ -290,41 +453,6 @@ VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE m
 		rb_raise(rb_eArgError, "New scale must be bounded by numbers");
 	}
 	return self;
-}
-
-VALUE realmatrix_to_rb_ary(const RealMatrix& W) {
-	VALUE matrix = rb_ary_new2((int)W.size1());
-	for (size_t i = 0; i < W.size1(); ++i)
-	{
-		rb_ary_store(matrix, (int)i, rb_ary_new2((int) W.size2()));
-		for (size_t j = 0; j < W.size2(); ++j) {
-			// printf("W(%d,%d) = %f\n", (int)i, (int)j, W(i,j));
-			rb_ary_store(rb_ary_entry(matrix, (int)i), (int)j, rb_float_new(W(i,j)));
-		}
-	}
-	return matrix;
-}
-
-VALUE realmatrix_to_rb_ary(const RealMatrix& W, bool two_d_array) {
-	if (two_d_array == 1 && (W.size1() == 1 || W.size2() == 1)) {
-		VALUE matrix = rb_ary_new2((int)W.size1()*W.size2());
-		bool tall = W.size1() > W.size2() ? 1 : 0;
-		int length = tall ? W.size1() : W.size2();
-		for (size_t i = 0; i < length; ++i)
-			rb_ary_store(matrix, i, rb_float_new(tall ? W(i,0) : W(0,i)));
-		return matrix;
-	} else {
-		return realmatrix_to_rb_ary(W);
-	}
-	
-}
-
-VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
-	VALUE ary = rb_ary_new2((int)W.size());
-	for (int i = 0; i < W.size(); ++i) {
-		rb_ary_store(ary, i,realmatrix_to_rb_ary(W[i]));
-	}
-	return ary;
 }
 
 /* end Ruby Stuff */
@@ -630,31 +758,6 @@ static VALUE method_autoencode_output_size(VALUE self) {
 	return INT2FIX((o->model).outputSize());
 }
 
-std::vector<shark::RealMatrix> rb_ary_to_realmatrix(VALUE ary) {
-
-	std::vector<shark::RealMatrix> matrices;
-
-	if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
-		// 2D array
-		int width = RARRAY_LEN(ary);
-		int height = RARRAY_LEN(rb_ary_entry(ary, 0));
-		shark::RealMatrix matrix(height, width);
-		for (int i=0;i<height;i++)
-			for (int j=0;j<width;j++)
-				matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));
-		matrices.push_back(matrix);
-	} else {
-		// 1D array
-		int height = RARRAY_LEN(ary);
-		shark::RealMatrix matrix(1, height);
-		for (int i=0;i<height;i++)
-			matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));
-		matrices.push_back(matrix);
-	}
-	
-	return matrices;
-}
-
 static VALUE method_autoencode_eval(VALUE self, VALUE sample) {
 	Optimizer *o;
 	Data_Get_Struct(self, Optimizer, o);
@@ -664,7 +767,7 @@ static VALUE method_autoencode_eval(VALUE self, VALUE sample) {
 	if (RARRAY_LEN(sample) < 1)
 		rb_raise(rb_eArgError, "There must be at least one sample to evaluate.");
 
-	std::vector<shark::RealMatrix> samples = rb_ary_to_realmatrix(sample);
+	std::vector<shark::RealMatrix> samples = rb_ary_to_realmatrices(sample);
 
 	// convert sample to Realmatrix.
 	std::vector<shark::RealMatrix> evaluation = o->eval(samples[0]);
@@ -761,6 +864,15 @@ extern "C"  {
 			rb_define_alloc_func(rb_optimizer_realvector_klass, (rb_alloc_func_t) method_realvector_allocate);
 			rb_define_method(rb_optimizer_realvector_klass, "initialize", (rb_method)method_realvector_initialize,-1);
 
+			rb_define_method(rb_optimizer_realmatrix_klass, "sqrt", (rb_method)method_realmatrix_get_sqrt,0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "to_a", (rb_method)method_realmatrix_to_ary, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "*", (rb_method)method_realmatrix_multiply, 1);
+			rb_define_method(rb_optimizer_realmatrix_klass, "/", (rb_method)method_realmatrix_divide, 1);
+			rb_define_method(rb_optimizer_realmatrix_klass, "length", (rb_method)method_realmatrix_length, 0);
+			// rb_define_method(rb_optimizer_realmatrix_klass, "-@", (rb_method)method_realmatrix_negate,0);
+			rb_define_alloc_func(rb_optimizer_realmatrix_klass, (rb_alloc_func_t) method_realmatrix_allocate);
+			rb_define_method(rb_optimizer_realmatrix_klass, "initialize", (rb_method)method_realmatrix_initialize,-1);
+
 			rb_define_method(rb_optimizer_regressionset_klass, "visible_size", (rb_method)method_regressionset_get_visible_size, 0);
 			rb_define_method(rb_optimizer_regressionset_klass, "length", (rb_method)method_regressionset_get_size,0);
 			rb_define_method(rb_optimizer_regressionset_klass, "size", (rb_method)method_regressionset_get_size,0);
@@ -773,6 +885,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a", (rb_method)method_unlabeleddata_to_ary,0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "mean", (rb_method)method_unlabeleddata_mean,0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "variance", (rb_method)method_unlabeleddata_variance,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "covariance", (rb_method)method_unlabeleddata_covariance,0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "shift", (rb_method)method_unlabeleddata_shift,1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);

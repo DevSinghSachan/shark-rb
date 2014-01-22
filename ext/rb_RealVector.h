@@ -6,5 +6,6 @@ using namespace shark;
 class rb_RealVector {
 	public:
 		rb_RealVector(RealVector);
+		rb_RealVector();
 		RealVector data;
 };
