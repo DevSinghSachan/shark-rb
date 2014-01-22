@@ -1,6 +1,7 @@
 #include "Optimizer.h"
 #include "rb_RealVector.h"
 #include "rb_UnlabeledData.h"
+#include "rb_RegressionDataset.h"
 
 using namespace std;
 using namespace shark;
@@ -10,24 +11,33 @@ VALUE rb_sym_new(const char *s) {
 }
 
 VALUE rb_optimizer_klass               = rb_define_class("Optimizer", rb_cObject);
-VALUE rb_optimizer_samples_klass       = rb_define_class("Optimizer::Samples", rb_cObject);
-VALUE rb_optimizer_realvector_klass    = rb_define_class("Optimizer::RealVector", rb_cObject);
-VALUE rb_optimizer_unlabeleddata_klass = rb_define_class("Optimizer::UnlabeledData", rb_cObject);
-VALUE rb_optimizer_regressionset_klass = rb_define_class("Optimizer::RegressionDataset", rb_cObject);
+VALUE rb_optimizer_samples_klass       = rb_define_class_under(rb_optimizer_klass, "Samples", rb_cObject);
+VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klass, "RealVector", rb_cObject);
+VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
+VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
 
 template<class Obtype> void delete_objects(Obtype *ptr){
-	// ptr.cleanUp();
 	delete ptr;
 }
 
-template<class Obtype> VALUE wrap_pointer(VALUE klass,Obtype *ptr){ //wrap)c++)obje
+template<class Obtype> VALUE wrap_pointer(VALUE klass,Obtype *ptr){
 	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
 }
 
-template<class Obtype> VALUE alloc_ob(VALUE self)
-{
-	return wrap_pointer<Obtype>(self,new Obtype());//optimizer, function, model, data, loss));//, error));
+template<class Obtype> VALUE alloc_ob(VALUE self) {
+	return wrap_pointer<Obtype>(self,new Obtype());
 }
+
+
+shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
+	int length = RARRAY_LEN(ary);
+	shark::RealVector vector(length);
+	for (int i=0; i < length;i++) {
+		vector(i) = NUM2DBL(rb_ary_entry(ary, i));
+	}
+	return vector;
+}
+
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 	int width = RARRAY_LEN(ary);
@@ -99,6 +109,9 @@ VALUE method_realvector_to_ary (VALUE self) {
 }
 
 VALUE method_realvector_length (VALUE self) {
+	cout << "okay" << endl;
+	Check_Type(self, rb_optimizer_realvector_klass);
+	cout << "next" << endl;
 	rb_RealVector *s;
 	Data_Get_Struct(self, rb_RealVector, s);
 	return INT2FIX((s->data).size());
@@ -110,8 +123,9 @@ VALUE method_unlabeleddata_length (VALUE self) {
 	return INT2FIX((s->data).numberOfElements());
 }
 
-VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self {
+VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE dataset;
+	cout << "initializing" << endl;
 	rb_scan_args(
 		number_of_arguments,
 		ruby_arguments,
@@ -120,12 +134,12 @@ VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_argumen
 	if (TYPE(dataset) == T_ARRAY) {
 		return wrap_pointer<rb_RealVector>(
 			rb_optimizer_realvector_klass,
-			new rb_RealVector(rb_ary_to_realvector(dataset))
+			new rb_RealVector(rb_ary_to_1d_realvector(dataset))
 			);
 	} else {
 		return wrap_pointer<rb_RealVector>(
 			rb_optimizer_realvector_klass,
-			new rb_RealVector(rb_ary_to_realvector(rb_ary_new()))
+			new rb_RealVector(rb_ary_to_1d_realvector(rb_ary_new()))
 			);
 	}
 }
@@ -232,31 +246,6 @@ VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE m
 		rb_raise(rb_eArgError, "New scale must be bounded by numbers");
 	}
 	return self;
-}
-
-std::vector<shark::RealMatrix> rb_ary_to_realmatrix(VALUE ary) {
-
-	std::vector<shark::RealMatrix> matrices;
-
-	if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
-		// 2D array
-		int width = RARRAY_LEN(ary);
-		int height = RARRAY_LEN(rb_ary_entry(ary, 0));
-		shark::RealMatrix matrix(height, width);
-		for (int i=0;i<height;i++)
-			for (int j=0;j<width;j++)
-				matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));
-		matrices.push_back(matrix);
-	} else {
-		// 1D array
-		int height = RARRAY_LEN(ary);
-		shark::RealMatrix matrix(1, height);
-		for (int i=0;i<height;i++)
-			matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));
-		matrices.push_back(matrix);
-	}
-	
-	return matrices;
 }
 
 VALUE realmatrix_to_rb_ary(const RealMatrix& W) {
@@ -398,14 +387,6 @@ static VALUE method_get_samples(int number_of_arguments, VALUE* ruby_arguments, 
 			r_width != Qnil ? NUM2INT(r_width) : 8)
 		);
 }
-/*static VALUE method_create_realvector(VALUE self, VALUE data) {
-	Check_Type(data, T_ARRAY);
-	// shark::UnlabeledData<shark::RealVector> unlabeled_data = rb_ary_to_unlabeleddata(data);
-	return wrap_pointer<rb_UnlabeledData>(
-		rb_optimizer_unlabeleddata_klass,
-		new rb_UnlabeledData(rb_ary_to_unlabeleddata(data))
-		);
-}*/
 
 static VALUE method_create_samples(VALUE self, VALUE data) {
 	return wrap_pointer<Samples>(
@@ -563,7 +544,6 @@ static VALUE method_autoencode_hiddenSize(VALUE self) {
 	return INT2FIX(o->hiddenSize);
 }
 
-
 static VALUE method_autoencode_beta(VALUE self) {
 	Optimizer *o;
 	Data_Get_Struct(self, Optimizer, o);
@@ -604,6 +584,31 @@ static VALUE method_autoencode_output_size(VALUE self) {
 	Optimizer *o;
 	Data_Get_Struct(self, Optimizer, o);
 	return INT2FIX((o->model).outputSize());
+}
+
+std::vector<shark::RealMatrix> rb_ary_to_realmatrix(VALUE ary) {
+
+	std::vector<shark::RealMatrix> matrices;
+
+	if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
+		// 2D array
+		int width = RARRAY_LEN(ary);
+		int height = RARRAY_LEN(rb_ary_entry(ary, 0));
+		shark::RealMatrix matrix(height, width);
+		for (int i=0;i<height;i++)
+			for (int j=0;j<width;j++)
+				matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));
+		matrices.push_back(matrix);
+	} else {
+		// 1D array
+		int height = RARRAY_LEN(ary);
+		shark::RealMatrix matrix(1, height);
+		for (int i=0;i<height;i++)
+			matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));
+		matrices.push_back(matrix);
+	}
+	
+	return matrices;
 }
 
 static VALUE method_autoencode_eval(VALUE self, VALUE sample) {
@@ -652,86 +657,85 @@ extern "C"  {
 
 	void Init_rb_shark() {
 
-		// Ruby methods for AutoEncoder
-		rb_define_singleton_method(rb_optimizer_klass, "autoencoder", (rb_method)method_autoencode, -1);
-		
-		// advance learning by one iteration:
-		rb_define_method(rb_optimizer_klass, "step", (rb_method)method_autoencode_step,0);
-		rb_define_method(rb_optimizer_klass, "train", (rb_method)method_autoencode_step,0);
-		
-		// current training error:
-		rb_define_method(rb_optimizer_klass, "error", (rb_method)method_autoencode_error,0);
-		rb_define_method(rb_optimizer_klass, "solution", (rb_method)method_autoencode_error,0);
-		
-		// The current parameter assignments on the neural net
-		rb_define_method(rb_optimizer_klass, "parameters", (rb_method)method_autoencode_layer_matrices, -1);
-		rb_define_method(rb_optimizer_klass, "layers", (rb_method)method_autoencode_layer_matrices, -1);
-		rb_define_method(rb_optimizer_klass, "export", (rb_method)method_export_feature_images, -1);
-		
-		// number of iterations
-		rb_define_method(rb_optimizer_klass, "steps", (rb_method)method_autoencode_numSteps,0);
-		
-		// Neural-Net shape:
-		rb_define_method(rb_optimizer_klass, "hidden_size", (rb_method)method_autoencode_hiddenSize,0);
-		rb_define_method(rb_optimizer_klass, "visible_size", (rb_method)method_autoencode_visibleSize,0);
+		// Autoencoder
+			// Ruby methods for AutoEncoder
+			rb_define_singleton_method(rb_optimizer_klass, "autoencoder", (rb_method)method_autoencode, -1);
+			
+			// advance learning by one iteration:
+			rb_define_method(rb_optimizer_klass, "step", (rb_method)method_autoencode_step,0);
+			rb_define_method(rb_optimizer_klass, "train", (rb_method)method_autoencode_step,0);
+			
+			// current training error:
+			rb_define_method(rb_optimizer_klass, "error", (rb_method)method_autoencode_error,0);
+			rb_define_method(rb_optimizer_klass, "solution", (rb_method)method_autoencode_error,0);
+			
+			// The current parameter assignments on the neural net
+			rb_define_method(rb_optimizer_klass, "parameters", (rb_method)method_autoencode_layer_matrices, -1);
+			rb_define_method(rb_optimizer_klass, "layers", (rb_method)method_autoencode_layer_matrices, -1);
+			rb_define_method(rb_optimizer_klass, "export", (rb_method)method_export_feature_images, -1);
+			
+			// number of iterations
+			rb_define_method(rb_optimizer_klass, "steps", (rb_method)method_autoencode_numSteps,0);
+			
+			// Neural-Net shape:
+			rb_define_method(rb_optimizer_klass, "hidden_size", (rb_method)method_autoencode_hiddenSize,0);
+			rb_define_method(rb_optimizer_klass, "visible_size", (rb_method)method_autoencode_visibleSize,0);
 
-		// Autoencoder parameters:
-		rb_define_method(rb_optimizer_klass, "beta", (rb_method)method_autoencode_beta,0);
-		rb_define_method(rb_optimizer_klass, "lambda", (rb_method)method_autoencode_lambda,0);
-		rb_define_method(rb_optimizer_klass, "rho", (rb_method)method_autoencode_rho,0);
+			// Autoencoder parameters:
+			rb_define_method(rb_optimizer_klass, "beta", (rb_method)method_autoencode_beta,0);
+			rb_define_method(rb_optimizer_klass, "lambda", (rb_method)method_autoencode_lambda,0);
+			rb_define_method(rb_optimizer_klass, "rho", (rb_method)method_autoencode_rho,0);
 
-		// Neural-Net model:
-		rb_define_method(rb_optimizer_klass, "number_of_neurons", (rb_method)method_autoencode_number_of_neurons,0);
-		rb_define_method(rb_optimizer_klass, "input_size", (rb_method)method_autoencode_input_size,0);
-		rb_define_method(rb_optimizer_klass, "output_size", (rb_method)method_autoencode_output_size,0);
-		rb_define_method(rb_optimizer_klass, "number_of_parameters", (rb_method)method_autoencode_number_of_parameters,0);
+			// Neural-Net model:
+			rb_define_method(rb_optimizer_klass, "number_of_neurons", (rb_method)method_autoencode_number_of_neurons,0);
+			rb_define_method(rb_optimizer_klass, "input_size", (rb_method)method_autoencode_input_size,0);
+			rb_define_method(rb_optimizer_klass, "output_size", (rb_method)method_autoencode_output_size,0);
+			rb_define_method(rb_optimizer_klass, "number_of_parameters", (rb_method)method_autoencode_number_of_parameters,0);
 
-		// Neural-Net evaluation:
-		rb_define_method(rb_optimizer_klass, "eval", (rb_method)method_autoencode_eval, 1);
+			// Neural-Net evaluation:
+			rb_define_method(rb_optimizer_klass, "eval", (rb_method)method_autoencode_eval, 1);
 
+		// Datatypes
 		// Ruby methods for samples
+			rb_define_singleton_method(rb_optimizer_klass, "getSamples", (rb_method)method_get_samples,-1);
+			rb_define_singleton_method(rb_optimizer_klass, "samples", (rb_method)method_create_samples,1);
+			rb_define_singleton_method(rb_optimizer_samples_klass, "getSamples", (rb_method)method_get_samples,-1);
+			rb_define_singleton_method(rb_optimizer_samples_klass, "samples", (rb_method)method_create_samples,1);
+
+			rb_define_method(rb_optimizer_samples_klass, "visible_size", (rb_method)method_get_visible_size, 0);
+			rb_define_method(rb_optimizer_samples_klass, "length", (rb_method)method_samples_get_size,0);
+			rb_define_method(rb_optimizer_samples_klass, "size", (rb_method)method_samples_get_size,0);
+			rb_define_method(rb_optimizer_samples_klass, "elements", (rb_method)method_samples_get_elements,0);
+			rb_define_method(rb_optimizer_samples_klass, "to_a", (rb_method)method_samples_get_elements,0);
+
+			rb_define_method(rb_optimizer_realvector_klass, "sqrt", (rb_method)method_realvector_get_sqrt,0);
+			rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
+			rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
+			rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
+			rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
+			rb_define_method(rb_optimizer_realvector_klass, "-@", (rb_method)method_realvector_negate,0);
+			rb_define_method(rb_optimizer_realvector_klass, "initialize", (rb_method)method_realvector_initialize,-1);
+
+			rb_define_method(rb_optimizer_regressionset_klass, "visible_size", (rb_method)method_regressionset_get_visible_size, 0);
+			rb_define_method(rb_optimizer_regressionset_klass, "length", (rb_method)method_regressionset_get_size,0);
+			rb_define_method(rb_optimizer_regressionset_klass, "size", (rb_method)method_regressionset_get_size,0);
+			rb_define_method(rb_optimizer_regressionset_klass, "elements", (rb_method)method_regressionset_get_elements,0);
+			rb_define_method(rb_optimizer_regressionset_klass, "to_a", (rb_method)method_regressionset_get_elements,0);
+
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "elements", (rb_method)method_unlabeleddata_to_ary,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a", (rb_method)method_unlabeleddata_to_ary,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "mean", (rb_method)method_unlabeleddata_mean,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "variance", (rb_method)method_unlabeleddata_variance,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "shift", (rb_method)method_unlabeleddata_shift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "truncate_and_rescale", (rb_method)method_unlabeleddata_truncate_and_rescale,4);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "initialize", (rb_method)method_unlabeleddata_initialize, -1);
+
 		// <deprecated>
 		// rb_define_singleton_method(rb_optimizer_klass, "create_unlabeled_data", (rb_method)method_create_unlabeleddata, 1);
 		// </deprecated>
-		rb_define_singleton_method(rb_optimizer_klass, "getSamples", (rb_method)method_get_samples,-1);
-		rb_define_singleton_method(rb_optimizer_klass, "samples", (rb_method)method_create_samples,1);
-		rb_define_singleton_method(rb_optimizer_samples_klass, "getSamples", (rb_method)method_get_samples,-1);
-		rb_define_singleton_method(rb_optimizer_samples_klass, "samples", (rb_method)method_create_samples,1);
 
-		rb_define_method(rb_optimizer_samples_klass, "visible_size", (rb_method)method_get_visible_size, 0);
-		rb_define_method(rb_optimizer_samples_klass, "length", (rb_method)method_samples_get_size,0);
-		rb_define_method(rb_optimizer_samples_klass, "size", (rb_method)method_samples_get_size,0);
-		rb_define_method(rb_optimizer_samples_klass, "elements", (rb_method)method_samples_get_elements,0);
-		rb_define_method(rb_optimizer_samples_klass, "to_a", (rb_method)method_samples_get_elements,0);
-
-		rb_define_method(rb_optimizer_realvector_klass, "sqrt", (rb_method)method_realvector_get_sqrt,0);
-		rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
-		rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
-		rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
-		rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
-		rb_define_method(rb_optimizer_realvector_klass, "-@", (rb_method)method_realvector_negate,0);
-		rb_define_method(rb_optimizer_realvector_klass, "initialize", (rb_method)method_realvector_initialize,0);
-
-		rb_define_method(rb_optimizer_regressionset_klass, "visible_size", (rb_method)method_get_visible_size, 0);
-		rb_define_method(rb_optimizer_regressionset_klass, "length", (rb_method)method_regressionset_get_size,0);
-		rb_define_method(rb_optimizer_regressionset_klass, "size", (rb_method)method_regressionset_get_size,0);
-		rb_define_method(rb_optimizer_regressionset_klass, "elements", (rb_method)method_regressionset_get_elements,0);
-		rb_define_method(rb_optimizer_regressionset_klass, "to_a", (rb_method)method_regressionset_get_elements,0);
-
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "elements", (rb_method)method_unlabeleddata_to_ary,0);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a", (rb_method)method_unlabeleddata_to_ary,0);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "mean", (rb_method)method_unlabeleddata_mean,0);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "variance", (rb_method)method_unlabeleddata_variance,0);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "shift", (rb_method)method_unlabeleddata_shift,1);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "truncate_and_rescale", (rb_method)method_unlabeleddata_truncate_and_rescale,4);
-		rb_define_method(rb_optimizer_unlabeleddata_klass, "initialize", (rb_method)method_unlabeleddata_initialize, -1);
-
-		/*rb_define_method(rb_optimizer_samples_klass, "truncate", (rb_method)method_samples_truncate,0);
-		rb_define_method(rb_optimizer_samples_klass, "truncate_and_rescale", (rb_method)method_samples_truncate_and_rescale,0);
-		
-		*/
 	}
 }

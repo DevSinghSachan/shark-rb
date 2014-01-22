@@ -1,20 +1,10 @@
 #include "rb_RegressionDataset.h"
-rb_RegressionDataset::rb_RegressionDataset(VALUE self, VALUE rb_unlabeled_data) {
-	Check_Type(rb_data, T_ARRAY);
+#include "rb_UnlabeledData.h"
+using namespace std;
+using namespace shark;
 
-	rb_UnlabeledData *s;
-	Data_Get_Struct(rb_unlabeled_data, rb_UnlabeledData, s);
-
-	std::vector<shark::RealVector> created_data = s->data;
-
-	shark::UnlabeledData<shark::RealVector> samples = shark::createDataFromRange(created_data);
-
-	data = RegressionDataset(samples, samples);
-	visibleSize = created_data.numberOfElements() > 0 ? created_data.element(0).size() : 0;
-}
-
-// Create fake samples:
-shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, int width) {
+// Or create fake samples:
+shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSamples, int height, int width) {
 	// Read images
 	shark::UnlabeledData<shark::RealVector> images;
 	import_csv(images, "data/images.csv");
@@ -66,11 +56,41 @@ shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, i
 	return samples;
 }
 
-Samples::Samples(int numSamples, int height, int width) {
+rb_RegressionDataset::rb_RegressionDataset(int numSamples, int height, int width) {
 	// Read the data
-	shark::UnlabeledData<shark::RealVector> samples = getSamples(numSamples, height, width);
+	shark::UnlabeledData<shark::RealVector> samples = test_regressionset_getSamples(numSamples, height, width);
 	cout << "Getting regression dataset," << endl;
 	cout << "Generated : " << samples.numberOfElements() << " patches." << endl;
 	data = RegressionDataset(samples, samples);
 	visibleSize = height * width;
+}
+
+// If labels and data are the same thing.
+rb_RegressionDataset::rb_RegressionDataset(VALUE self, VALUE rb_unlabeled_data) {
+	Check_Type(rb_unlabeled_data, T_DATA);
+
+	rb_UnlabeledData *s;
+	Data_Get_Struct(rb_unlabeled_data, rb_UnlabeledData, s);
+
+	shark::UnlabeledData<shark::RealVector> samples = s->data;
+
+	data = RegressionDataset(samples, samples);
+	visibleSize = samples.numberOfElements() > 0 ? samples.element(0).size() : 0;
+}
+
+// Import labels and data separately
+rb_RegressionDataset::rb_RegressionDataset(VALUE self, VALUE rb_unlabeled_data, VALUE rb_labels) {
+	Check_Type(rb_unlabeled_data, T_DATA);
+	Check_Type(rb_labels, T_DATA);
+
+	rb_UnlabeledData *s, *l;
+
+	Data_Get_Struct(rb_unlabeled_data, rb_UnlabeledData, s);
+	Data_Get_Struct(rb_labels,         rb_UnlabeledData, l);
+
+	shark::UnlabeledData<shark::RealVector> samples = s->data,
+											labels  = l->data;
+
+	data = RegressionDataset(samples, labels);
+	visibleSize = samples.numberOfElements() > 0 ? samples.element(0).size() : 0;
 }
