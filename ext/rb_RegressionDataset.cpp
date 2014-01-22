@@ -72,13 +72,9 @@ rb_RegressionDataset::rb_RegressionDataset(VALUE rb_unlabeled_data) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(rb_unlabeled_data, rb_UnlabeledData, s);
 
-	cout << "structs obtained " << endl;
-
 	shark::UnlabeledData<shark::RealVector> samples = s->data;
 
 	data = RegressionDataset(samples, samples);
-
-	cout << "regression obtained " << endl;
 	visibleSize = samples.numberOfElements() > 0 ? samples.element(0).size() : 0;
 }
 
@@ -92,12 +88,9 @@ rb_RegressionDataset::rb_RegressionDataset(VALUE rb_unlabeled_data, VALUE rb_lab
 	Data_Get_Struct(rb_unlabeled_data, rb_UnlabeledData, s);
 	Data_Get_Struct(rb_labels,         rb_UnlabeledData, l);
 
-	cout << "structs obtained " << endl;
-
 	shark::UnlabeledData<shark::RealVector> samples = s->data,
 											labels  = l->data;
 
 	data = RegressionDataset(samples, labels);
-	cout << "regression obtained " << endl;
 	visibleSize = samples.numberOfElements() > 0 ? samples.element(0).size() : 0;
 }

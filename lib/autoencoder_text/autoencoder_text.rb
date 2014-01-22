@@ -5,6 +5,7 @@ class Optimizer
 		class Text
 			attr_reader :autoencoder
 			attr_reader :standard_vector
+			attr_reader :regression_dataset
 			DefaultRho = 0.01 #Sparsity parameter
 			DefaultBeta = 3.0 #Regularization parameter
 			DefaultLambda = 0.0002  #Weight decay paramater
@@ -73,12 +74,28 @@ class Optimizer
 				converted_filter
 			end
 
+			def normalize_data
+				meanvec = @unlabeled_data.mean
+				@unlabeled_data -= meanvec # would be better with -= operator
+				# Remove outliers outside of +/- 3 standard deviations
+				# and normalize to [0.1, 0.9]
+				pstd = @unlabeled_data.variance.sqrt * @num_std_deviations
+				puts "pstd = #{pstd.to_a.inspect}, @unlabeled_data=#{@unlabeled_data.to_a.inspect}"
+				@unlabeled_data.truncate_and_rescale(-pstd, pstd, @min_value, @max_value)
+				@unlabeled_data.remove_NaN
+			end
+
 			def initialize(opts={})
+				@num_std_deviations = opts[:std_deviations].nil? ? 3 : opts[:std_deviations]
+				@min_value = opts[:min_value].nil? ? 0.1 : opts[:min_value]
+				@max_value = opts[:max_value].nil? ? 0.9 : opts[:max_value]
 				@standard_vector     = Optimizer::Autoencoder::Text.create_text_sample_set_from_samples opts[:samples]
-				@unlabeledData       = Optimizer::UnlabeledData.new Optimizer::Autoencoder::Text.create_autoencoder_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
-				@regression_data_set = Optimizer.regression_data_set
-				@autoencoder_vectors = Optimizer.samples 
-				@autoencoder = Optimizer.autoencoder :data => @autoencoder_vectors,
+				@unlabeled_data       = Optimizer::UnlabeledData.new Optimizer::Autoencoder::Text.create_autoencoder_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
+				# normalize the data
+				normalize_data
+				@regression_dataset = Optimizer.regression_dataset @unlabeled_data, @unlabeled_data
+				@unlabeled_data = nil
+				@autoencoder = Optimizer.autoencoder :data => @regression_dataset,
 													 :hidden_neurons => opts[:hidden_neurons] || DefaultHiddenNeurons,
 													 :rho => opts[:rho]                       || DefaultRho,
 													 :lambda => opts[:lambda]                 || DefaultLambda,

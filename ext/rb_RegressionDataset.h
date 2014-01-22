@@ -13,5 +13,4 @@ class rb_RegressionDataset {
 		rb_RegressionDataset(VALUE);
 		rb_RegressionDataset(VALUE, VALUE);
 		shark::RegressionDataset data;
-		std::vector<shark::RealVector> input ();
 };

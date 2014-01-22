@@ -1,8 +1,8 @@
 #include "Optimizer.h"
-#include "datatypes/rb_RealVector.h"
-#include "datatypes/rb_UnlabeledData.h"
-#include "datatypes/rb_RegressionDataset.h"
-#include "datatypes/rb_RealMatrix.h"
+#include "rb_RealVector.h"
+#include "rb_UnlabeledData.h"
+#include "rb_RegressionDataset.h"
+#include "rb_RealMatrix.h"
 
 using namespace std;
 using namespace shark;
@@ -158,6 +158,13 @@ VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
 	return ary;
 }
 
+VALUE method_unlabeleddata_remove_NaN (VALUE self) {
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	s->remove_NaN();
+	return self;
+}
+
 VALUE method_unlabeleddata_to_ary (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
@@ -243,7 +250,7 @@ VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
 		rb_RealMatrix *m;
 		Data_Get_Struct(self, rb_RealMatrix, m);
-		m->data = NUM2DBL(multiplier)*(m->data);
+		m->data *= NUM2DBL(multiplier);
 	} else {
 		rb_raise(rb_eArgError, "Can only multiply RealMatrix by a number");
 	}
@@ -253,7 +260,7 @@ VALUE method_realmatrix_divide (VALUE self, VALUE divider) {
 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
 		rb_RealMatrix *m;
 		Data_Get_Struct(self, rb_RealMatrix, m);
-		m->data = (m->data) / NUM2DBL(divider);
+		m->data /= NUM2DBL(divider);
 	} else {
 		rb_raise(rb_eArgError, "Can only divide RealMatrix by a number");
 	}
@@ -269,6 +276,71 @@ VALUE method_realmatrix_length (VALUE self) {
 	rb_ary_store(size, 1, INT2FIX((m->data).size2()));
 	return size;
 }
+
+VALUE method_realmatrix_size1 (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	return INT2FIX((m->data).size1());
+}
+VALUE method_realmatrix_size2 (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	return INT2FIX((m->data).size2());
+}
+VALUE method_realmatrix_stride1 (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	return INT2FIX((m->data).stride1());
+}
+VALUE method_realmatrix_stride2 (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	return INT2FIX((m->data).stride2());
+}
+VALUE method_realmatrix_clear (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	(m->data).clear();
+	return self;
+}
+
+VALUE method_realmatrix_query (VALUE self, VALUE row, VALUE column) {
+	Check_Type(row, T_FIXNUM);
+	Check_Type(column, T_FIXNUM);
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	if (NUM2INT(row) < 0 || NUM2INT(column) < 0)
+		rb_raise(rb_eArgError, "Can only access positive positions in RealMatrix");
+	if (NUM2INT(row) >= (m->data).size1() || NUM2INT(column) >= (m->data).size2())
+		rb_raise(rb_eArgError, "Out of range of RealMatrix");
+	return rb_float_new((m->data)(NUM2INT(row), NUM2INT(column)));
+}
+
+VALUE method_realmatrix_insert (VALUE self, VALUE row, VALUE column, VALUE assignment) {
+	Check_Type(row, T_FIXNUM);
+	Check_Type(column, T_FIXNUM);
+	if (TYPE(assignment) != T_FIXNUM && TYPE(assignment) != T_FLOAT)
+		rb_raise(rb_eArgError, "Can only insert floats into RealMatrix.");
+
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	if (NUM2INT(row) < 0 || NUM2INT(column) < 0)
+		rb_raise(rb_eArgError, "Can only access positive positions in RealMatrix");
+	if (NUM2INT(row) >= (m->data).size1() || NUM2INT(column) >= (m->data).size2())
+		rb_raise(rb_eArgError, "Out of range of RealMatrix");
+	(m->data)(NUM2INT(row), NUM2INT(column)) = NUM2DBL(assignment);
+	return self;
+}
+
+VALUE method_realmatrix_resize (VALUE self, VALUE newRows, VALUE newColumns) {
+	Check_Type(newRows, T_FIXNUM);
+	Check_Type(newColumns, T_FIXNUM);
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	(m->data).resize(NUM2INT(newRows), NUM2INT(newColumns));
+	return self;
+}
+
 VALUE method_realmatrix_negate (VALUE self) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
@@ -303,7 +375,7 @@ VALUE method_realvector_multiply (VALUE self, VALUE multiplier) {
 	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
 		rb_RealVector *s;
 		Data_Get_Struct(self, rb_RealVector, s);
-		s->data = NUM2DBL(multiplier)*(s->data);
+		s->data *= NUM2DBL(multiplier);
 	} else {
 		rb_raise(rb_eArgError, "Can only multiply RealVector by a number");
 	}
@@ -321,7 +393,7 @@ VALUE method_realvector_divide (VALUE self, VALUE divider) {
 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
 		rb_RealVector *s;
 		Data_Get_Struct(self, rb_RealVector, s);
-		s->data = (s->data) / NUM2DBL(divider);
+		s->data /= NUM2DBL(divider);
 	} else {
 		rb_raise(rb_eArgError, "Can only divide RealVector by a number");
 	}
@@ -350,17 +422,131 @@ VALUE method_realvector_length (VALUE self) {
 	return INT2FIX((s->data).size());
 }
 
+VALUE method_realvector_stride (VALUE self) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	return INT2FIX((s->data).stride());
+}
+VALUE method_realvector_resize (VALUE self, VALUE newlength) {
+	Check_Type(newlength, T_FIXNUM);
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	if (NUM2INT(newlength) < 0)
+		rb_raise(rb_eArgError, "Can only create positive length vectors due to lack of antimatter.");
+	(s->data).resize(NUM2INT(newlength));
+	return self;
+}
+VALUE method_realvector_empty (VALUE self) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	if ((s->data).empty())
+		return Qtrue;
+	return Qfalse;
+}
+VALUE method_realvector_clear (VALUE self) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	(s->data).clear();
+	return self;
+}
+VALUE method_realvector_query (VALUE self, VALUE position) {
+	Check_Type(position, T_FIXNUM);
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	if (NUM2INT(position) < 0) {
+		if (NUM2INT(position) < -(s->data).size())
+			rb_raise(rb_eArgError, "Out of range.");
+		// to get last element ask for -1 for instance:
+		return rb_float_new((s->data)[(s->data).size()+NUM2INT(position)]);
+	} else {
+		if (NUM2INT(position) >= (s->data).size())
+			rb_raise(rb_eArgError, "Out of range.");
+		// ordered normally
+		return rb_float_new((s->data)[NUM2INT(position)]);
+	}
+}
+VALUE method_realvector_insert (VALUE self, VALUE position, VALUE assignment) {
+	Check_Type(position, T_FIXNUM);
+	if (TYPE(assignment) != T_FIXNUM && TYPE(assignment) != T_FLOAT)
+		rb_raise(rb_eArgError, "Can only insert floats in RealVector.");
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	if (NUM2INT(position) < 0) {
+		if (NUM2INT(position) < -(s->data).size())
+			rb_raise(rb_eArgError, "Out of range.");
+		// to get last element ask for -1 for instance:
+		(s->data)[(s->data).size()+NUM2INT(position)] = NUM2DBL(assignment);
+	} else {
+		if (NUM2INT(position) >= (s->data).size())
+			rb_raise(rb_eArgError, "Out of range.");
+		// ordered normally
+		(s->data)[NUM2INT(position)] = NUM2DBL(assignment);
+	}
+	return self;
+}
+
 VALUE method_unlabeleddata_length (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return INT2FIX((s->data).numberOfElements());
+}
+VALUE method_unlabeleddata_batchlength (VALUE self) {
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	return INT2FIX((s->data).numberOfBatches());
+}
+VALUE method_unlabeleddata_empty (VALUE self) {
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	if ((s->data).empty())
+		return Qtrue;
+	return Qfalse;
+}
+VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
+	Check_Type(position, T_FIXNUM);
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	if (NUM2INT(position) < 0) {
+		if (NUM2INT(position) < -(s->data).numberOfElements())
+			rb_raise(rb_eArgError, "Out of range.");
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector((s->data).element((s->data).numberOfElements() + NUM2INT(position)))
+		);
+	} else {
+		if (NUM2INT(position) >= (s->data).numberOfElements())
+			rb_raise(rb_eArgError, "Out of range.");
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector((s->data).element(NUM2INT(position)))
+		);
+	}
+}
+
+VALUE method_unlabeleddata_insert (VALUE self, VALUE position, VALUE assignment) {
+	Check_Type(assignment, T_DATA);
+	Check_Type(position, T_FIXNUM);
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	rb_RealVector *a;
+	Data_Get_Struct(assignment, rb_RealVector, a);
+	if (NUM2INT(position) < 0) {
+		if (NUM2INT(position) < -(s->data).numberOfElements())
+			rb_raise(rb_eArgError, "Out of range.");
+		(s->data).element((s->data).numberOfElements() + NUM2INT(position)) = a->data;
+	} else {
+		if (NUM2INT(position) >= (s->data).numberOfElements())
+			rb_raise(rb_eArgError, "Out of range.");
+		(s->data).element(NUM2INT(position)) = a->data;
+	}
+	return self;
 }
 
 VALUE method_realvector_allocate (VALUE klass) {
 	return wrap_pointer<rb_RealVector>(
 			rb_optimizer_realvector_klass,
 			new rb_RealVector()
-			);//new rb_RealVector(rb_ary_to_1d_realvector(rb_ary_new()))
+			);
 }
 
 VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
@@ -428,6 +614,22 @@ VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 	rb_RealVector *v;
 	Data_Get_Struct(shift_vector, rb_RealVector, v);
 	s->data = transform(s->data, shark::Shift((v->data)));
+	return self;
+}
+
+VALUE method_unlabeleddata_truncate (VALUE self, VALUE minX, VALUE minY) {
+	Check_Type(minX, T_DATA);
+	Check_Type(minY, T_DATA);
+	// could also check classes...
+
+	rb_UnlabeledData *s;
+	rb_RealVector *minVX, *minVY;
+
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	Data_Get_Struct(minX, rb_RealVector,    minVX);
+	Data_Get_Struct(minY, rb_RealVector,    minVY);
+
+	s->data = transform(s->data, shark::Truncate(minVX->data, minVY->data));
 	return self;
 }
 
@@ -540,6 +742,7 @@ std::vector<shark::RealVector> Samples::input () {
 	return my_input;
 }
 
+
 static VALUE method_get_samples(int number_of_arguments, VALUE* ruby_arguments, VALUE self)
 {
 	VALUE rb_number_of_samples, r_height, r_width;
@@ -593,11 +796,21 @@ static VALUE method_regressionset_get_visible_size(VALUE self) {
 	return INT2FIX(s->visibleSize);
 }
 
-static VALUE method_regressionset_get_elements(VALUE self) {
+static VALUE method_regressionset_get_labels(VALUE self) {
 	rb_RegressionDataset *s;
 	Data_Get_Struct(self, rb_RegressionDataset, s);
-	std::vector<shark::RealVector> inputData = s->input();
-	return stdvector_realvector_to_rb_ary(inputData);
+	return wrap_pointer<rb_UnlabeledData>(
+		rb_optimizer_unlabeleddata_klass,
+		new rb_UnlabeledData((s->data).labels())
+		);
+}
+static VALUE method_regressionset_get_inputs(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return wrap_pointer<rb_UnlabeledData>(
+		rb_optimizer_unlabeleddata_klass,
+		new rb_UnlabeledData((s->data).inputs())
+		);
 }
 
 static VALUE method_regressionset_get_size(VALUE self) {
@@ -646,8 +859,8 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 		}
 		if (rb_data != Qnil) {
 			Check_Type(rb_data, T_DATA);
-			Samples *s;
-			Data_Get_Struct(rb_data, Samples, s);
+			rb_RegressionDataset *s;
+			Data_Get_Struct(rb_data, rb_RegressionDataset, s);
 			data = s->data;
 			visibleSize = s-> visibleSize;
 		}
@@ -855,42 +1068,73 @@ extern "C"  {
 			rb_define_method(rb_optimizer_samples_klass, "elements", (rb_method)method_samples_get_elements,0);
 			rb_define_method(rb_optimizer_samples_klass, "to_a", (rb_method)method_samples_get_elements,0);
 
+
+		// Shark Vectors:
 			rb_define_method(rb_optimizer_realvector_klass, "sqrt", (rb_method)method_realvector_get_sqrt,0);
 			rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
 			rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
 			rb_define_method(rb_optimizer_realvector_klass, "-@", (rb_method)method_realvector_negate,0);
+			rb_define_method(rb_optimizer_realvector_klass, "stride", (rb_method)method_realvector_stride,0);
+			rb_define_method(rb_optimizer_realvector_klass, "resize", (rb_method)method_realvector_resize,1);
+			rb_define_method(rb_optimizer_realvector_klass, "empty?", (rb_method)method_realvector_empty,0);
+			rb_define_method(rb_optimizer_realvector_klass, "clear", (rb_method)method_realvector_clear,0);
+			rb_define_method(rb_optimizer_realvector_klass, "[]", (rb_method)method_realvector_query,1);
+			rb_define_method(rb_optimizer_realvector_klass, "[]=", (rb_method)method_realvector_insert,2);
 			rb_define_alloc_func(rb_optimizer_realvector_klass, (rb_alloc_func_t) method_realvector_allocate);
 			rb_define_method(rb_optimizer_realvector_klass, "initialize", (rb_method)method_realvector_initialize,-1);
 
+		// Shark Matrices:
 			rb_define_method(rb_optimizer_realmatrix_klass, "sqrt", (rb_method)method_realmatrix_get_sqrt,0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "to_a", (rb_method)method_realmatrix_to_ary, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "*", (rb_method)method_realmatrix_multiply, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "/", (rb_method)method_realmatrix_divide, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "length", (rb_method)method_realmatrix_length, 0);
-			// rb_define_method(rb_optimizer_realmatrix_klass, "-@", (rb_method)method_realmatrix_negate,0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "size", (rb_method)method_realmatrix_length, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "size1", (rb_method)method_realmatrix_size1, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "size2", (rb_method)method_realmatrix_size2, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "stride1", (rb_method)method_realmatrix_stride1, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "stride2", (rb_method)method_realmatrix_stride2, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "clear", (rb_method)method_realmatrix_clear, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "-@", (rb_method)method_realmatrix_negate,0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "[]", (rb_method)method_realmatrix_query,2);
+			rb_define_method(rb_optimizer_realmatrix_klass, "resize", (rb_method)method_realmatrix_resize, 2);
+			rb_define_method(rb_optimizer_realmatrix_klass, "[]=", (rb_method)method_realmatrix_insert,3);
 			rb_define_alloc_func(rb_optimizer_realmatrix_klass, (rb_alloc_func_t) method_realmatrix_allocate);
 			rb_define_method(rb_optimizer_realmatrix_klass, "initialize", (rb_method)method_realmatrix_initialize,-1);
 
-			rb_define_method(rb_optimizer_regressionset_klass, "visible_size", (rb_method)method_regressionset_get_visible_size, 0);
-			rb_define_method(rb_optimizer_regressionset_klass, "length", (rb_method)method_regressionset_get_size,0);
-			rb_define_method(rb_optimizer_regressionset_klass, "size", (rb_method)method_regressionset_get_size,0);
-			rb_define_method(rb_optimizer_regressionset_klass, "elements", (rb_method)method_regressionset_get_elements,0);
-			rb_define_method(rb_optimizer_regressionset_klass, "to_a", (rb_method)method_regressionset_get_elements,0);
+		// Shark Regression sets for supervisied / labeled learning:
+			rb_define_method(rb_optimizer_regressionset_klass, "visible_size",   (rb_method)method_regressionset_get_visible_size, 0);
+			rb_define_method(rb_optimizer_regressionset_klass, "labels",         (rb_method)method_regressionset_get_labels, 0);
+			rb_define_method(rb_optimizer_regressionset_klass, "inputs",         (rb_method)method_regressionset_get_inputs, 0);
+			rb_define_method(rb_optimizer_regressionset_klass, "length",         (rb_method)method_regressionset_get_size,0);
+			rb_define_method(rb_optimizer_regressionset_klass, "size",           (rb_method)method_regressionset_get_size,0);
+			rb_define_method(rb_optimizer_regressionset_klass, "elements",       (rb_method)method_regressionset_get_inputs,0);
+			rb_define_method(rb_optimizer_regressionset_klass, "to_a",           (rb_method)method_regressionset_get_inputs,0);
 			rb_define_singleton_method(rb_optimizer_klass, "regression_dataset", (rb_method)method_regressionset_create,-1);
 
+		// Shark Unlabeled data sets:
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "elements", (rb_method)method_unlabeleddata_to_ary,0);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a", (rb_method)method_unlabeleddata_to_ary,0);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "mean", (rb_method)method_unlabeleddata_mean,0);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "variance", (rb_method)method_unlabeleddata_variance,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "number_of_batches", (rb_method)method_unlabeleddata_batchlength, 0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "empty?",     (rb_method)method_unlabeleddata_empty, 0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "element",    (rb_method)method_unlabeleddata_query, 1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "[]",         (rb_method)method_unlabeleddata_query, 1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "[]=",        (rb_method)method_unlabeleddata_insert, 2);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "remove_NaN", (rb_method)method_unlabeleddata_remove_NaN, 0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "elements",   (rb_method)method_unlabeleddata_to_ary,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a",       (rb_method)method_unlabeleddata_to_ary,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "mean",       (rb_method)method_unlabeleddata_mean,0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "variance",   (rb_method)method_unlabeleddata_variance,0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "covariance", (rb_method)method_unlabeleddata_covariance,0);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "shift", (rb_method)method_unlabeleddata_shift,1);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "shift",      (rb_method)method_unlabeleddata_shift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "-",          (rb_method)method_unlabeleddata_shift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "-=",          (rb_method)method_unlabeleddata_shift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "+=",          (rb_method)method_unlabeleddata_posshift,1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "+",          (rb_method)method_unlabeleddata_posshift,1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "truncate_and_rescale", (rb_method)method_unlabeleddata_truncate_and_rescale,4);
-			rb_define_alloc_func(rb_optimizer_unlabeleddata_klass, (rb_alloc_func_t) method_unlabeleddata_allocate);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "truncate",   (rb_method)method_unlabeleddata_truncate,2);
+			rb_define_alloc_func(rb_optimizer_unlabeleddata_klass,           (rb_alloc_func_t) method_unlabeleddata_allocate);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "initialize", (rb_method)method_unlabeleddata_initialize, -1);
 
 		// <deprecated>
