@@ -1,7 +1,8 @@
 #include "Optimizer.h"
-#include "rb_RealVector.h"
-#include "rb_UnlabeledData.h"
-#include "rb_RegressionDataset.h"
+#include "datatypes/rb_RealVector.h"
+#include "datatypes/rb_UnlabeledData.h"
+#include "datatypes/rb_RegressionDataset.h"
+#include "datatypes/rb_RealMatrix.h"
 
 using namespace std;
 using namespace shark;
@@ -20,7 +21,7 @@ template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
 }
 
-template<class Obtype> VALUE wrap_pointer(VALUE klass,Obtype *ptr){
+template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
 	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
 }
 
@@ -32,7 +33,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 	int length = RARRAY_LEN(ary);
 	shark::RealVector vector(length);
-	for (int i=0; i < length;i++) {
+	for (int i=0; i < length;i++) {
 		vector(i) = NUM2DBL(rb_ary_entry(ary, i));
 	}
 	return vector;
@@ -41,7 +42,7 @@ shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 	int width = RARRAY_LEN(ary);
-	int height = RARRAY_LEN(rb_ary_entry(ary, 0));
+	int height = width > 0 ? RARRAY_LEN(rb_ary_entry(ary, 0)) : 0;
 	std::vector<shark::RealVector> matrix;
 	for (int i=0;i<width;i++) {
 		shark::RealVector vector(height);
@@ -82,24 +83,68 @@ VALUE method_unlabeleddata_to_ary (VALUE self) {
 	return stdvector_realvector_to_rb_ary(s->input());
 }
 
+VALUE method_unlabeleddata_allocate (VALUE klass) {
+	return wrap_pointer<rb_UnlabeledData>(
+			rb_optimizer_unlabeleddata_klass,
+			new rb_UnlabeledData()
+		);
+}
+
+VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE samples,
+		  labels,
+		  width;
+	// these variables are also:
+	//    numSamples, height, width;
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"12",
+		&samples,
+		&labels,
+		&width);
+
+	if (TYPE(samples) == T_DATA) {
+		// input is either labels and data or just data:
+		if (TYPE(labels) == T_DATA) {
+			return wrap_pointer<rb_RegressionDataset>(
+				rb_optimizer_regressionset_klass,
+				new rb_RegressionDataset(samples, labels)
+			);
+		} else {
+			return wrap_pointer<rb_RegressionDataset>(
+				rb_optimizer_regressionset_klass,
+				new rb_RegressionDataset(samples)
+			);
+		}
+	} else {
+		// create a random set from csv file.
+		Check_Type(samples, T_FIXNUM);
+		Check_Type(labels,  T_FIXNUM);
+		Check_Type(width,   T_FIXNUM);
+		return wrap_pointer<rb_RegressionDataset>(
+			rb_optimizer_regressionset_klass,
+			new rb_RegressionDataset(NUM2INT(samples), NUM2INT(labels), NUM2INT(width))
+		);
+	}
+}
+
 VALUE method_unlabeleddata_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE dataset;
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+
 	rb_scan_args(
 		number_of_arguments,
 		ruby_arguments,
 		"01",
 		&dataset);
-	if (TYPE(dataset) == T_ARRAY) {
-		return wrap_pointer<rb_UnlabeledData>(
-			rb_optimizer_unlabeleddata_klass,
-			new rb_UnlabeledData(rb_ary_to_unlabeleddata(dataset))
-		);
-	} else {
-		return wrap_pointer<rb_UnlabeledData>(
-			rb_optimizer_unlabeleddata_klass,
-			new rb_UnlabeledData(rb_ary_to_unlabeleddata(rb_ary_new()))
-		);
-	}
+
+	if (TYPE(dataset) == T_ARRAY)
+		s->data = rb_ary_to_unlabeleddata(dataset);
+
+	return self;
 }
 
 VALUE method_realvector_to_ary (VALUE self) {
@@ -109,9 +154,6 @@ VALUE method_realvector_to_ary (VALUE self) {
 }
 
 VALUE method_realvector_length (VALUE self) {
-	cout << "okay" << endl;
-	Check_Type(self, rb_optimizer_realvector_klass);
-	cout << "next" << endl;
 	rb_RealVector *s;
 	Data_Get_Struct(self, rb_RealVector, s);
 	return INT2FIX((s->data).size());
@@ -123,25 +165,27 @@ VALUE method_unlabeleddata_length (VALUE self) {
 	return INT2FIX((s->data).numberOfElements());
 }
 
+VALUE method_realvector_allocate (VALUE klass) {
+	return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(rb_ary_to_1d_realvector(rb_ary_new()))
+			);
+}
+
 VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE dataset;
-	cout << "initializing" << endl;
 	rb_scan_args(
 		number_of_arguments,
 		ruby_arguments,
 		"01",
 		&dataset);
-	if (TYPE(dataset) == T_ARRAY) {
-		return wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
-			new rb_RealVector(rb_ary_to_1d_realvector(dataset))
-			);
-	} else {
-		return wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
-			new rb_RealVector(rb_ary_to_1d_realvector(rb_ary_new()))
-			);
-	}
+	rb_RealVector *v;
+	Data_Get_Struct(self, rb_RealVector, v);
+
+	if (TYPE(dataset) == T_ARRAY)
+		v->data = rb_ary_to_1d_realvector(dataset);
+
+	return self;
 }
 
 // We wrap the mean method of Shark with a realvector
@@ -714,6 +758,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
 			rb_define_method(rb_optimizer_realvector_klass, "-@", (rb_method)method_realvector_negate,0);
+			rb_define_alloc_func(rb_optimizer_realvector_klass, (rb_alloc_func_t) method_realvector_allocate);
 			rb_define_method(rb_optimizer_realvector_klass, "initialize", (rb_method)method_realvector_initialize,-1);
 
 			rb_define_method(rb_optimizer_regressionset_klass, "visible_size", (rb_method)method_regressionset_get_visible_size, 0);
@@ -721,6 +766,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_regressionset_klass, "size", (rb_method)method_regressionset_get_size,0);
 			rb_define_method(rb_optimizer_regressionset_klass, "elements", (rb_method)method_regressionset_get_elements,0);
 			rb_define_method(rb_optimizer_regressionset_klass, "to_a", (rb_method)method_regressionset_get_elements,0);
+			rb_define_singleton_method(rb_optimizer_klass, "regression_dataset", (rb_method)method_regressionset_create,-1);
 
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "elements", (rb_method)method_unlabeleddata_to_ary,0);
@@ -731,6 +777,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "truncate_and_rescale", (rb_method)method_unlabeleddata_truncate_and_rescale,4);
+			rb_define_alloc_func(rb_optimizer_unlabeleddata_klass, (rb_alloc_func_t) method_unlabeleddata_allocate);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "initialize", (rb_method)method_unlabeleddata_initialize, -1);
 
 		// <deprecated>
