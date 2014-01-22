@@ -9,10 +9,11 @@ VALUE rb_sym_new(const char *s) {
 	return ID2SYM(rb_intern(s));
 }
 
-VALUE rb_optimizer_klass = rb_define_class("Optimizer", rb_cObject);
-VALUE rb_optimizer_samples_klass = rb_define_class("Optimizer::Samples", rb_cObject);
-VALUE rb_optimizer_realvector_klass = rb_define_class("Optimizer::RealVector", rb_cObject);
+VALUE rb_optimizer_klass               = rb_define_class("Optimizer", rb_cObject);
+VALUE rb_optimizer_samples_klass       = rb_define_class("Optimizer::Samples", rb_cObject);
+VALUE rb_optimizer_realvector_klass    = rb_define_class("Optimizer::RealVector", rb_cObject);
 VALUE rb_optimizer_unlabeleddata_klass = rb_define_class("Optimizer::UnlabeledData", rb_cObject);
+VALUE rb_optimizer_regressionset_klass = rb_define_class("Optimizer::RegressionDataset", rb_cObject);
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	// ptr.cleanUp();
@@ -29,7 +30,6 @@ template<class Obtype> VALUE alloc_ob(VALUE self)
 }
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
-
 	int width = RARRAY_LEN(ary);
 	int height = RARRAY_LEN(rb_ary_entry(ary, 0));
 	std::vector<shark::RealVector> matrix;
@@ -72,6 +72,26 @@ VALUE method_unlabeleddata_to_ary (VALUE self) {
 	return stdvector_realvector_to_rb_ary(s->input());
 }
 
+VALUE method_unlabeleddata_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE dataset;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&dataset);
+	if (TYPE(dataset) == T_ARRAY) {
+		return wrap_pointer<rb_UnlabeledData>(
+			rb_optimizer_unlabeleddata_klass,
+			new rb_UnlabeledData(rb_ary_to_unlabeleddata(dataset))
+		);
+	} else {
+		return wrap_pointer<rb_UnlabeledData>(
+			rb_optimizer_unlabeleddata_klass,
+			new rb_UnlabeledData(rb_ary_to_unlabeleddata(rb_ary_new()))
+		);
+	}
+}
+
 VALUE method_realvector_to_ary (VALUE self) {
 	rb_RealVector *s;
 	Data_Get_Struct(self, rb_RealVector, s);
@@ -88,6 +108,26 @@ VALUE method_unlabeleddata_length (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return INT2FIX((s->data).numberOfElements());
+}
+
+VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self {
+	VALUE dataset;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&dataset);
+	if (TYPE(dataset) == T_ARRAY) {
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(rb_ary_to_realvector(dataset))
+			);
+	} else {
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(rb_ary_to_realvector(rb_ary_new()))
+			);
+	}
 }
 
 // We wrap the mean method of Shark with a realvector
@@ -131,6 +171,13 @@ VALUE method_realvector_multiply (VALUE self, VALUE multiplier) {
 	return self;
 }
 
+VALUE method_realvector_get_sqrt (VALUE self) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	s->data = sqrt(s->data);
+	return self;
+}
+
 VALUE method_realvector_divide (VALUE self, VALUE multiplier) {
 	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
 		rb_RealVector *s;
@@ -151,6 +198,39 @@ VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 	rb_RealVector *v;
 	Data_Get_Struct(shift_vector, rb_RealVector, v);
 	s->data = transform(s->data, shark::Shift((v->data)));
+	return self;
+}
+
+VALUE method_realvector_negate (VALUE self) {
+	rb_RealVector *v;
+	Data_Get_Struct(self, rb_RealVector, v);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(-(v->data))
+	);
+}
+
+VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE minY, VALUE newMin, VALUE newMax) {
+	Check_Type(minX, T_DATA);
+	Check_Type(minY, T_DATA);
+	if (
+		(TYPE(newMin) == T_FLOAT || TYPE(newMin) == T_FIXNUM) && 
+		(TYPE(newMax) == T_FLOAT || TYPE(newMax) == T_FIXNUM)
+		) {
+
+		rb_UnlabeledData *s;
+		rb_RealVector *minVX, *minVY;
+
+		Data_Get_Struct(self, rb_UnlabeledData, s);
+		Data_Get_Struct(minX, rb_RealVector,    minVX);
+		Data_Get_Struct(minY, rb_RealVector,    minVY);
+
+		s->data = transform(s->data, shark::TruncateAndRescale(minVX->data, minVY->data, NUM2DBL(newMin), NUM2DBL(newMax)));
+
+	} else {
+		rb_raise(rb_eArgError, "New scale must be bounded by numbers");
+	}
 	return self;
 }
 
@@ -216,8 +296,7 @@ VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
 
 /* end Ruby Stuff */
 
-shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, int width)
-{
+shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, int width) {
 	// Read images
 	shark::UnlabeledData<shark::RealVector> images;
 	import_csv(images, "data/images.csv");
@@ -273,15 +352,7 @@ shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, i
 Samples::Samples(VALUE self, VALUE rb_data) {
 	Check_Type(rb_data, T_ARRAY);
 
-	// For debugging purposes 
-	/* cout << "arrived in Samples::Samples" << endl; */
-
 	std::vector<shark::RealVector> created_data = rb_ary_to_realvector(rb_data);
-
-	/*cout << "created_data.size() => " << created_data.size() << endl;
-	for (int i= 0;i < created_data.size();i++) {
-		cout << "created_data[i].size() => " << created_data[i].size() << endl;
-	}*/
 
 	shark::UnlabeledData<shark::RealVector> samples = shark::createDataFromRange(created_data);
 
@@ -327,15 +398,6 @@ static VALUE method_get_samples(int number_of_arguments, VALUE* ruby_arguments, 
 			r_width != Qnil ? NUM2INT(r_width) : 8)
 		);
 }
-
-static VALUE method_create_unlabeleddata(VALUE self, VALUE data) {
-	Check_Type(data, T_ARRAY);
-	// shark::UnlabeledData<shark::RealVector> unlabeled_data = rb_ary_to_unlabeleddata(data);
-	return wrap_pointer<rb_UnlabeledData>(
-		rb_optimizer_unlabeleddata_klass,
-		new rb_UnlabeledData(rb_ary_to_unlabeleddata(data))
-		);
-}
 /*static VALUE method_create_realvector(VALUE self, VALUE data) {
 	Check_Type(data, T_ARRAY);
 	// shark::UnlabeledData<shark::RealVector> unlabeled_data = rb_ary_to_unlabeleddata(data);
@@ -370,28 +432,28 @@ static VALUE method_samples_get_size(VALUE self) {
 	return INT2FIX((s->data).numberOfElements());
 }
 
-/*static VALUE method_samples_truncate(VALUE self) {
-	Samples *s;
-	Data_Get_Struct(self, Samples, s);
+// Regression Data set wrapper methods:
 
+static VALUE method_regressionset_get_visible_size(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return INT2FIX(s->visibleSize);
+}
 
-	return wrap_pointer<shark::RealVector>(rb_optimizer_realvector_klass, )
+static VALUE method_regressionset_get_elements(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	std::vector<shark::RealVector> inputData = s->input();
+	return stdvector_realvector_to_rb_ary(inputData);
 }
-static VALUE method_samples_truncate_and_rescale(VALUE self) {
-	Samples *s;
-	Data_Get_Struct(self, Samples, s);
-}
-static VALUE method_samples_get_variance(VALUE self) {
-	Samples *s;
-	Data_Get_Struct(self, Samples, s);
-}
-static VALUE method_samples_get_mean(VALUE self) {
-	Samples *s;
-	Data_Get_Struct(self, Samples, s);
-}*/
 
-static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, VALUE self)
-{
+static VALUE method_regressionset_get_size(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return INT2FIX((s->data).numberOfElements());
+}
+
+static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	unsigned int numhidden = 25;
 	double rho = 0.01; // Sparsity parameter
 	double beta = 3.0; // Regularization parameter
@@ -400,8 +462,8 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 	shark::RegressionDataset data;
 
 	if (number_of_arguments == 1 && TYPE(ruby_arguments[0]) == T_DATA ) {
-		Samples *s;
-		Data_Get_Struct(ruby_arguments[0], Samples, s);
+		rb_RegressionDataset *s;
+		Data_Get_Struct(ruby_arguments[0], rb_RegressionDataset, s);
 		data = s->data;
 		visibleSize = s-> visibleSize;
 	} else if (number_of_arguments == 1 && TYPE(ruby_arguments[0]) == T_HASH) {
@@ -446,8 +508,7 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 	return wrap_pointer<Optimizer>(self, my_optimizer);
 }
 
-static VALUE method_autoencode_layer_matrices(int number_of_arguments, VALUE* ruby_arguments, VALUE self)
-{
+static VALUE method_autoencode_layer_matrices(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_layer_index;
 	rb_scan_args(
 		number_of_arguments,
@@ -629,30 +690,44 @@ extern "C"  {
 		rb_define_method(rb_optimizer_klass, "eval", (rb_method)method_autoencode_eval, 1);
 
 		// Ruby methods for samples
+		// <deprecated>
+		// rb_define_singleton_method(rb_optimizer_klass, "create_unlabeled_data", (rb_method)method_create_unlabeleddata, 1);
+		// </deprecated>
 		rb_define_singleton_method(rb_optimizer_klass, "getSamples", (rb_method)method_get_samples,-1);
 		rb_define_singleton_method(rb_optimizer_klass, "samples", (rb_method)method_create_samples,1);
-		rb_define_singleton_method(rb_optimizer_klass, "create_unlabeled_data", (rb_method)method_create_unlabeleddata, 1);
 		rb_define_singleton_method(rb_optimizer_samples_klass, "getSamples", (rb_method)method_get_samples,-1);
 		rb_define_singleton_method(rb_optimizer_samples_klass, "samples", (rb_method)method_create_samples,1);
+
 		rb_define_method(rb_optimizer_samples_klass, "visible_size", (rb_method)method_get_visible_size, 0);
 		rb_define_method(rb_optimizer_samples_klass, "length", (rb_method)method_samples_get_size,0);
 		rb_define_method(rb_optimizer_samples_klass, "size", (rb_method)method_samples_get_size,0);
 		rb_define_method(rb_optimizer_samples_klass, "elements", (rb_method)method_samples_get_elements,0);
-		rb_define_method(rb_optimizer_samples_klass, "data", (rb_method)method_samples_get_elements,0);
+		rb_define_method(rb_optimizer_samples_klass, "to_a", (rb_method)method_samples_get_elements,0);
 
+		rb_define_method(rb_optimizer_realvector_klass, "sqrt", (rb_method)method_realvector_get_sqrt,0);
 		rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
 		rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
 		rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
 		rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
+		rb_define_method(rb_optimizer_realvector_klass, "-@", (rb_method)method_realvector_negate,0);
+		rb_define_method(rb_optimizer_realvector_klass, "initialize", (rb_method)method_realvector_initialize,0);
+
+		rb_define_method(rb_optimizer_regressionset_klass, "visible_size", (rb_method)method_get_visible_size, 0);
+		rb_define_method(rb_optimizer_regressionset_klass, "length", (rb_method)method_regressionset_get_size,0);
+		rb_define_method(rb_optimizer_regressionset_klass, "size", (rb_method)method_regressionset_get_size,0);
+		rb_define_method(rb_optimizer_regressionset_klass, "elements", (rb_method)method_regressionset_get_elements,0);
+		rb_define_method(rb_optimizer_regressionset_klass, "to_a", (rb_method)method_regressionset_get_elements,0);
 
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
+		rb_define_method(rb_optimizer_unlabeleddata_klass, "elements", (rb_method)method_unlabeleddata_to_ary,0);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a", (rb_method)method_unlabeleddata_to_ary,0);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "mean", (rb_method)method_unlabeleddata_mean,0);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "variance", (rb_method)method_unlabeleddata_variance,0);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "shift", (rb_method)method_unlabeleddata_shift,1);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "-", (rb_method)method_unlabeleddata_shift,1);
 		rb_define_method(rb_optimizer_unlabeleddata_klass, "+", (rb_method)method_unlabeleddata_posshift,1);
-		// rb_define_method(rb_optimizer_samples_klass, "truncate_and_rescale", (rb_method)method_samples_truncate_and_rescale,4);
+		rb_define_method(rb_optimizer_unlabeleddata_klass, "truncate_and_rescale", (rb_method)method_unlabeleddata_truncate_and_rescale,4);
+		rb_define_method(rb_optimizer_unlabeleddata_klass, "initialize", (rb_method)method_unlabeleddata_initialize, -1);
 
 		/*rb_define_method(rb_optimizer_samples_klass, "truncate", (rb_method)method_samples_truncate,0);
 		rb_define_method(rb_optimizer_samples_klass, "truncate_and_rescale", (rb_method)method_samples_truncate_and_rescale,0);

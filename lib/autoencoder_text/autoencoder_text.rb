@@ -1,6 +1,14 @@
 require 'set'
 require 'ostruct'
 class Optimizer
+	class Samples
+	end
+	class RealVector
+	end
+	class UnlabeledData
+	end
+	class RegressionDataset
+	end
 	module Autoencoder
 		class Text
 			attr_reader :autoencoder
@@ -75,7 +83,9 @@ class Optimizer
 
 			def initialize(opts={})
 				@standard_vector     = Optimizer::Autoencoder::Text.create_text_sample_set_from_samples opts[:samples]
-				@autoencoder_vectors = Optimizer.samples Optimizer::Autoencoder::Text.create_autoencoder_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
+				@unlabeledData       = Optimizer::UnlabeledData.new Optimizer::Autoencoder::Text.create_autoencoder_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
+				@regression_data_set = Optimizer.regression_data_set
+				@autoencoder_vectors = Optimizer.samples 
 				@autoencoder = Optimizer.autoencoder :data => @autoencoder_vectors,
 													 :hidden_neurons => opts[:hidden_neurons] || DefaultHiddenNeurons,
 													 :rho => opts[:rho]                       || DefaultRho,
