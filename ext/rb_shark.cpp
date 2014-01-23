@@ -41,13 +41,14 @@ shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 }
 RealMatrix rb_ary_to_realmatrix(VALUE ary) {
 
-	int width = RARRAY_LEN(ary);
-	int height = RARRAY_LEN(rb_ary_entry(ary, 0));
-	shark::RealMatrix matrix(height, width);
-		
-	for (int i=0;i<height;i++)
-		for (int j=0;j<width;j++)
-			matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));
+	int rows = RARRAY_LEN(ary);
+	int cols = rows > 0 ? RARRAY_LEN(rb_ary_entry(ary, 0)) : 0;
+	shark::RealMatrix matrix(rows, cols);
+	
+	// accessing ary[i][j] and placing it in matrix(i, j):
+	for (int i=0;i<rows;i++)
+		for (int j=0;j<cols;j++)
+			matrix(i,j) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, i), j));
 
 	return matrix;
 }
@@ -66,19 +67,9 @@ std::vector<shark::RealMatrix> rb_ary_to_realmatrices(VALUE ary) {
 
 	if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
 		// 2D array
-		/*int width = RARRAY_LEN(ary);
-		int height = RARRAY_LEN(rb_ary_entry(ary, 0));
-		shark::RealMatrix matrix(height, width);
-		for (int i=0;i<height;i++)
-			for (int j=0;j<width;j++)
-				matrix(j,i) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, j), i));*/
 		matrices.push_back(rb_ary_to_realmatrix(ary));
 	} else {
 		// 1D array
-		/*int height = RARRAY_LEN(ary);
-		shark::RealMatrix matrix(1, height);
-		for (int i=0;i<height;i++)
-			matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));*/
 		matrices.push_back(rb_1d_ary_to_realmatrix(ary));
 	}
 	
@@ -158,10 +149,22 @@ VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
 	return ary;
 }
 
-VALUE method_unlabeleddata_remove_NaN (VALUE self) {
+VALUE method_unlabeleddata_remove_NaN (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_replacement;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&rb_replacement);
+	double replacement = 0.0;
+	if (rb_replacement != Qnil) {
+		if (TYPE(rb_replacement) != T_FLOAT && TYPE(rb_replacement) != T_FIXNUM)
+			rb_raise(rb_eArgError, "Can only replace NaN by floats.");
+		replacement = NUM2DBL(rb_replacement);
+	}
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
-	s->remove_NaN();
+	s->remove_NaN(replacement);
 	return self;
 }
 
@@ -304,6 +307,15 @@ VALUE method_realmatrix_clear (VALUE self) {
 	return self;
 }
 
+VALUE method_realmatrix_fill (VALUE self, VALUE filling) {
+	if (TYPE(filling) != T_FLOAT && TYPE(filling) != T_FIXNUM)
+		rb_raise(rb_eArgError, "Can only fill RealMatrix with floats.");
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	m->fill(NUM2DBL(filling));
+	return self;
+}
+
 VALUE method_realmatrix_query (VALUE self, VALUE row, VALUE column) {
 	Check_Type(row, T_FIXNUM);
 	Check_Type(column, T_FIXNUM);
@@ -366,7 +378,9 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 	Data_Get_Struct(self, rb_RealMatrix, m);
 
 	if (TYPE(dataset) == T_ARRAY)
-		m->data = rb_ary_to_realmatrix(dataset);
+		m->data = (RARRAY_LEN(dataset) > 0 && TYPE(rb_ary_entry(dataset, 0)) == T_ARRAY) ?
+						rb_ary_to_realmatrix(dataset) : 
+						rb_1d_ary_to_realmatrix(dataset);
 
 	return self;
 }
@@ -449,6 +463,14 @@ VALUE method_realvector_clear (VALUE self) {
 	(s->data).clear();
 	return self;
 }
+VALUE method_realvector_fill (VALUE self, VALUE filling) {
+	if (TYPE(filling) != T_FLOAT && TYPE(filling) != T_FIXNUM)
+		rb_raise(rb_eArgError, "Can only fill RealVector with floats.");
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	s->fill(NUM2DBL(filling));
+	return self;
+}
 VALUE method_realvector_query (VALUE self, VALUE position) {
 	Check_Type(position, T_FIXNUM);
 	rb_RealVector *s;
@@ -501,6 +523,14 @@ VALUE method_unlabeleddata_empty (VALUE self) {
 	if ((s->data).empty())
 		return Qtrue;
 	return Qfalse;
+}
+VALUE method_unlabeleddata_fill (VALUE self, VALUE filling) {
+	if (TYPE(filling) != T_FLOAT && TYPE(filling) != T_FIXNUM)
+		rb_raise(rb_eArgError, "Can only fill UnlabeledData with floats.");
+	rb_UnlabeledData *s;
+	Data_Get_Struct(self, rb_UnlabeledData, s);
+	s->fill(NUM2DBL(filling));
+	return self;
 }
 VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
 	Check_Type(position, T_FIXNUM);
@@ -1017,6 +1047,9 @@ extern "C"  {
 
 	void Init_rb_shark() {
 
+		// for better naming conventions:
+		rb_define_global_const("Shark", rb_optimizer_klass);
+
 		// Autoencoder
 			// Ruby methods for AutoEncoder
 			rb_define_singleton_method(rb_optimizer_klass, "autoencoder", (rb_method)method_autoencode, -1);
@@ -1080,6 +1113,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realvector_klass, "resize", (rb_method)method_realvector_resize,1);
 			rb_define_method(rb_optimizer_realvector_klass, "empty?", (rb_method)method_realvector_empty,0);
 			rb_define_method(rb_optimizer_realvector_klass, "clear", (rb_method)method_realvector_clear,0);
+			rb_define_method(rb_optimizer_realvector_klass, "fill", (rb_method)method_realvector_fill,1);
 			rb_define_method(rb_optimizer_realvector_klass, "[]", (rb_method)method_realvector_query,1);
 			rb_define_method(rb_optimizer_realvector_klass, "[]=", (rb_method)method_realvector_insert,2);
 			rb_define_alloc_func(rb_optimizer_realvector_klass, (rb_alloc_func_t) method_realvector_allocate);
@@ -1096,6 +1130,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realmatrix_klass, "size2", (rb_method)method_realmatrix_size2, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "stride1", (rb_method)method_realmatrix_stride1, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "stride2", (rb_method)method_realmatrix_stride2, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "fill", (rb_method)method_realmatrix_fill, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "clear", (rb_method)method_realmatrix_clear, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "-@", (rb_method)method_realmatrix_negate,0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "[]", (rb_method)method_realmatrix_query,2);
@@ -1121,7 +1156,8 @@ extern "C"  {
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "element",    (rb_method)method_unlabeleddata_query, 1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "[]",         (rb_method)method_unlabeleddata_query, 1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "[]=",        (rb_method)method_unlabeleddata_insert, 2);
-			rb_define_method(rb_optimizer_unlabeleddata_klass, "remove_NaN", (rb_method)method_unlabeleddata_remove_NaN, 0);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "fill",        (rb_method)method_unlabeleddata_fill, 1);
+			rb_define_method(rb_optimizer_unlabeleddata_klass, "remove_NaN", (rb_method)method_unlabeleddata_remove_NaN, -1);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "elements",   (rb_method)method_unlabeleddata_to_ary,0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "to_a",       (rb_method)method_unlabeleddata_to_ary,0);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "mean",       (rb_method)method_unlabeleddata_mean,0);

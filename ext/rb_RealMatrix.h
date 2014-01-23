@@ -7,5 +7,6 @@ class rb_RealMatrix {
 	public:
 		rb_RealMatrix(RealMatrix);
 		rb_RealMatrix();
+		void fill(double);
 		RealMatrix data;
 };

@@ -7,5 +7,7 @@ class rb_RealVector {
 	public:
 		rb_RealVector(RealVector);
 		rb_RealVector();
+		void fill(double);
+		void remove_NaN(double);
 		RealVector data;
 };

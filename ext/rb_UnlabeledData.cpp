@@ -1,11 +1,14 @@
 #include "rb_UnlabeledData.h"
+#include <limits>
+using namespace shark;
+using namespace std;
 rb_UnlabeledData::rb_UnlabeledData(UnlabeledData<RealVector> _data) {
 	data = _data;
 }
 rb_UnlabeledData::rb_UnlabeledData() {
 }
-std::vector<shark::RealVector> rb_UnlabeledData::input () {
-	std::vector<shark::RealVector> my_input(data.numberOfElements());
+vector<RealVector> rb_UnlabeledData::input () {
+	vector<RealVector> my_input(data.numberOfElements());
 	for (size_t i=0; i<data.numberOfElements(); i++)
 	{
 		RealVector output(data.element(i));
@@ -14,10 +17,16 @@ std::vector<shark::RealVector> rb_UnlabeledData::input () {
 	return my_input;
 }
 
-void rb_UnlabeledData::remove_NaN() {
-	for (UnlabeledData::element_iterator pos=data.elemBegin();pos!= data.elemEnd();++pos) {
-		std::cout<<*pos<<" ";
-		Set::element_reference ref=*pos;
-		ref*=2;
-		std::cout<<*pos<<std::endl;
+void rb_UnlabeledData::remove_NaN(double replacement = 0.0) {
+	BOOST_FOREACH(UnlabeledData<RealVector>::element_reference vector, data.elements()) {
+		for (size_t i = 0;i< vector.size();i++)
+			if (vector(i) != vector(i))
+				vector(i) = replacement;
+	}
+}
+
+void rb_UnlabeledData::fill(double replacement) {
+	BOOST_FOREACH(UnlabeledData<RealVector>::element_reference vector, data.elements()) {
+		std::fill(vector.begin(), vector.end(), replacement);
+	}
 }

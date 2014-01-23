@@ -9,5 +9,6 @@ class rb_UnlabeledData {
 		rb_UnlabeledData(UnlabeledData<RealVector>);
 		UnlabeledData<RealVector> data;
 		vector<RealVector> input ();
-		void remove_NaN();
+		void fill(double);
+		void remove_NaN(double);
 };
