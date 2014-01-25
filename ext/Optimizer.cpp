@@ -105,8 +105,8 @@ std::vector<RealMatrix> Optimizer::layer_matrices() {
 }
 
 RealMatrix& Optimizer::layer_matrices_at_index(int index) {
-	if (steps < 1)
-		rb_raise(rb_eRuntimeError, "Layer matrices are only available once at least 1 training step has occured.");
+	/*if (steps < 1)
+		rb_raise(rb_eRuntimeError, "Layer matrices are only available once at least 1 training step has occured.");*/
 	return model.layerMatrices()[index];
 }
 

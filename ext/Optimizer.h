@@ -44,7 +44,6 @@ class Optimizer {
 		std::vector<shark::RealMatrix> layer_matrices();
 		RealMatrix& layer_matrices_at_index(int);
 		void updateFunction();
-	private:
 		void setStartingPoint();
 };
 

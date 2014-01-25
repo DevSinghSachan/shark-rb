@@ -3,6 +3,7 @@
 #include "rb_UnlabeledData.h"
 #include "rb_RegressionDataset.h"
 #include "rb_RealMatrix.h"
+#include "rb_LinearModel.h"
 
 using namespace std;
 using namespace shark;
@@ -196,9 +197,9 @@ VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_argument
 		&labels,
 		&width);
 
-	if (TYPE(samples) == T_DATA) {
+	if (TYPE(samples) == T_DATA && CLASS_OF(labels) == rb_optimizer_unlabeleddata_klass) {
 		// input is either labels and data or just data:
-		if (TYPE(labels) == T_DATA) {
+		if (TYPE(labels) == T_DATA && CLASS_OF(labels) == rb_optimizer_unlabeleddata_klass) {
 			return wrap_pointer<rb_RegressionDataset>(
 				rb_optimizer_regressionset_klass,
 				new rb_RegressionDataset(samples, labels)
@@ -357,7 +358,7 @@ VALUE method_realmatrix_negate (VALUE self) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
 	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realvector_klass,
+		rb_optimizer_realmatrix_klass,
 		new rb_RealMatrix(-(m->data))
 	);
 }
@@ -555,6 +556,8 @@ VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
 
 VALUE method_unlabeleddata_insert (VALUE self, VALUE position, VALUE assignment) {
 	Check_Type(assignment, T_DATA);
+	if (CLASS_OF(assignment) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "Can only insert a RealVector.");
 	Check_Type(position, T_FIXNUM);
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
@@ -625,6 +628,9 @@ VALUE method_unlabeleddata_covariance (VALUE self) {
 
 VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 	Check_Type(shift_vector, T_DATA);
+	if (CLASS_OF(shift_vector) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "Shift can only be performed by a RealVector.");
+
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 
@@ -638,6 +644,8 @@ VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 
 VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 	Check_Type(shift_vector, T_DATA);
+	if (CLASS_OF(shift_vector) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "Shift can only be performed by a RealVector.");
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 
@@ -650,6 +658,8 @@ VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 VALUE method_unlabeleddata_truncate (VALUE self, VALUE minX, VALUE minY) {
 	Check_Type(minX, T_DATA);
 	Check_Type(minY, T_DATA);
+	if (CLASS_OF(minX) != rb_optimizer_realvector_klass || CLASS_OF(minX) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "Can only truncate using a RealVector.");
 	// could also check classes...
 
 	rb_UnlabeledData *s;
@@ -667,6 +677,8 @@ VALUE method_unlabeleddata_truncate (VALUE self, VALUE minX, VALUE minY) {
 VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE minY, VALUE newMin, VALUE newMax) {
 	Check_Type(minX, T_DATA);
 	Check_Type(minY, T_DATA);
+	if (CLASS_OF(minX) != rb_optimizer_realvector_klass || CLASS_OF(minX) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "Can only truncate using a RealVector.");
 	if (
 		(TYPE(newMin) == T_FLOAT || TYPE(newMin) == T_FIXNUM) && 
 		(TYPE(newMax) == T_FLOAT || TYPE(newMax) == T_FIXNUM)
@@ -858,6 +870,9 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 	shark::RegressionDataset data;
 
 	if (number_of_arguments == 1 && TYPE(ruby_arguments[0]) == T_DATA ) {
+		if (CLASS_OF(ruby_arguments[0]) != rb_optimizer_regressionset_klass)
+			rb_raise(rb_eArgError, "Samples must be of class RegressionDataset.");
+
 		rb_RegressionDataset *s;
 		Data_Get_Struct(ruby_arguments[0], rb_RegressionDataset, s);
 		data = s->data;
@@ -889,13 +904,15 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 		}
 		if (rb_data != Qnil) {
 			Check_Type(rb_data, T_DATA);
+			if (CLASS_OF(rb_data) != rb_optimizer_regressionset_klass)
+				rb_raise(rb_eArgError, "Samples can only be a RegressionDataset.");
 			rb_RegressionDataset *s;
 			Data_Get_Struct(rb_data, rb_RegressionDataset, s);
 			data = s->data;
 			visibleSize = s-> visibleSize;
 		}
 	} else if (number_of_arguments > 1) {
-		rb_raise(rb_eArgError, "Autoencoder takes 1 argument: Optimizer::Samples, or a Hash or parameters:\n  {\n    :data => Optimizer::Samples,\n    :beta => 3.0,\n    :rho => 0.01,\n    :lambda => 0.0002,\n    :hidden_neurons => 25\n  }");
+		rb_raise(rb_eArgError, "Autoencoder takes 1 argument (Optimizer::RegressionDataset), or a Hash of parameters (e.g\n  {\n    :data => Optimizer::RegressionDataset,\n    :beta => 3.0,\n    :rho => 0.01,\n    :lambda => 0.0002,\n    :hidden_neurons => 25\n  }).");
 	}
 	
 	Optimizer *my_optimizer = new Optimizer(visibleSize, numhidden, rho, beta, lambda);
@@ -904,7 +921,50 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 	return wrap_pointer<Optimizer>(self, my_optimizer);
 }
 
+
+static VALUE method_autoencode_set_parameter_vector(VALUE self, VALUE rb_parameter_vector) {
+
+	Optimizer *o;
+	Data_Get_Struct(self, Optimizer, o);
+
+	rb_RealVector *v;
+	Data_Get_Struct(rb_parameter_vector, rb_RealVector, v);
+
+	o->setParameterVector(v->data);
+
+	return self;
+}
+
 static VALUE method_autoencode_layer_matrices(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_layer_index;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&rb_layer_index);
+
+	if (TYPE(rb_layer_index) == T_FIXNUM) {
+		Optimizer *o;
+		Data_Get_Struct(self, Optimizer, o);
+		int index = rb_layer_index != Qnil ? NUM2INT(rb_layer_index) : 0;
+
+		if (index > 1 || index < 0)
+			rb_raise(rb_eArgError, "Layer index must be between 0 and 1. There are only 2 layers in this Neural-Net.");
+		RealMatrix& matrix = o->layer_matrices_at_index(index);
+
+		return wrap_pointer<rb_RealMatrix>(
+			rb_optimizer_realmatrix_klass,
+			new rb_RealMatrix(matrix)
+		);
+	} else if (TYPE(rb_layer_index) == T_DATA && CLASS_OF(rb_layer_index) == rb_optimizer_realvector_klass) {
+		return method_autoencode_set_parameter_vector(self, rb_layer_index);
+	} else {
+		rb_raise(rb_eArgError, "Can only query layer parameters by specifying a Fixnum index (e.g. 0), or by providing a RealVector to reassign the parameters.");
+		return self;
+	}
+}
+
+static VALUE method_autoencode_layer_matrices_to_a(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_layer_index;
 	rb_scan_args(
 		number_of_arguments,
@@ -921,8 +981,18 @@ static VALUE method_autoencode_layer_matrices(int number_of_arguments, VALUE* ru
 	if (index > 1 || index < 0)
 		rb_raise(rb_eArgError, "Layer index must be between 0 and 1. There are only 2 layers in this Neural-Net.");
 	RealMatrix& matrix = o->layer_matrices_at_index(index);
-	return realmatrix_to_rb_ary(matrix);
 
+	return realmatrix_to_rb_ary(matrix);
+}
+
+static VALUE method_autoencode_set_starting_point(VALUE self) {
+
+	Optimizer *o;
+	Data_Get_Struct(self, Optimizer, o);
+
+	o->setStartingPoint();
+
+	return self;
 }
 
 typedef VALUE (*rb_method)(...);
@@ -1064,6 +1134,8 @@ extern "C"  {
 			
 			// The current parameter assignments on the neural net
 			rb_define_method(rb_optimizer_klass, "parameters", (rb_method)method_autoencode_layer_matrices, -1);
+			rb_define_method(rb_optimizer_klass, "parameters_to_a", (rb_method)method_autoencode_layer_matrices_to_a, -1);
+			rb_define_method(rb_optimizer_klass, "set_starting_point", (rb_method)method_autoencode_set_starting_point, 0);
 			rb_define_method(rb_optimizer_klass, "layers", (rb_method)method_autoencode_layer_matrices, -1);
 			rb_define_method(rb_optimizer_klass, "export", (rb_method)method_export_feature_images, -1);
 			

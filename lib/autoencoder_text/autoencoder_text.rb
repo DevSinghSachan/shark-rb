@@ -80,7 +80,6 @@ class Optimizer
 				# Remove outliers outside of +/- 3 standard deviations
 				# and normalize to [0.1, 0.9]
 				pstd = @unlabeled_data.variance.sqrt * @num_std_deviations
-				puts "pstd = #{pstd.to_a.inspect}, @unlabeled_data=#{@unlabeled_data.to_a.inspect}"
 				@unlabeled_data.truncate_and_rescale(-pstd, pstd, @min_value, @max_value)
 				@unlabeled_data.remove_NaN
 			end
@@ -102,12 +101,22 @@ class Optimizer
 													 :beta => opts[:beta]                     || DefaultBeta
 			end
 
-			def present(cutoff=0)
+			def present(cutoff=0, ordered=true, cutoff_number=false)
 				parameters.each do |filter|
 					puts "\n{"
-					filter.each_pair do |k,v|
-						if v > cutoff
-							puts "    #{k} => #{v}"
+					if ordered
+						filter.to_a.sort_by {|i| -i[1]}.each_with_index do |pair, k|
+							if cutoff_number and k > cutoff_number then break end
+							if pair[1] > cutoff
+								puts "    #{pair[0]} => #{pair[1]}"
+							end
+						end
+					else
+						filter.to_a.each_with_index do |pair, k|
+							if cutoff_number and k > cutoff_number then break end
+							if pair[1] > cutoff
+								puts "    #{pair[0]} => #{pair[1]}"
+							end
 						end
 					end
 					puts "}\n"
@@ -124,12 +133,12 @@ class Optimizer
 
 			def parameters index = 0, rendered = true
 				if index == 0 and rendered
-					filters = @autoencoder.parameters index
+					filters = @autoencoder.parameters_to_a index
 					filters.map do |filter|
 						Optimizer::Autoencoder::Text.create_text_samples_from_filters :filter => filter, :vector => @standard_vector.features
 					end
 				else 
-					@autoencoder.parameters index
+					@autoencoder.parameters_to_a index
 				end
 			end
 
