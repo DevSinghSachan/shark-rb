@@ -4,6 +4,7 @@
 #include "rb_RegressionDataset.h"
 #include "rb_RealMatrix.h"
 #include "rb_LinearModel.h"
+#include "rb_PCA.h"
 
 using namespace std;
 using namespace shark;
@@ -18,6 +19,8 @@ VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klas
 VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
 VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
 VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
+VALUE rb_optimizer_linearmodel_klass   = rb_define_class_under(rb_optimizer_klass, "LinearModel", rb_cObject);
+VALUE rb_optimizer_pca_klass           = rb_define_class_under(rb_optimizer_klass, "PCA", rb_cObject);
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -181,6 +184,305 @@ VALUE method_unlabeleddata_allocate (VALUE klass) {
 			new rb_UnlabeledData()
 		);
 }
+
+VALUE method_pca_allocate (VALUE klass) {
+return wrap_pointer<rb_LinearModel>(
+			rb_optimizer_linearmodel_klass,
+			new rb_LinearModel()
+		);
+};
+
+VALUE method_pca_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_data,
+			rb_whitening;
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"02",
+		&rb_data,
+		&rb_whitening);
+
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, pc);
+
+	if (TYPE(rb_data) == T_DATA) {
+
+		if (CLASS_OF(rb_data) != rb_optimizer_unlabeleddata_klass)
+			rb_raise(rb_eArgError, "PCA takes either:\n - UnlabeledData, and a boolean choice whether to do whitening, OR\n - a boolean whether to do whitening, OR\n - no parameters.");
+
+		bool whitening = true;
+		rb_UnlabeledData *d;
+		Data_Get_Struct(rb_data, rb_UnlabeledData, d);
+
+		if (rb_whitening != Qnil) {
+			if (rb_whitening == Qtrue) {
+				whitening = true;
+			} else {
+				whitening = false;
+			}
+		}
+
+		p->trainer = new rb_PCA(d->data, whitening);
+
+	} else if (TYPE(rb_data) != Qnil) {
+		if (rb_data == Qtrue) {
+			p->setWhitening(true)
+		} else {
+			p->setWhitening(false);
+		}
+	} else {
+		// No settings for structure.
+	}
+
+	return self;
+};
+
+
+VALUE method_pca_train (VALUE self, VALUE rb_model, VALUE rb_inputs) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+	Check_Type(rb_model, T_DATA);
+	Check_Type(rb_inputs, T_DATA);
+	if (CLASS_OF(rb_model) != rb_optimizer_linearmodel_klass || CLASS_OF(rb_inputs) != rb_optimizer_unlabeleddata_klass)
+		rb_raise(rb_eArgError, "PCA is trained using a LinearModel and UnlabeledData.");
+
+	rb_LinearModel *m;
+	rb_UnlabeledData *d;
+	Data_Get_Struct(rb_model, rb_LinearModel, m);
+	Data_Get_Struct(rb_inputs, rb_UnlabeledData, d);
+
+	p->train(m->model, d->data);
+
+	return self;
+};
+
+VALUE method_pca_setWhitening (VALUE self, VALUE whitening) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	if (whitening == Qtrue)
+		p->setWhitening(true);
+	else
+		p->setWhitening(false);
+	return self;
+};
+
+VALUE method_pca_get_whitening (VALUE self) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+	return (p->whitening() ? Qtrue : Qfalse);
+};
+
+VALUE method_pca_setData (VALUE self, VALUE rb_data) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+	Check_Type(rb_data, T_DATA);
+	if (CLASS_OF(rb_data) != rb_optimizer_unlabeleddata_klass)
+		rb_raise(rb_eArgError, "PCA's data is set using UnlabeledData.");
+	rb_UnlabeledData *d;
+	Data_Get_Struct(rb_data, rb_UnlabeledData, d);
+
+	p->setData(d->data);
+	return self;
+};
+
+VALUE method_pca_encoder (VALUE self) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	Check_Type(numDimensions, T_FIXNUM);
+	Check_Type(model, T_DATA);
+	if (CLASS_OF(model) != rb_optimizer_linearmodel_klass)
+		rb_raise(rb_eArgError, "PCA's encoder must be used with a LinearModel");
+
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+
+	m->encoder(m->model, NUM2INT(numDimensions));
+
+	return self;
+};
+
+VALUE method_pca_decoder (VALUE self, VALUE model, VALUE numDimensions) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	Check_Type(numDimensions, T_FIXNUM);
+	Check_Type(model, T_DATA);
+	if (CLASS_OF(model) != rb_optimizer_linearmodel_klass)
+		rb_raise(rb_eArgError, "PCA's decoder must be used with a LinearModel");
+
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+
+	m->decoder(m->model, NUM2INT(numDimensions));
+
+	return self;
+};
+
+VALUE method_pca_eigenvalues (VALUE self) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(p->eigenvalues())
+	);
+};
+
+VALUE method_pca_eigenvalue (VALUE self, VALUE position) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	Check_Type(position, T_FIXNUM);
+
+	return rb_float_new(p->eigenvalue(NUM2INT(position)));
+};
+
+VALUE method_pca_eigenvectors (VALUE self) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	return wrap_pointer<rb_RealMatrix>(
+		rb_optimizer_realmatrix_klass,
+		new rb_RealMatrix(p->eigenvectors())
+	);
+};
+
+VALUE method_pca_mean (VALUE self) {
+	rb_PCA *p;
+	Data_Get_Struct(self, rb_PCA, p);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(p->mean())
+	);
+};
+
+
+VALUE method_linearmodel_allocate (VALUE klass) {
+	return wrap_pointer<rb_LinearModel>(
+			rb_optimizer_linearmodel_klass,
+			new rb_LinearModel()
+		);
+}
+
+VALUE method_linearmodel_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	
+	VALUE rb_matrix,
+			rb_offsets,
+			rb_bias;
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"03",
+		&rb_matrix,
+		&rb_offsets,
+		&rb_bias);
+
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+
+	if (TYPE(rb_matrix) == T_DATA) {
+
+		if (CLASS_OF(rb_matrix) != rb_optimizer_realmatrix_klass)
+			rb_raise(rb_eArgError, "LinearModel takes either:\n - a number of inputs, a number of outputs, and a boolean choice whether to use offsets, OR\n - a RealMatrix and a RealVector, OR\n - no parameters.");
+
+		rb_RealMatrix *mat;
+		Data_Get_Struct(rb_matrix, rb_RealMatrix, mat);
+
+		if (TYPE(rb_offsets) == T_DATA) {
+			// With offsets vector.
+			if (CLASS_OF(rb_offsets) != rb_optimizer_realvector_klass)
+				rb_raise(rb_eArgError, "LinearModel takes either:\n - a number of inputs, a number of outputs, and a boolean choice whether to use offsets, OR\n - a RealMatrix and a RealVector, OR\n - no parameters.");
+			rb_RealVector *vec;
+			Data_Get_Struct(rb_offsets, rb_RealVector, vec);
+			m->setStructure(mat->data, vec->data);
+
+		} else {
+			// Without offsets vector.
+			m->setStructure(mat->data, *new RealVector());
+
+		}
+
+	} else if (TYPE(rb_matrix) == T_FIXNUM && TYPE(rb_offsets) == T_FIXNUM) {
+		// Using numbers to choose structure.
+		m->setStructure(NUM2INT(rb_matrix), NUM2INT(rb_offsets), rb_bias == Qtrue ? true : false);
+	} else {
+		// No settings for structure.
+	}
+
+	return self;
+}
+
+VALUE method_linearmodel_offset(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(m->offset())
+	);
+};
+
+VALUE method_linearmodel_matrix(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return wrap_pointer<rb_RealMatrix>(
+		rb_optimizer_realmatrix_klass,
+		new rb_RealMatrix(m->matrix())
+	);
+};
+
+
+VALUE method_linearmodel_setParameterVector(VALUE self, VALUE paramVector) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+
+	Check_Type(paramVector, T_DATA);
+	if (CLASS_OF(paramVector) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "LinearModel's parameter vector can only be set using a RealVector.");
+
+	rb_RealVector *vec;
+	Data_Get_Struct(paramVector, rb_RealVector, vec);
+
+	m->setParameterVector(vec->data);
+	return self;
+};
+
+VALUE method_linearmodel_parameterVector(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(m->parameterVector())
+	);
+};
+
+VALUE method_linearmodel_numberOfParameters(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return INT2FIX(m->numberOfParameters());
+};
+
+VALUE method_linearmodel_outputSize(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return INT2FIX(m->outputSize());
+};
+
+VALUE method_linearmodel_inputSize(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return INT2FIX(m->inputSize());
+};
+
+VALUE method_linearmodel_hasOffset(VALUE self) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	return (m->hasOffset() ? Qtrue : Qfalse);
+};
 
 VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE samples,
@@ -1085,7 +1387,7 @@ static VALUE method_autoencode_eval(VALUE self, VALUE sample) {
 	// convert sample to Realmatrix.
 	std::vector<shark::RealMatrix> evaluation = o->eval(samples[0]);
 
-	VALUE output_hash, rb_evaluation, rb_hidden_evaluation, rb_other_evaluation, rb_all_evaluation;
+	VALUE output_hash, rb_evaluation, rb_hidden_evaluation;
 
 	rb_evaluation        = realmatrix_to_rb_ary(evaluation[0], 1);
 	rb_hidden_evaluation = realmatrix_to_rb_ary(evaluation[1], 1);
@@ -1123,7 +1425,7 @@ extern "C"  {
 		// Autoencoder
 			// Ruby methods for AutoEncoder
 			rb_define_singleton_method(rb_optimizer_klass, "autoencoder", (rb_method)method_autoencode, -1);
-			
+
 			// advance learning by one iteration:
 			rb_define_method(rb_optimizer_klass, "step", (rb_method)method_autoencode_step,0);
 			rb_define_method(rb_optimizer_klass, "train", (rb_method)method_autoencode_step,0);
@@ -1138,10 +1440,10 @@ extern "C"  {
 			rb_define_method(rb_optimizer_klass, "set_starting_point", (rb_method)method_autoencode_set_starting_point, 0);
 			rb_define_method(rb_optimizer_klass, "layers", (rb_method)method_autoencode_layer_matrices, -1);
 			rb_define_method(rb_optimizer_klass, "export", (rb_method)method_export_feature_images, -1);
-			
+
 			// number of iterations
 			rb_define_method(rb_optimizer_klass, "steps", (rb_method)method_autoencode_numSteps,0);
-			
+
 			// Neural-Net shape:
 			rb_define_method(rb_optimizer_klass, "hidden_size", (rb_method)method_autoencode_hiddenSize,0);
 			rb_define_method(rb_optimizer_klass, "visible_size", (rb_method)method_autoencode_visibleSize,0);
@@ -1159,6 +1461,10 @@ extern "C"  {
 
 			// Neural-Net evaluation:
 			rb_define_method(rb_optimizer_klass, "eval", (rb_method)method_autoencode_eval, 1);
+
+			// <deprecated>
+			// rb_define_singleton_method(rb_optimizer_klass, "create_unlabeled_data", (rb_method)method_create_unlabeleddata, 1);
+			// </deprecated>
 
 		// Datatypes
 		// Ruby methods for samples
@@ -1245,9 +1551,32 @@ extern "C"  {
 			rb_define_alloc_func(rb_optimizer_unlabeleddata_klass,           (rb_alloc_func_t) method_unlabeleddata_allocate);
 			rb_define_method(rb_optimizer_unlabeleddata_klass, "initialize", (rb_method)method_unlabeleddata_initialize, -1);
 
-		// <deprecated>
-		// rb_define_singleton_method(rb_optimizer_klass, "create_unlabeled_data", (rb_method)method_create_unlabeleddata, 1);
-		// </deprecated>
+		// Shark LinearModel class:
+			rb_define_alloc_func(rb_optimizer_linearmodel_klass,  (rb_alloc_func_t) method_linearmodel_allocate);
+			rb_define_method(rb_optimizer_linearmodel_klass, "initialize", (rb_method)method_linearmodel_initialize, -1);
+			rb_define_method(rb_optimizer_linearmodel_klass, "set_structure", (rb_method)method_linearmodel_initialize, -1);
+			rb_define_method(rb_optimizer_linearmodel_klass, "offset" ,(rb_method) method_linearmodel_offset, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "matrix",(rb_method) method_linearmodel_matrix, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "parameter_vector=",(rb_method) method_linearmodel_setParameterVector, 1);
+			rb_define_method(rb_optimizer_linearmodel_klass, "parameter_vector",(rb_method) method_linearmodel_parameterVector, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "number_of_parameters",(rb_method) method_linearmodel_numberOfParameters, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "output_size",(rb_method) method_linearmodel_outputSize, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "input_size",(rb_method) method_linearmodel_inputSize, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "has_offset?",(rb_method) method_linearmodel_hasOffset, 0);
+
+		// Shark PCA class:
+			rb_define_alloc_func(rb_optimizer_pca_klass,  (rb_alloc_func_t) method_pca_allocate);
+			rb_define_method(rb_optimizer_pca_klass, "initialize", (rb_method)method_pca_initialize, -1);
+			rb_define_method(rb_optimizer_pca_klass, "train",(rb_method) method_pca_train, 0);
+			rb_define_method(rb_optimizer_pca_klass, "whitening=",(rb_method) method_pca_setWhitening, 0);
+			rb_define_method(rb_optimizer_pca_klass, "whitening",(rb_method) method_pca_get_whitening, 0);
+			rb_define_method(rb_optimizer_pca_klass, "set_data",(rb_method) method_pca_setData, 0);
+			rb_define_method(rb_optimizer_pca_klass, "encoder",(rb_method) method_pca_encoder, 0);
+			rb_define_method(rb_optimizer_pca_klass, "decoder",(rb_method) method_pca_decoder, 0);
+			rb_define_method(rb_optimizer_pca_klass, "eigenvalues",(rb_method) method_pca_eigenvalues, 0);
+			rb_define_method(rb_optimizer_pca_klass, "eigenvalue",(rb_method) method_pca_eigenvalue, 0);
+			rb_define_method(rb_optimizer_pca_klass, "eigenvectors",(rb_method) method_pca_eigenvectors, 0);
+			rb_define_method(rb_optimizer_pca_klass, "mean",(rb_method) method_pca_mean, 0);
 
 	}
 }

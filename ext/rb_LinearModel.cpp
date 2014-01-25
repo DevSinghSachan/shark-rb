@@ -1,48 +1,47 @@
 #include "rb_LinearModel.h"
 using namespace std;
 using namespace shark;
-RealVector& offset() {
-	return (this->model).offset();
+RealVector& rb_LinearModel::offset() {
+	return model.offset();
 };
-RealMatrix& matrix() {
-	return (this->model).matrix();
+RealMatrix& rb_LinearModel::matrix() {
+	return model.matrix();
 };
-void setStructure(RealMatrix const& matrix, RealVector const& offset = RealVector()) {
-	(this->model).setStructure(matrix, offset);
+void rb_LinearModel::setStructure(RealMatrix const& matrix, RealVector const& offset = RealVector()) {
+	model.setStructure(matrix, offset);
 };
-void setStructure(unsigned int inputs, unsigned int outputs = 1, bool offset = false) {
-	(this->model).setStructure(inputs, outputs, offset);
+void rb_LinearModel::setStructure(int inputs, int outputs = 1, bool offset = false) {
+	model.setStructure(inputs, outputs, offset);
 };
-int numberOfParemeters() {
-	return (int)(this->model).numberOfParemeters();
+int rb_LinearModel::numberOfParameters() {
+	return (int)model.numberOfParameters();
 };
-void setParameterVector(RealVector const& vec) {
-	(this->model).setParameterVector(vec);
+void rb_LinearModel::setParameterVector(RealVector const& vec) {
+	model.setParameterVector(vec);
 };
-RealVector parameterVector() {
-	return (this->model).parameterVector();
+RealVector rb_LinearModel::parameterVector() {
+	return model.parameterVector();
 };
-int outputSize() {
-	return (int)(this->model).outputSize();
+int rb_LinearModel::outputSize() {
+	return (int)model.outputSize();
 };
-int inputSize() {
-	return (int)(this->model).inputSize();
+int rb_LinearModel::inputSize() {
+	return (int)model.inputSize();
 };
-bool hasOffset() {
-	return (this->model).hasOffset();
-};
-LinearModel model() {
-	return this->model;
+bool rb_LinearModel::hasOffset() {
+	return model.hasOffset();
 };
 rb_LinearModel::rb_LinearModel() {
 };
-rb_LinearModel::rb_LinearModel(LinearModel _model) {
-	this->model = _model;
+rb_LinearModel::rb_LinearModel(LinearModel<RealVector> _model) {
+	model = _model;
 };
 rb_LinearModel::rb_LinearModel(RealMatrix const& matrix) {
-	this->model = new LinearModel(matrix);
+	LinearModel<RealVector> *new_model = new LinearModel<RealVector>(matrix, *new RealVector());
+	model = *new_model;
 };
 rb_LinearModel::rb_LinearModel(RealMatrix const& matrix, RealVector const& offset) {
-	this->model = new LinearModel(matrix, offset);
+	LinearModel<RealVector> *new_model = new LinearModel<RealVector>(matrix, offset);
+	model = *new_model;
 };
 // should add eval as well.

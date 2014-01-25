@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-01-22"
+  s.date = "2014-01-25"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -26,6 +26,8 @@ Gem::Specification.new do |s|
     "ext/Optimizer.h",
     "ext/data/images.csv",
     "ext/extconf.rb",
+    "ext/rb_LinearModel.cpp",
+    "ext/rb_LinearModel.h",
     "ext/rb_RealMatrix.cpp",
     "ext/rb_RealMatrix.h",
     "ext/rb_RealVector.cpp",

@@ -91,7 +91,6 @@ void Optimizer::setParameterVector(RealVector const & parameters) {
 void Optimizer::step() {
 	steps++;
 	optimizer.step(func);
-	double solution = optimizer.solution().value;
 }
 
 double Optimizer::errorValue() {
