@@ -39,7 +39,6 @@ class Optimizer {
 		double errorValue();
 		void step();
 		~Optimizer();
-		void exportFeatureImages(int);
 		void display_layer_matrices();
 		std::vector<shark::RealMatrix> layer_matrices();
 		RealMatrix& layer_matrices_at_index(int);

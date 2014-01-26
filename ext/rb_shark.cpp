@@ -1573,7 +1573,7 @@ static VALUE method_autoencode_eval(VALUE self, VALUE sample) {
 	return output_hash;
 }
 
-static VALUE method_export_feature_images(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+/*static VALUE method_export_feature_images(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_layer_index;
 	rb_scan_args(
 		number_of_arguments,
@@ -1587,7 +1587,7 @@ static VALUE method_export_feature_images(int number_of_arguments, VALUE* ruby_a
 		rb_raise(rb_eArgError, "Layer index must be between 0 and 1. There are only 2 layers in this Neural-Net.");
 	o->exportFeatureImages(index);
 	return self;
-}
+}*/
 
 extern "C"  {
 
@@ -1617,7 +1617,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_klass, "parameters_to_a", (rb_method)method_autoencode_layer_matrices_to_a, -1);
 			rb_define_method(rb_optimizer_klass, "set_starting_point", (rb_method)method_autoencode_set_starting_point, 0);
 			rb_define_method(rb_optimizer_klass, "layers", (rb_method)method_autoencode_layer_matrices, -1);
-			rb_define_method(rb_optimizer_klass, "export", (rb_method)method_export_feature_images, -1);
+			// rb_define_method(rb_optimizer_klass, "export", (rb_method)method_export_feature_images, -1);
 
 			// number of iterations
 			rb_define_method(rb_optimizer_klass, "steps", (rb_method)method_autoencode_numSteps,0);

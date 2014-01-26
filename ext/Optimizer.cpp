@@ -59,7 +59,7 @@ void Optimizer::updateFunction() {
 	optimizer.lineSearch().lineSearchType() = shark::LineSearch::WolfeCubic;
 	optimizer.init(func, model.parameterVector());
 }
-
+/*
 void Optimizer::exportFeatureImages(int index) {
 	RealMatrix& W = model.layerMatrices()[index];
 	// Export the visualized features.
@@ -75,7 +75,7 @@ void Optimizer::exportFeatureImages(int index) {
 			img(j) = W(i,j);
 		//exportPGM((filename % i).str().c_str(), img, 8, 8, true);
 	}
-}
+}*/
 
 void Optimizer::setData(shark::RegressionDataset data) {
 	error.setDataset(data);
