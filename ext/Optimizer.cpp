@@ -1,5 +1,8 @@
 #include "Optimizer.h"
+/*#ifndef SHARK_PGM
+#define SHARK_PGM
 #include <shark/Data/Pgm.h>
+#endif*/
 
 using namespace std;
 using namespace shark;
@@ -70,7 +73,7 @@ void Optimizer::exportFeatureImages(int index) {
 		shark::RealVector img(W.size2());
 		for (size_t j = 0; j < W.size2(); ++j)
 			img(j) = W(i,j);
-		exportPGM((filename % i).str().c_str(), img, 8, 8, true);
+		//exportPGM((filename % i).str().c_str(), img, 8, 8, true);
 	}
 }
 

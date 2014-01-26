@@ -31,17 +31,29 @@ int rb_LinearModel::inputSize() {
 bool rb_LinearModel::hasOffset() {
 	return model.hasOffset();
 };
+Data<RealVector> rb_LinearModel::operator()(Data<RealVector> const& patterns) {
+	return model(patterns);
+};
+RealVector rb_LinearModel::operator()(RealVector const& patterns) {
+	return model(patterns);
+};
+Data<RealVector> rb_LinearModel::eval(Data<RealVector> const& patterns) {
+	return model(patterns);
+};
+RealVector rb_LinearModel::eval(RealVector const& patterns) {
+	return model(patterns);
+};
 rb_LinearModel::rb_LinearModel() {
 };
 rb_LinearModel::rb_LinearModel(LinearModel<RealVector> _model) {
 	model = _model;
 };
 rb_LinearModel::rb_LinearModel(RealMatrix const& matrix) {
-	LinearModel<RealVector> *new_model = new LinearModel<RealVector>(matrix, *new RealVector());
+	LinearModel<> *new_model = new LinearModel<>(matrix, *new RealVector());
 	model = *new_model;
 };
 rb_LinearModel::rb_LinearModel(RealMatrix const& matrix, RealVector const& offset) {
-	LinearModel<RealVector> *new_model = new LinearModel<RealVector>(matrix, offset);
+	LinearModel<> *new_model = new LinearModel<>(matrix, offset);
 	model = *new_model;
 };
 // should add eval as well.

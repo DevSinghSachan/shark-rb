@@ -5,12 +5,21 @@
 #include "rb_RealMatrix.h"
 #include "rb_LinearModel.h"
 #include "rb_PCA.h"
+/*#ifndef SHARK_PGM
+#define SHARK_PGM
+#include <shark/Data/Pgm.h>
+#endif*/
+#include <shark/Data/Pgm.h>
 
 using namespace std;
 using namespace shark;
 
 VALUE rb_sym_new(const char *s) {
 	return ID2SYM(rb_intern(s));
+}
+
+static VALUE method_is_a_directory(VALUE path) {
+	return rb_file_directory_p(Qnil, path);
 }
 
 VALUE rb_optimizer_klass               = rb_define_class("Optimizer", rb_cObject);
@@ -21,6 +30,8 @@ VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klas
 VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
 VALUE rb_optimizer_linearmodel_klass   = rb_define_class_under(rb_optimizer_klass, "LinearModel", rb_cObject);
 VALUE rb_optimizer_pca_klass           = rb_define_class_under(rb_optimizer_klass, "PCA", rb_cObject);
+
+#define StringValueCStr(v) rb_string_value_cstr(&(v))
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -186,9 +197,9 @@ VALUE method_unlabeleddata_allocate (VALUE klass) {
 }
 
 VALUE method_pca_allocate (VALUE klass) {
-return wrap_pointer<rb_LinearModel>(
-			rb_optimizer_linearmodel_klass,
-			new rb_LinearModel()
+return wrap_pointer<rb_PCA>(
+			rb_optimizer_pca_klass,
+			new rb_PCA()
 		);
 };
 
@@ -204,7 +215,7 @@ VALUE method_pca_initialize (int number_of_arguments, VALUE* ruby_arguments, VAL
 		&rb_whitening);
 
 	rb_PCA *p;
-	Data_Get_Struct(self, rb_PCA, pc);
+	Data_Get_Struct(self, rb_PCA, p);
 
 	if (TYPE(rb_data) == T_DATA) {
 
@@ -222,18 +233,16 @@ VALUE method_pca_initialize (int number_of_arguments, VALUE* ruby_arguments, VAL
 				whitening = false;
 			}
 		}
-
-		p->trainer = new rb_PCA(d->data, whitening);
+		p->trainer.setWhitening(whitening);
+		p->trainer.setData(d->data);
 
 	} else if (TYPE(rb_data) != Qnil) {
 		if (rb_data == Qtrue) {
-			p->setWhitening(true)
+			p->setWhitening(true);
 		} else {
 			p->setWhitening(false);
 		}
-	} else {
-		// No settings for structure.
-	}
+	} // else No settings made to structure.. doing that later I guess.
 
 	return self;
 };
@@ -287,36 +296,174 @@ VALUE method_pca_setData (VALUE self, VALUE rb_data) {
 	return self;
 };
 
-VALUE method_pca_encoder (VALUE self) {
+VALUE method_pca_encoder (VALUE self, VALUE rb_model, VALUE numDimensions) {
 	rb_PCA *p;
 	Data_Get_Struct(self, rb_PCA, p);
 
 	Check_Type(numDimensions, T_FIXNUM);
-	Check_Type(model, T_DATA);
-	if (CLASS_OF(model) != rb_optimizer_linearmodel_klass)
+	Check_Type(rb_model, T_DATA);
+	if (CLASS_OF(rb_model) != rb_optimizer_linearmodel_klass)
 		rb_raise(rb_eArgError, "PCA's encoder must be used with a LinearModel");
 
 	rb_LinearModel *m;
-	Data_Get_Struct(self, rb_LinearModel, m);
+	Data_Get_Struct(rb_model, rb_LinearModel, m);
 
-	m->encoder(m->model, NUM2INT(numDimensions));
+	p->encoder(m->model, NUM2INT(numDimensions));
 
 	return self;
 };
 
-VALUE method_pca_decoder (VALUE self, VALUE model, VALUE numDimensions) {
+VALUE method_import_pgm_dir (VALUE self, VALUE rb_directory) {
+	Check_Type(rb_directory, T_STRING);
+	VALUE is_directory = method_is_a_directory(rb_directory);
+
+	const char *path = StringValueCStr(rb_directory);
+
+	if (is_directory == Qtrue) {
+		UnlabeledData<RealVector> images;
+		Data<ImageInformation> imagesInfo;
+
+		try {
+			importPGMSet(path, images, imagesInfo);
+
+			return wrap_pointer<rb_UnlabeledData>(
+				rb_optimizer_unlabeleddata_klass,
+				new rb_UnlabeledData(images)
+				);
+
+		} catch(...) {
+			rb_raise(rb_eRuntimeError, "Could not find .pgm files in directory.");
+			return self;
+		}
+	} else {
+		try {
+			RealVector vec;
+			ImageInformation imgInfo;
+			importPGM(path, vec, imgInfo.x, imgInfo.y);
+
+			return wrap_pointer<rb_RealVector>(
+				rb_optimizer_realvector_klass,
+				new rb_RealVector(vec)
+				);
+		} catch(...) {
+			rb_raise(rb_eRuntimeError, "Could not find .pgm file in this path.");
+
+			return self;
+		}
+	}
+}
+
+VALUE method_export_pgm (VALUE self, VALUE data_hash) {
+	Check_Type(data_hash, T_HASH);
+	VALUE rb_data   = rb_hash_aref(data_hash, rb_sym_new("image"));
+	VALUE rb_path   = rb_hash_aref(data_hash, rb_sym_new("path"));
+	VALUE rb_height = rb_hash_aref(data_hash, rb_sym_new("height"));
+	VALUE rb_width  = rb_hash_aref(data_hash, rb_sym_new("width"));
+	VALUE normalize = rb_hash_aref(data_hash, rb_sym_new("normalize"));
+
+	Check_Type(rb_data, T_DATA);
+	if (CLASS_OF(rb_data) != rb_optimizer_realvector_klass)
+		rb_raise(rb_eArgError, "PGM are exported from a RealVector");
+
+	rb_RealVector *v;
+	Data_Get_Struct(rb_data, rb_RealVector, v);
+
+	Check_Type(rb_height, T_FIXNUM);
+	Check_Type(rb_width, T_FIXNUM);
+	Check_Type(rb_path, T_STRING);
+	try {
+		exportPGM(StringValueCStr(rb_path), v->data, NUM2INT(rb_width), NUM2INT(rb_height), normalize == Qtrue);
+		return rb_path;
+	} catch (...) {
+		rb_raise(rb_eRuntimeError, "Could not write PGM file.");
+		return rb_path;
+	}
+}
+
+VALUE method_realvector_export_pgm (VALUE self, VALUE data_hash) {
+	Check_Type(data_hash, T_HASH);
+	VALUE rb_path   = rb_hash_aref(data_hash, rb_sym_new("path"));
+	VALUE rb_height = rb_hash_aref(data_hash, rb_sym_new("height"));
+	VALUE rb_width  = rb_hash_aref(data_hash, rb_sym_new("width"));
+	VALUE normalize = rb_hash_aref(data_hash, rb_sym_new("normalize"));
+
+	rb_RealVector *v;
+	Data_Get_Struct(self, rb_RealVector, v);
+
+	Check_Type(rb_height, T_FIXNUM);
+	Check_Type(rb_width, T_FIXNUM);
+	Check_Type(rb_path, T_STRING);
+	try {
+		exportPGM(StringValueCStr(rb_path), v->data, NUM2INT(rb_width), NUM2INT(rb_height), normalize == Qtrue);
+		return self;
+	} catch (...) {
+		rb_raise(rb_eRuntimeError, "Could not write PGM file.");
+		return self;
+	}
+}
+
+VALUE method_pca_test (VALUE self) {
+
+	const char *facedirectory = "/Users/jonathanraiman/Desktop/orl_faces/"; //< set this to the directory containing the face database
+	UnlabeledData<RealVector> images;
+	Data<ImageInformation> imagesInfo;
+	cout << "Read images ... " << flush;
+	try {
+		importPGMSet(facedirectory, images, imagesInfo);
+	} catch(...) {
+		cerr << "[PCATutorial] could not open face database directory\n\nThis file is part of the \"Principal Component Analysis\" tutorial.\nThe tutorial requires that you download the Cambridge Face Database\nfrom http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html\nand adjust the facedirectory path in the source code to the directory\ncontaining the faces in PGM format." << endl;
+		return 1;
+	}
+	cout << "done." << endl;
+	
+	unsigned l = images.numberOfElements();   // number of samples
+	unsigned x = imagesInfo.element(0).x;     // width of images
+	unsigned y = imagesInfo.element(0).y;     // height of images
+	
+	cout << "Eigenvalue decomposition ... " << flush;
+	PCA pca(images);
+	cout << "done." << endl;
+	
+	cout << "Writing mean face and eigenvalues... " << flush;
+	ofstream ofs("facesEigenvalues.csv");
+	for(unsigned i=0; i<l; i++) 
+		ofs << pca.eigenvalue(i) << endl;
+	exportPGM("facesMean.pgm", pca.mean(), x, y);
+	cout << "done. " << endl;
+
+	cout << "Encoding ... " << flush;
+	unsigned m = 299;
+	LinearModel<> enc;
+	pca.encoder(enc, m);
+	Data<RealVector> encodedImages = enc(images);
+	cout << "done. " << endl;
+
+	unsigned sampleImage = 0;
+	cout << "Reconstructing face " << sampleImage << " ... " << flush;
+	boost::format fmterTrue("face%d.pgm");
+	exportPGM((fmterTrue % sampleImage).str().c_str(), images.element(sampleImage), x, y);
+	LinearModel<> dec;
+	pca.decoder(dec, m);
+	boost::format fmterRec("facesReconstruction%d-%d.pgm");
+	exportPGM((fmterRec % sampleImage % m).str().c_str(), dec(encodedImages.element(sampleImage)), x, y);
+	cout << "done." << endl;
+
+	return self;
+}
+
+VALUE method_pca_decoder (VALUE self, VALUE rb_model, VALUE numDimensions) {
 	rb_PCA *p;
 	Data_Get_Struct(self, rb_PCA, p);
 
 	Check_Type(numDimensions, T_FIXNUM);
-	Check_Type(model, T_DATA);
-	if (CLASS_OF(model) != rb_optimizer_linearmodel_klass)
+	Check_Type(rb_model, T_DATA);
+	if (CLASS_OF(rb_model) != rb_optimizer_linearmodel_klass)
 		rb_raise(rb_eArgError, "PCA's decoder must be used with a LinearModel");
 
 	rb_LinearModel *m;
-	Data_Get_Struct(self, rb_LinearModel, m);
+	Data_Get_Struct(rb_model, rb_LinearModel, m);
 
-	m->decoder(m->model, NUM2INT(numDimensions));
+	p->decoder(m->model, NUM2INT(numDimensions));
 
 	return self;
 };
@@ -482,6 +629,33 @@ VALUE method_linearmodel_hasOffset(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
 	return (m->hasOffset() ? Qtrue : Qfalse);
+};
+
+VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
+	rb_LinearModel *m;
+	Data_Get_Struct(self, rb_LinearModel, m);
+	Check_Type(dataset, T_DATA);
+
+	if (CLASS_OF(dataset) == rb_optimizer_unlabeleddata_klass) {
+		rb_UnlabeledData *d;
+		Data_Get_Struct(dataset, rb_UnlabeledData, d);
+
+		return wrap_pointer<rb_UnlabeledData>(
+			rb_optimizer_unlabeleddata_klass,
+			new rb_UnlabeledData(m->eval(d->data))
+		);
+	} else if (CLASS_OF(dataset) == rb_optimizer_realvector_klass) {
+		rb_RealVector *d;
+		Data_Get_Struct(dataset, rb_RealVector, d);
+
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(m->eval(d->data))
+		);
+	} else {
+		rb_raise(rb_eArgError, "LinearModel can evalute UnlabeledData or RealVectors.");
+	}
+	return self;
 };
 
 VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
@@ -1419,6 +1593,10 @@ extern "C"  {
 
 	void Init_rb_shark() {
 
+		// TODO:
+		//   - define .each method,
+		//   - define a slice of a matrix as a RealVector.
+
 		// for better naming conventions:
 		rb_define_global_const("Shark", rb_optimizer_klass);
 
@@ -1462,6 +1640,10 @@ extern "C"  {
 			// Neural-Net evaluation:
 			rb_define_method(rb_optimizer_klass, "eval", (rb_method)method_autoencode_eval, 1);
 
+			// Import PGM
+			rb_define_singleton_method(rb_optimizer_klass, "export_pgm", (rb_method) method_export_pgm, 1);
+			rb_define_singleton_method(rb_optimizer_klass, "import_pgm", (rb_method) method_import_pgm_dir, 1);
+
 			// <deprecated>
 			// rb_define_singleton_method(rb_optimizer_klass, "create_unlabeled_data", (rb_method)method_create_unlabeleddata, 1);
 			// </deprecated>
@@ -1481,6 +1663,7 @@ extern "C"  {
 
 
 		// Shark Vectors:
+			rb_define_method(rb_optimizer_realvector_klass, "to_pgm", (rb_method)method_realvector_export_pgm, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "sqrt", (rb_method)method_realvector_get_sqrt,0);
 			rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
 			rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
@@ -1563,20 +1746,23 @@ extern "C"  {
 			rb_define_method(rb_optimizer_linearmodel_klass, "output_size",(rb_method) method_linearmodel_outputSize, 0);
 			rb_define_method(rb_optimizer_linearmodel_klass, "input_size",(rb_method) method_linearmodel_inputSize, 0);
 			rb_define_method(rb_optimizer_linearmodel_klass, "has_offset?",(rb_method) method_linearmodel_hasOffset, 0);
+			rb_define_method(rb_optimizer_linearmodel_klass, "eval",(rb_method) method_linearmodel_eval, 1);
 
 		// Shark PCA class:
 			rb_define_alloc_func(rb_optimizer_pca_klass,  (rb_alloc_func_t) method_pca_allocate);
 			rb_define_method(rb_optimizer_pca_klass, "initialize", (rb_method)method_pca_initialize, -1);
-			rb_define_method(rb_optimizer_pca_klass, "train",(rb_method) method_pca_train, 0);
-			rb_define_method(rb_optimizer_pca_klass, "whitening=",(rb_method) method_pca_setWhitening, 0);
+			rb_define_method(rb_optimizer_pca_klass, "train",(rb_method) method_pca_train, 2);
+			rb_define_method(rb_optimizer_pca_klass, "whitening=",(rb_method) method_pca_setWhitening, 1);
 			rb_define_method(rb_optimizer_pca_klass, "whitening",(rb_method) method_pca_get_whitening, 0);
-			rb_define_method(rb_optimizer_pca_klass, "set_data",(rb_method) method_pca_setData, 0);
-			rb_define_method(rb_optimizer_pca_klass, "encoder",(rb_method) method_pca_encoder, 0);
-			rb_define_method(rb_optimizer_pca_klass, "decoder",(rb_method) method_pca_decoder, 0);
+			rb_define_method(rb_optimizer_pca_klass, "set_data",(rb_method) method_pca_setData, 1);
+			rb_define_method(rb_optimizer_pca_klass, "encoder",(rb_method) method_pca_encoder, 2);
+			rb_define_method(rb_optimizer_pca_klass, "decoder",(rb_method) method_pca_decoder, 2);
 			rb_define_method(rb_optimizer_pca_klass, "eigenvalues",(rb_method) method_pca_eigenvalues, 0);
-			rb_define_method(rb_optimizer_pca_klass, "eigenvalue",(rb_method) method_pca_eigenvalue, 0);
+			rb_define_method(rb_optimizer_pca_klass, "eigenvalue",(rb_method) method_pca_eigenvalue, 1);
 			rb_define_method(rb_optimizer_pca_klass, "eigenvectors",(rb_method) method_pca_eigenvectors, 0);
 			rb_define_method(rb_optimizer_pca_klass, "mean",(rb_method) method_pca_mean, 0);
+			rb_define_method(rb_optimizer_pca_klass, "test", (rb_method) method_pca_test, 0);
+
 
 	}
 }

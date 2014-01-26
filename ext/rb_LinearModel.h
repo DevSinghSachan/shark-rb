@@ -17,11 +17,14 @@ class rb_LinearModel {
 		int outputSize();
 		int inputSize();
 		bool hasOffset();
-		
+		Data<RealVector> operator()(Data<RealVector> const&);
+		RealVector operator()(RealVector const&);
+		Data<RealVector> eval(Data<RealVector> const&);
+		RealVector eval(RealVector const&);
 		rb_LinearModel();
 		rb_LinearModel(LinearModel<RealVector>);
 		rb_LinearModel(RealMatrix const&);
 		rb_LinearModel(RealMatrix const&, RealVector const&);
 		// should add eval as well.
-		LinearModel<RealVector> model;
+		LinearModel<> model;
 };

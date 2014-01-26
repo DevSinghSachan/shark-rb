@@ -12,9 +12,11 @@ class rb_PCA {
 		void setWhitening(bool);
 		bool whitening();
 		PCA trainer;
+		bool m_whitening;
 		void setData(UnlabeledData<RealVector> const&);
 		rb_PCA();
 		rb_PCA(bool);
+		
 		rb_PCA(UnlabeledData<RealVector> const&, bool);
 		void encoder(LinearModel<RealVector> &, size_t);
 		void decoder(LinearModel<RealVector> &, size_t);
@@ -22,4 +24,4 @@ class rb_PCA {
 		double eigenvalue(size_t);
 		RealMatrix const& eigenvectors();
 		RealVector const& mean();
-}
+};
