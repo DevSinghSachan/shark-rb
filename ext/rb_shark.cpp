@@ -906,6 +906,16 @@ VALUE method_realmatrix_length (VALUE self) {
 	return size;
 }
 
+VALUE method_realmatrix_transpose (VALUE self) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+
+	return wrap_pointer<rb_RealMatrix>(
+		rb_optimizer_realmatrix_klass,
+		new rb_RealMatrix(trans(m->data))
+		);
+}
+
 VALUE method_realmatrix_size1 (VALUE self) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
@@ -2130,6 +2140,8 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realmatrix_klass, "/", (rb_method)method_realmatrix_divide, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "length", (rb_method)method_realmatrix_length, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "size", (rb_method)method_realmatrix_length, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "transpose", (rb_method)method_realmatrix_transpose, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "", (rb_method)method_realmatrix_transpose, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "size1", (rb_method)method_realmatrix_size1, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "size2", (rb_method)method_realmatrix_size2, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "stride1", (rb_method)method_realmatrix_stride1, 0);
