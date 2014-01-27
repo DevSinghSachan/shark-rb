@@ -9,4 +9,7 @@ class rb_RealMatrix {
 		rb_RealMatrix();
 		void fill(double);
 		RealMatrix data;
+		RealVector get_row(int);
+		RealVector get_column(int);
+
 };

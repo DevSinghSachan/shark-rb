@@ -126,8 +126,9 @@ For those that were curious about the missing step that encoded the images:
 	decodedImages = dec.eval encodedImages  # this can go on forever!
 
 
-
 ## Issues ##
+
+
 
 	Incredible and beautiful memory leaks? Niagara fall memory leaks? Maybe(s).. we would have to inspect this.
 

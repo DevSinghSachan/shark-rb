@@ -773,10 +773,53 @@ VALUE method_realmatrix_stride1 (VALUE self) {
 	return INT2FIX((m->data).stride1());
 }
 VALUE method_realmatrix_stride2 (VALUE self) {
+	Check_Type(index, T_FIXNUM);
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
 	return INT2FIX((m->data).stride2());
 }
+
+VALUE method_realmatrix_get_row (VALUE self, VALUE rb_index) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+
+	int index = NUM2INT(rb_index);
+
+	if (index < 0 && index + m->data.size2() < 0)
+		rb_raise(rb_eArgError, "Out of range of RealMatrix");
+	if (index >= (m->data).size2())
+		rb_raise(rb_eArgError, "Out of range of RealMatrix");
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(m->get_column(
+			index < 0 ?
+				index + m->data.size2() :
+				index
+			))
+		);
+}
+VALUE method_realmatrix_get_column (VALUE self, VALUE rb_index) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+
+	int index = NUM2INT(rb_index);
+
+	if (index < 0 && index + m->data.size1() < 0)
+		rb_raise(rb_eArgError, "Out of range of RealMatrix");
+	if (index >= (m->data).size1())
+		rb_raise(rb_eArgError, "Out of range of RealMatrix");
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(m->get_column(
+			index < 0 ?
+				index + m->data.size1() :
+				index
+			))
+		);
+}
+
 VALUE method_realmatrix_clear (VALUE self) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
@@ -1339,10 +1382,10 @@ static VALUE method_regressionset_get_size(VALUE self) {
 
 static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	unsigned int numhidden = 25;
-	double rho = 0.01; // Sparsity parameter
-	double beta = 3.0; // Regularization parameter
-	double lambda = 0.0002; // Weight decay paramater
-	int visibleSize = 0;
+	double rho             = 0.01; // Sparsity parameter
+	double beta            = 3.0; // Regularization parameter
+	double lambda          = 0.0002; // Weight decay paramater
+	int visibleSize        = 0;
 	shark::RegressionDataset data;
 
 	if (number_of_arguments == 1 && TYPE(ruby_arguments[0]) == T_DATA ) {
@@ -1691,6 +1734,9 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realmatrix_klass, "size2", (rb_method)method_realmatrix_size2, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "stride1", (rb_method)method_realmatrix_stride1, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "stride2", (rb_method)method_realmatrix_stride2, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "row", (rb_method)method_realmatrix_get_row, 1);
+			rb_define_method(rb_optimizer_realmatrix_klass, "column", (rb_method)method_realmatrix_get_column, 1);
+			rb_define_method(rb_optimizer_realmatrix_klass, "col", (rb_method)method_realmatrix_get_column, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "fill", (rb_method)method_realmatrix_fill, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "clear", (rb_method)method_realmatrix_clear, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "-@", (rb_method)method_realmatrix_negate,0);
