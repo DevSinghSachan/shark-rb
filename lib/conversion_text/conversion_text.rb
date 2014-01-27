@@ -51,6 +51,28 @@ class Optimizer
 				OpenStruct.new :feature_vector => fv, :features => feature_vector.to_a
 			end
 
+			def self.present_filters filters, cutoff=0, ordered=true, cutoff_number=false
+				filters.each do |filter|
+					puts "\n{"
+					if ordered
+						filter.to_a.sort_by {|i| -i[1]}.each_with_index do |pair, k|
+							if cutoff_number and k > cutoff_number then break end
+							if pair[1] > cutoff
+								puts "    #{pair[0]} => #{pair[1]}"
+							end
+						end
+					else
+						filter.to_a.each_with_index do |pair, k|
+							if cutoff_number and k > cutoff_number then break end
+							if pair[1] > cutoff
+								puts "    #{pair[0]} => #{pair[1]}"
+							end
+						end
+					end
+					puts "}\n"
+				end
+			end
+
 			def self.create_samples opts={}
 				vectors = Array.new(opts[:data].length).map {Array.new(opts[:vector].keys.length, 0.0)}
 				opts[:data].each_with_index do |sample, k|
@@ -69,5 +91,3 @@ class Optimizer
 		end
 	end
 end
-
-TextAutoencoder = Optimizer::Autoencoder::Text

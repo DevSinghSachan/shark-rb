@@ -37,25 +37,7 @@ class Optimizer
 			end
 
 			def present(cutoff=0, ordered=true, cutoff_number=false)
-				parameters.each do |filter|
-					puts "\n{"
-					if ordered
-						filter.to_a.sort_by {|i| -i[1]}.each_with_index do |pair, k|
-							if cutoff_number and k > cutoff_number then break end
-							if pair[1] > cutoff
-								puts "    #{pair[0]} => #{pair[1]}"
-							end
-						end
-					else
-						filter.to_a.each_with_index do |pair, k|
-							if cutoff_number and k > cutoff_number then break end
-							if pair[1] > cutoff
-								puts "    #{pair[0]} => #{pair[1]}"
-							end
-						end
-					end
-					puts "}\n"
-				end
+				Optimizer::Conversion::Text.present_filters parameters, cutoff, ordered, cutoff_number
 			end
 
 			def train
