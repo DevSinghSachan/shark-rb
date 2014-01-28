@@ -256,14 +256,17 @@ VALUE method_pca_initialize (int number_of_arguments, VALUE* ruby_arguments, VAL
 				whitening = false;
 			}
 		}
+		p->m_whitening = whitening;
 		p->trainer.setWhitening(whitening);
 		p->trainer.setData(d->data);
 
 	} else if (TYPE(rb_data) != Qnil) {
 		if (rb_data == Qtrue) {
 			p->setWhitening(true);
+			p->m_whitening = true;
 		} else {
 			p->setWhitening(false);
+			p->m_whitening = false;
 		}
 	} // else No settings made to structure.. doing that later I guess.
 
@@ -293,10 +296,13 @@ VALUE method_pca_setWhitening (VALUE self, VALUE whitening) {
 	rb_PCA *p;
 	Data_Get_Struct(self, rb_PCA, p);
 
-	if (whitening == Qtrue)
+	if (whitening == Qtrue) {
+		p->m_whitening = true;
 		p->setWhitening(true);
-	else
+	} else {
+		p->m_whitening = false;
 		p->setWhitening(false);
+	}
 	return self;
 };
 
@@ -395,7 +401,7 @@ VALUE method_export_pgm (VALUE self, VALUE data_hash) {
 	Check_Type(rb_width, T_FIXNUM);
 	Check_Type(rb_path, T_STRING);
 	try {
-		exportPGM(StringValueCStr(rb_path), v->data, NUM2INT(rb_width), NUM2INT(rb_height), normalize == Qtrue);
+		exportPGM(StringValueCStr(rb_path), v->data, NUM2INT(rb_width), NUM2INT(rb_height), (normalize == Qnil || normalize == Qtrue));
 		return rb_path;
 	} catch (...) {
 		rb_raise(rb_eRuntimeError, "Could not write PGM file.");
