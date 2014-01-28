@@ -22,6 +22,7 @@ static VALUE method_is_a_directory(VALUE path) {
 	return rb_file_directory_p(Qnil, path);
 }
 
+VALUE rb_array_klass                   = rb_define_class("Array", rb_cObject);
 VALUE rb_optimizer_klass               = rb_define_class("Optimizer", rb_cObject);
 VALUE rb_optimizer_samples_klass       = rb_define_class_under(rb_optimizer_klass, "Samples", rb_cObject);
 VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klass, "RealVector", rb_cObject);
@@ -656,28 +657,53 @@ VALUE method_linearmodel_hasOffset(VALUE self) {
 VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
-	Check_Type(dataset, T_DATA);
 
-	if (CLASS_OF(dataset) == rb_optimizer_unlabeleddata_klass) {
-		rb_UnlabeledData *d;
-		Data_Get_Struct(dataset, rb_UnlabeledData, d);
+	if (TYPE(dataset) == T_ARRAY) {
 
-		return wrap_pointer<rb_UnlabeledData>(
-			rb_optimizer_unlabeleddata_klass,
-			new rb_UnlabeledData(m->eval(d->data))
-		);
-	} else if (CLASS_OF(dataset) == rb_optimizer_realvector_klass) {
-		rb_RealVector *d;
-		Data_Get_Struct(dataset, rb_RealVector, d);
+		if (RARRAY_LEN(dataset) > 0) {
 
-		return wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
-			new rb_RealVector(m->eval(d->data))
-		);
+			if (TYPE(rb_ary_entry(dataset, 0)) == T_ARRAY) {
+				// 2d array case.
+
+				return wrap_pointer<rb_UnlabeledData>(
+					rb_optimizer_unlabeleddata_klass,
+					new rb_UnlabeledData(rb_ary_to_unlabeleddata(dataset))
+				);
+
+			} else {
+				return wrap_pointer<rb_RealVector>(
+					rb_optimizer_realvector_klass,
+					new rb_RealVector(m->eval(rb_ary_to_1d_realvector(dataset)))
+				);
+			}
+		} else {
+			rb_raise(rb_eArgError, "Can only evaluate non-empty data. Look at LinearModel#offset for the constant part of the transformation.");
+		}
 	} else {
-		rb_raise(rb_eArgError, "LinearModel can evalute UnlabeledData or RealVectors.");
+		// add the ability to eval Arrays here!!
+		Check_Type(dataset, T_DATA);
+
+		if (CLASS_OF(dataset) == rb_optimizer_unlabeleddata_klass) {
+			rb_UnlabeledData *d;
+			Data_Get_Struct(dataset, rb_UnlabeledData, d);
+
+			return wrap_pointer<rb_UnlabeledData>(
+				rb_optimizer_unlabeleddata_klass,
+				new rb_UnlabeledData(m->eval(d->data))
+			);
+		} else if (CLASS_OF(dataset) == rb_optimizer_realvector_klass) {
+			rb_RealVector *d;
+			Data_Get_Struct(dataset, rb_RealVector, d);
+
+			return wrap_pointer<rb_RealVector>(
+				rb_optimizer_realvector_klass,
+				new rb_RealVector(m->eval(d->data))
+			);
+		} else {
+			rb_raise(rb_eArgError, "LinearModel can evalute UnlabeledData, RealVectors, or Arrays.");
+		}
+		return self;
 	}
-	return self;
 };
 
 VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
@@ -737,6 +763,23 @@ VALUE method_unlabeleddata_initialize (int number_of_arguments, VALUE* ruby_argu
 	return self;
 }
 
+VALUE method_rb_ary_to_realvector (VALUE self) {
+	if (RARRAY_LEN(self) > 0) {
+		if (TYPE(rb_ary_entry(self, 0)) != T_FIXNUM && TYPE(rb_ary_entry(self, 0)) != T_FLOAT)
+			rb_raise(rb_eArgError, "Can only convert to RealVector 1-dimensional Float or Fixnum vectors (please be gentle).");
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(rb_ary_to_1d_realvector(self))
+			);
+	} else {
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector()
+			);
+	}
+	return self;
+}
+
 VALUE method_realmatrix_get_sqrt (VALUE self) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
@@ -748,6 +791,169 @@ VALUE method_realmatrix_to_ary (VALUE self) {
 	Data_Get_Struct(self, rb_RealMatrix, m);
 	return realmatrix_to_rb_ary(m->data);
 }
+
+VALUE method_realmatrix_add (VALUE self, VALUE rb_other) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	if (TYPE(rb_other) == T_DATA) {
+		if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_klass) {
+			rb_RealMatrix *other;
+			Data_Get_Struct(rb_other, rb_RealMatrix, other);
+			if (other->data.size1() == m->data.size1() && other->data.size2() == m->data.size2()) {
+				return wrap_pointer<rb_RealMatrix>(
+					rb_optimizer_realmatrix_klass,
+					new rb_RealMatrix(m->data + other->data)
+					);
+			} else if (other->data.size2() == m->data.size1() && other->data.size1() == m->data.size2()) {
+				return wrap_pointer<rb_RealMatrix>(
+					rb_optimizer_realmatrix_klass,
+					new rb_RealMatrix(m->data + trans(other->data))
+					);
+			} else {
+				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+			}
+		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_klass) {
+			rb_RealVector *other;
+			Data_Get_Struct(rb_other, rb_RealVector, other);
+			if (other->data.size() == m->data.size1()) {
+				if (m->data.size2() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(column(m->data, 0) + other->data));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else if (other->data.size() == m->data.size2()) {
+				if (m->data.size1() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(row(m->data, 0) + other->data));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else {
+				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+			}
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix other = rb_ary_to_realmatrix(rb_other);
+			if (other.size1() == m->data.size1() && other.size2() == m->data.size2()) {
+				return wrap_pointer<rb_RealMatrix>(
+					rb_optimizer_realmatrix_klass,
+					new rb_RealMatrix(m->data + other)
+					);
+			} else if (other.size2() == m->data.size1() && other.size1() == m->data.size2()) {
+				return wrap_pointer<rb_RealMatrix>(
+					rb_optimizer_realmatrix_klass,
+					new rb_RealMatrix(m->data + trans(other))
+					);
+			} else {
+				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+			}
+		} else {
+			RealVector other = rb_ary_to_1d_realvector(rb_other);
+			if (other.size() == m->data.size1()) {
+				if (m->data.size2() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(row(m->data, 0) + other));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else if (other.size() == m->data.size2()) {
+				if (m->data.size1() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(column(m->data, 0) + other));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else {
+				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+			}
+		}
+	} else {
+		rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, and RealMatrices to a RealMatrix.");
+	}
+	return self;
+}
+
+VALUE method_realmatrix_add_equals (VALUE self, VALUE rb_other) {
+	rb_RealMatrix *m;
+	Data_Get_Struct(self, rb_RealMatrix, m);
+	if (TYPE(rb_other) == T_DATA) {
+		if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_klass) {
+			rb_RealMatrix *other;
+			Data_Get_Struct(rb_other, rb_RealMatrix, other);
+			if (other->data.size1() == m->data.size1() && other->data.size2() == m->data.size2()) {
+				m->data += other->data;
+			} else if (other->data.size2() == m->data.size1() && other->data.size1() == m->data.size2()) {
+				m->data += trans(other->data);
+			} else {
+				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+			}
+		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_klass) {
+			rb_RealVector *other;
+			Data_Get_Struct(rb_other, rb_RealVector, other);
+			if (other->data.size() == m->data.size1()) {
+				if (m->data.size2() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(column(m->data, 0) + other->data));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else if (other->data.size() == m->data.size2()) {
+				if (m->data.size1() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(row(m->data, 0) + other->data));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else {
+				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+			}
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix other = rb_ary_to_realmatrix(rb_other);
+			if (other.size1() == m->data.size1() && other.size2() == m->data.size2()) {
+				m->data += other;
+			} else if (other.size2() == m->data.size1() && other.size1() == m->data.size2()) {
+				m->data += trans(other);
+			} else {
+				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+			}
+		} else {
+			RealVector other = rb_ary_to_1d_realvector(rb_other);
+			if (other.size() == m->data.size1()) {
+				if (m->data.size2() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(row(m->data, 0) + other));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else if (other.size() == m->data.size2()) {
+				if (m->data.size1() == 1) {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(column(m->data, 0) + other));
+				} else {
+					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
+				}
+			} else {
+				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+			}
+		}
+	} else {
+		rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, and RealMatrices to a RealMatrix.");
+	}
+	return self;
+}
+
 VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
@@ -763,7 +969,7 @@ VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 			Data_Get_Struct(multiplier, rb_RealMatrix, multi_matrix);
 			if ((m->data).size2() != (multi_matrix->data).size1()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % (multi_matrix->data).size2()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % (multi_matrix->data).size1()).str().c_str());
 			}/*
 			RealMatrix temp(multi_matrix->data.size1(),m->data.size2());
 			axpy_prod(m->data, multi_matrix->data, temp);*/
@@ -793,7 +999,7 @@ VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 			RealMatrix multi_matrix = rb_ary_to_realmatrix(multiplier);
 			if ((m->data).size2() != multi_matrix.size1()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % multi_matrix.size2()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % multi_matrix.size1()).str().c_str());
 			}/*
 			RealMatrix temp(multi_matrix.size1(),m->data.size2());
 			axpy_prod(m->data, multi_matrix, temp);*/
@@ -805,7 +1011,7 @@ VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 			RealVector vec = rb_ary_to_1d_realvector(multiplier);
 			if ((m->data).size2() != vec.size()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % vec.size()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % vec.size()).str().c_str());
 			}/*
 			RealVector temp(m->data.size2());
 			axpy_prod(m->data, vec, temp);*/
@@ -833,7 +1039,7 @@ VALUE method_realmatrix_multiply_equals (VALUE self, VALUE multiplier) {
 			Data_Get_Struct(multiplier, rb_RealMatrix, multi_matrix);
 			if ((m->data).size2() != (multi_matrix->data).size1()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % (multi_matrix->data).size2()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % (multi_matrix->data).size1()).str().c_str());
 			}
 			// RealMatrix temp(multi_matrix->data.size1(),m->data.size2());
 			// axpy_prod(m->data, multi_matrix->data, temp);
@@ -843,7 +1049,7 @@ VALUE method_realmatrix_multiply_equals (VALUE self, VALUE multiplier) {
 			Data_Get_Struct(multiplier, rb_RealVector, vec);
 			if ((m->data).size2() != (vec->data).size()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % (vec->data).size()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % (vec->data).size()).str().c_str());
 			}
 			/*RealVector temp(m->data.size2());
 			axpy_prod(m->data, vec->data, temp);*/
@@ -859,7 +1065,7 @@ VALUE method_realmatrix_multiply_equals (VALUE self, VALUE multiplier) {
 			RealMatrix multi_matrix = rb_ary_to_realmatrix(multiplier);
 			if ((m->data).size2() != multi_matrix.size1()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % multi_matrix.size2()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % multi_matrix.size1()).str().c_str());
 			}
 			/*RealMatrix temp(multi_matrix.size1(),m->data.size2());
 			axpy_prod(m->data, multi_matrix, temp);*/
@@ -868,7 +1074,7 @@ VALUE method_realmatrix_multiply_equals (VALUE self, VALUE multiplier) {
 			RealVector vec = rb_ary_to_1d_realvector(multiplier);
 			if ((m->data).size2() != vec.size()) {
 				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size1() % vec.size()).str().c_str());
+				rb_raise(rb_eArgError, (error_str % (m->data).size2() % vec.size()).str().c_str());
 			}/*
 			RealVector temp(m->data.size2());
 			axpy_prod(m->data, vec, temp);*/
@@ -906,7 +1112,7 @@ VALUE method_realmatrix_length (VALUE self) {
 	return size;
 }
 
-VALUE method_realmatrix_transpose (VALUE self) {
+VALUE method_realmatrix_transpose (VALUE self) {
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
 
@@ -1133,7 +1339,7 @@ VALUE method_realvector_get_sqrt (VALUE self) {
 		);
 }
 
-VALUE method_realvector_divide (VALUE self, VALUE divider) {
+VALUE method_realvector_divide_equals (VALUE self, VALUE divider) {
 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
 		rb_RealVector *s;
 		Data_Get_Struct(self, rb_RealVector, s);
@@ -1144,7 +1350,7 @@ VALUE method_realvector_divide (VALUE self, VALUE divider) {
 	return self;
 }
 
-VALUE method_realvector_divide_equals (VALUE self, VALUE divider) {
+VALUE method_realvector_divide (VALUE self, VALUE divider) {
 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
 		rb_RealVector *s;
 		Data_Get_Struct(self, rb_RealVector, s);
@@ -1175,7 +1381,7 @@ VALUE method_realvector_add (VALUE self, VALUE rb_vector) {
 			);
 	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_klass) {
 		rb_RealVector *o;
-		Data_Get_Struct(self, rb_RealVector, o);
+		Data_Get_Struct(rb_vector, rb_RealVector, o);
 
 		if (o->data.size() != s->data.size())
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
@@ -1203,7 +1409,7 @@ VALUE method_realvector_add_equals (VALUE self, VALUE rb_vector) {
 		s->data += summer;
 	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_klass) {
 		rb_RealVector *o;
-		Data_Get_Struct(self, rb_RealVector, o);
+		Data_Get_Struct(rb_vector, rb_RealVector, o);
 
 		if (o->data.size() != s->data.size())
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
@@ -2093,6 +2299,9 @@ extern "C"  {
 			// </deprecated>
 
 		// Datatypes
+
+			rb_define_method(rb_array_klass, "to_realvector", (rb_method)method_rb_ary_to_realvector, 0);
+
 		// Ruby methods for samples
 			rb_define_singleton_method(rb_optimizer_klass, "getSamples", (rb_method)method_get_samples,-1);
 			rb_define_singleton_method(rb_optimizer_klass, "samples", (rb_method)method_create_samples,1);
@@ -2110,7 +2319,7 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realvector_klass, "to_pgm", (rb_method)method_realvector_export_pgm, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "sqrt", (rb_method)method_realvector_get_sqrt,0);
 			rb_define_method(rb_optimizer_realvector_klass, "to_a", (rb_method)method_realvector_to_ary, 0);
-			rb_define_method(rb_optimizer_realmatrix_klass, "to_matrix", (rb_method)method_realvector_to_matrix, -1);
+			rb_define_method(rb_optimizer_realvector_klass, "to_matrix", (rb_method)method_realvector_to_matrix, -1);
 			rb_define_method(rb_optimizer_realvector_klass, "*", (rb_method)method_realvector_multiply, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "*=", (rb_method)method_realvector_multiply_equals, 1);
 			rb_define_method(rb_optimizer_realvector_klass, "/", (rb_method)method_realvector_divide, 1);
@@ -2138,10 +2347,12 @@ extern "C"  {
 			rb_define_method(rb_optimizer_realmatrix_klass, "*", (rb_method)method_realmatrix_multiply, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "*=", (rb_method)method_realmatrix_multiply_equals, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "/", (rb_method)method_realmatrix_divide, 1);
+			rb_define_method(rb_optimizer_realmatrix_klass, "+", (rb_method)method_realmatrix_add, 1);
+			rb_define_method(rb_optimizer_realmatrix_klass, "+=", (rb_method)method_realmatrix_add_equals, 1);
 			rb_define_method(rb_optimizer_realmatrix_klass, "length", (rb_method)method_realmatrix_length, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "size", (rb_method)method_realmatrix_length, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "transpose", (rb_method)method_realmatrix_transpose, 0);
-			rb_define_method(rb_optimizer_realmatrix_klass, "", (rb_method)method_realmatrix_transpose, 0);
+			rb_define_method(rb_optimizer_realmatrix_klass, "~", (rb_method)method_realmatrix_transpose, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "size1", (rb_method)method_realmatrix_size1, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "size2", (rb_method)method_realmatrix_size2, 0);
 			rb_define_method(rb_optimizer_realmatrix_klass, "stride1", (rb_method)method_realmatrix_stride1, 0);

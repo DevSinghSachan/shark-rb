@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
     "ext/rb_shark.cpp",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/conversion_text/conversion_text.rb",
+    "lib/datatypes/datatypes.rb",
     "lib/pca_text/pca_text.rb",
     "lib/shark-rb.rb",
     "shark-rb.gemspec"

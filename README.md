@@ -126,6 +126,163 @@ For those that were curious about the missing step that encoded the images:
 	decodedImages = dec.eval encodedImages  # this can go on forever!
 
 
+uBLAS Vectors: RealMatrix and RealVector wrappers
+-------------------------------------------------
+
+How would you like to play around with `uBlas` vectors and matrices in Ruby? I know I do.
+
+Here's how you do it:
+
+
+	a = [1, 2].to_realvector
+
+	b = [5, 7].to_realvector
+
+	c = a + b
+	#  => #<Optimizer::RealVector:0x007fbec9093398 @data = [6.0, 9.0]>
+
+
+What about transposes? Good question!
+
+
+	mat = Shark::RealMatrix.new [[2, 3, 1], [4, 5, 6]]
+
+	a = [1, 2].to_realvector
+
+	mat * a
+	# => ArgumentError: For matrix product A*B incompatible number of A columns (3) and B rows (2) for multiplication.
+
+	~mat * a
+	# => #<Optimizer::RealVector:0x007fbec902e948 @data = [10.0, 13.0, 13.0]> 
+	# where ~ is the transpose operator.
+
+	mat.transpose * a
+	# => #<Optimizer::RealVector:0x007fbec902e948 @data = [10.0, 13.0, 13.0]> 
+	# also available as a method!
+
+
+What can we cast?
+
+	c = [2, 3].to_realvector
+
+	a = [1, 2] + c
+	# => #<Optimizer::RealVector:0x007fbed902e948> @data = [3.0, 5.0]>
+
+
+Reponse: any array can be cast during a sum to a RealVector for convenience!
+
+
+
+Dimension Reduction comparisions
+--------------------------------
+
+
+Suppose we want to reduce the number of dimensions for a set of data. In this case we will consider bag of words vectors so we can illustrate the problem better.
+
+In particular we are interested in European countries, their colonies, and the Chinese trade:
+
+	samples = []
+
+	samples << ["Paris", "France", "Napoleon"]
+	samples << ["Napoleon", "Corsica"]
+	samples << ["Coffee", "Caribeean"]
+	samples << ["Colonies", "Napoleon"]
+	samples << ["Paris", "Culture"]
+	samples << ["Paris", "Tennis", "Roland-Garros", "France"]
+	samples << ["Napoleon", "War"]
+	samples << ["Napoleon", "General"]
+	samples << ["China", "Hun"]
+	samples << ["China", "Import-Export"]
+	samples << ["Caribeean", "Import-Export"]
+	samples << ["Russia", "Waterloo", "Napoleon", "France"]
+	samples << ["Russia", "Tsar", "France", "Catherine the Great"]
+	samples << ["Russia", "Nabokov"]
+	samples << ["Colonies", "USA", "Napoleon", "Independence"]
+	samples << ["Founding Fathers", "USA", "Independence"]
+
+Once our examples are loaded in we can now proceed to apply:
+
+	1. A sparse AutoEncoder
+
+	2. Principal Component Analysis
+
+Each "bag" in our samples can be represented by a vector in the common vector space where each word represents one basis vector.
+
+Using this methodology we can then compare the two approaches:
+
+	pca = TextPCA.new :samples => samples, :dimensions => 5
+	autoencoder = TextAutoencoder.new :samples => samples, :hidden_neurons => 5
+
+Each hidden neuron in our Autoencoder represents a "filter" which acts as a new dimension in our reduced space.
+
+The results can then be compared as follows:
+
+	# we first need to train the autoencoder
+	100.times {autoencoder.train}
+
+	# then we can observe the results:
+
+	autoencoder_filters = autoencoder.parameters
+	pca_filters = pca.parameters
+
+
+	pca_filters[0]
+	# => {
+			"Paris"               => 0.3794550119360657,
+			"France"              => 0.5941384854054892,
+			"Napoleon"            => 0.2663832982265656,
+			"Corsica"             => 0.025642724623351328,
+			"Coffee"              => 0.05277653020188849,
+			"Caribeean"           => 0.10339719720976602,
+			"Colonies"            => -0.05118444157142263,
+			"Culture"             => 0.0915330355433201,
+			"Tennis"              => 0.17427168375950267,
+			"Roland-Garros"       => 0.17427168375950267,
+			"War"                 => 0.025642724623351328,
+			"General"             => 0.025642724623351314,
+			"China"               => 0.10339719720976599,
+			"Hun"                 => 0.052776530201888466,
+			"Import-Export"       => 0.10124133401575505,
+			"Russia"              => 0.40180576217652103,
+			"Waterloo"            => 0.12698927329469128,
+			"Tsar"                => 0.17922723571805216,
+			"Catherine the Great" => 0.17922723571805216,
+			"Nabokov"             => 0.09558925316377753,
+			"USA"                 => -0.06922484786608529,
+			"Independence"        => -0.06922484786608529,
+			"Founding Fathers"    => -0.013798900830750069
+		}
+
+	autoencoder_filters[0]
+	# => {
+			"Independence"        => 3.588175898266438,
+			"USA"                 => 3.566360086125802,
+			"Colonies"            => 1.286890962118011,
+			"Founding Fathers"    => 1.2152712816877504,
+			"Napoleon"            => -0.4019045745182443,
+			"Roland-Garros"       => -0.7611325630369179,
+			"Tennis"              => -0.7818230801150218,
+			"Catherine the Great" => -0.7889429645085315,
+			"Tsar"                => -0.8193810829552926,
+			"Waterloo"            => -0.8250753794403964,
+			"Coffee"              => -0.9219751572340426,
+			"Culture"             => -0.9439164440582949,
+			"Hun"                 => -0.9559185527755326,
+			"Nabokov"             => -0.9915334642270374,
+			"General"             => -1.0309468249908464,
+			"Corsica"             => -1.0389895602259018,
+			"War"                 => -1.0435156595642454,
+			"China"               => -1.1431966341707245,
+			"Import-Export"       => -1.1716929258881106,
+			"Caribeean"           => -1.1771240188468906,
+			"Russia"              => -1.1892642828543816,
+			"France"              => -1.2709889156956518,
+			"Paris"               => -1.3169276240654713
+		}
+
+
+There you go!
+
 ## Issues ##
 
 

@@ -26,7 +26,7 @@ class Optimizer
 				@standard_vector     = Optimizer::Conversion::Text.create_text_sample_set_from_samples opts[:samples]
 				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.create_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
 				# normalize the data
-				normalize_data
+				normalize_data if opts[:normalize] != false
 				@regression_dataset = Optimizer.regression_dataset @unlabeled_data, @unlabeled_data
 				@unlabeled_data = nil
 				@autoencoder = Optimizer.autoencoder :data => @regression_dataset,
