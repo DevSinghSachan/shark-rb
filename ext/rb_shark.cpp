@@ -14,9 +14,9 @@
 #include "rb_Rprop.h"
 
 #include <shark/Data/Pgm.h>
-#include "rb_conversions.h"
+//#include "rb_conversions.h"
 
-/*
+
 #define StringValueCStr(v) rb_string_value_cstr(&(v))
 
 
@@ -169,7 +169,7 @@ VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
 		rb_ary_store(ary, (int)i,realvector_to_rb_ary(W[i]));
 	}
 	return ary;
-}*/
+}
 
 
 #include "rb_classes.h"
