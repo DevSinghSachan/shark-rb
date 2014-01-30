@@ -21,13 +21,13 @@ shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSam
 	// distribution below.
 	
 	// Sample equal amount of patches per image
-	size_t patchesPerImg = numSamples / n;
+	int patchesPerImg = numSamples / n;
 	typedef shark::UnlabeledData<shark::RealVector>::element_range::iterator ElRef;
 	
 	// Create patches
 	std::vector<shark::RealVector> patches;
 	for (ElRef it = images.elements().begin(); it != images.elements().end(); ++it) {
-		for (size_t i = 0; i < patchesPerImg; ++i) {
+		for (int i = 0; i < patchesPerImg; ++i) {
 			// Upper left corner of image
 			unsigned int ulx = rand() % (w - width);
 			unsigned int uly = rand() % (h - height);
@@ -35,8 +35,8 @@ shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSam
 			unsigned int ul = ulx * h + uly;
 			shark::RealVector sample(width * height);
 			const shark::RealVector& img = *it;
-			for (size_t row = 0; row < height; ++row)
-				for (size_t column = 0; column < width; ++column)
+			for (int row = 0; row < height; ++row)
+				for (int column = 0; column < width; ++column)
 					sample(row * width + column) = img(ul + column + row * h);
 			patches.push_back(sample);
 		}

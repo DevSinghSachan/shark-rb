@@ -5,8 +5,12 @@
 #include "rb_RealMatrix.h"
 #include "rb_LinearModel.h"
 #include "rb_PCA.h"
-#include "rb_PGM.h"
 #include "rb_BinaryRBM.h"
+#include "rb_GaussianBinaryRBM.h"
+#include "rb_SteepestDescent.h"
+#include "rb_LBFGS.h"
+#include "rb_BFGS.h"
+#include "rb_Rprop.h"
 #include <shark/Data/Pgm.h>
 
 using namespace std;
@@ -29,6 +33,15 @@ VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klas
 VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
 VALUE rb_optimizer_linearmodel_klass   = rb_define_class_under(rb_optimizer_klass, "LinearModel", rb_cObject);
 VALUE rb_optimizer_pca_klass           = rb_define_class_under(rb_optimizer_klass, "PCA", rb_cObject);
+VALUE rb_optimizer_binaryrbm_klass     = rb_define_class_under(rb_optimizer_klass, "BinaryRBM", rb_cObject);
+VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_optimizer_klass, "GaussianBinaryRBM", rb_cObject);
+
+VALUE rb_algorithms_module             = rb_define_module_under(rb_optimizer_klass, "Algorithms");
+VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_algorithms_module, "SteepestDescent", rb_cObject);
+VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_algorithms_module, "GradientDescent", rb_cObject);
+VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_algorithms_module, "RProp", rb_cObject);
+VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_algorithms_module, "LBFGS", rb_cObject);
+
 
 #define StringValueCStr(v) rb_string_value_cstr(&(v))
 
@@ -920,7 +933,7 @@ VALUE method_realmatrix_add_equals (VALUE self, VALUE rb_other) {
 				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
 			}
 		}
-	} else if (TYPE(rb_other) == T_ARRAY) {
+	} else if (TYPE(rb_other) == T_ARRAY) {
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->data.size1() && other.size2() == m->data.size2()) {
@@ -930,7 +943,7 @@ VALUE method_realmatrix_add_equals (VALUE self, VALUE rb_other) {
 			} else {
 				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
 			}
-		} else {
+		} else {
 			RealVector other = rb_ary_to_1d_realvector(rb_other);
 			if (other.size() == m->data.size1()) {
 				if (m->data.size2() == 1) {
@@ -1154,9 +1167,9 @@ VALUE method_realmatrix_get_row (VALUE self, VALUE rb_index) {
 
 	int index = NUM2INT(rb_index);
 
-	if (index < 0 && index + m->data.size2() < 0)
+	if (index < 0 && (int)(index + m->data.size2()) < 0)
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
-	if (index >= (m->data).size2())
+	if (index >= (int)(m->data).size2())
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
 
 	return wrap_pointer<rb_RealVector>(
@@ -1175,9 +1188,9 @@ VALUE method_realmatrix_get_column (VALUE self, VALUE rb_index) {
 	int index = NUM2INT(rb_index),
 		neg_index = 0;
 
-	if (index < neg_index && (index + m->data.size1() < neg_index))
+	if (index < neg_index && (index + (int)m->data.size1() < neg_index))
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
-	if (index >= (m->data).size1())
+	if (index >= (int)(m->data).size1())
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
 
 	return wrap_pointer<rb_RealVector>(
@@ -1214,7 +1227,7 @@ VALUE method_realmatrix_query (VALUE self, VALUE row, VALUE column) {
 	int neg_index = 0;
 	if (NUM2INT(row) < neg_index || NUM2INT(column) < neg_index)
 		rb_raise(rb_eArgError, "Can only access positive positions in RealMatrix");
-	if (NUM2INT(row) >= (m->data).size1() || NUM2INT(column) >= (m->data).size2())
+	if (NUM2INT(row) >= (int)(m->data).size1() || NUM2INT(column) >= (int)(m->data).size2())
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
 	return rb_float_new((m->data)(NUM2INT(row), NUM2INT(column)));
 }
@@ -1230,7 +1243,7 @@ VALUE method_realmatrix_insert (VALUE self, VALUE row, VALUE column, VALUE assig
 	int neg_index = 0;
 	if (NUM2INT(row) < neg_index || NUM2INT(column) < neg_index)
 		rb_raise(rb_eArgError, "Can only access positive positions in RealMatrix");
-	if (NUM2INT(row) >= (m->data).size1() || NUM2INT(column) >= (m->data).size2())
+	if (NUM2INT(row) >= (int)(m->data).size1() || NUM2INT(column) >= (int)(m->data).size2())
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
 	(m->data)(NUM2INT(row), NUM2INT(column)) = NUM2DBL(assignment);
 	return self;
@@ -1297,7 +1310,7 @@ VALUE method_realvector_multiply (VALUE self, VALUE multiplier) {
 
 	} else if (TYPE(multiplier) == T_ARRAY) {
 
-		if (RARRAY_LEN(multiplier) != s->data.size())
+		if (RARRAY_LEN(multiplier) != (int)s->data.size())
 			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
 
 		RealVector vec_multiplier = rb_ary_to_1d_realvector(multiplier);
@@ -1323,7 +1336,7 @@ VALUE method_realvector_multiply_equals (VALUE self, VALUE multiplier) {
 		self = rb_float_new(inner_prod(s->data, o->data ));
 
 	} else if (TYPE(multiplier) == T_ARRAY) {
-		if (RARRAY_LEN(multiplier) != s->data.size())
+		if (RARRAY_LEN(multiplier) != (int)s->data.size())
 			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
 
 		RealVector vec_multiplier = rb_ary_to_1d_realvector(multiplier);
@@ -1373,7 +1386,7 @@ VALUE method_realvector_add (VALUE self, VALUE rb_vector) {
 	Data_Get_Struct(self, rb_RealVector, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
-		if (RARRAY_LEN(rb_vector) != s->data.size())
+		if (RARRAY_LEN(rb_vector) != (int)s->data.size())
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
 
 		RealVector summer;
@@ -1405,7 +1418,7 @@ VALUE method_realvector_add_equals (VALUE self, VALUE rb_vector) {
 	Data_Get_Struct(self, rb_RealVector, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
-		if (RARRAY_LEN(rb_vector) != s->data.size())
+		if (RARRAY_LEN(rb_vector) != (int)s->data.size())
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
 
 		RealVector summer;
@@ -1430,7 +1443,7 @@ VALUE method_realvector_remove (VALUE self, VALUE rb_vector) {
 	Data_Get_Struct(self, rb_RealVector, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
-		if (RARRAY_LEN(rb_vector) != s->data.size())
+		if (RARRAY_LEN(rb_vector) != (int)s->data.size())
 			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
 
 		RealVector summer;
@@ -1462,7 +1475,7 @@ VALUE method_realvector_remove_equals (VALUE self, VALUE rb_vector) {
 	Data_Get_Struct(self, rb_RealVector, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
-		if (RARRAY_LEN(rb_vector) != s->data.size())
+		if (RARRAY_LEN(rb_vector) != (int)s->data.size())
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
 
 		RealVector summer;
@@ -1607,12 +1620,12 @@ VALUE method_realvector_query (VALUE self, VALUE position) {
 	rb_RealVector *s;
 	Data_Get_Struct(self, rb_RealVector, s);
 	if (NUM2INT(position) < 0) {
-		if (NUM2INT(position) < -(s->data).size())
+		if (NUM2INT(position) < (int)-(s->data).size())
 			rb_raise(rb_eArgError, "Out of range.");
 		// to get last element ask for -1 for instance:
 		return rb_float_new((s->data)[(s->data).size()+NUM2INT(position)]);
 	} else {
-		if (NUM2INT(position) >= (s->data).size())
+		if (NUM2INT(position) >= (int)(s->data).size())
 			rb_raise(rb_eArgError, "Out of range.");
 		// ordered normally
 		return rb_float_new((s->data)[NUM2INT(position)]);
@@ -1625,12 +1638,12 @@ VALUE method_realvector_insert (VALUE self, VALUE position, VALUE assignment) {
 	rb_RealVector *s;
 	Data_Get_Struct(self, rb_RealVector, s);
 	if (NUM2INT(position) < 0) {
-		if (NUM2INT(position) < -(s->data).size())
+		if (NUM2INT(position) < (int)-(s->data).size())
 			rb_raise(rb_eArgError, "Out of range.");
 		// to get last element ask for -1 for instance:
 		(s->data)[(s->data).size()+NUM2INT(position)] = NUM2DBL(assignment);
 	} else {
-		if (NUM2INT(position) >= (s->data).size())
+		if (NUM2INT(position) >= (int)(s->data).size())
 			rb_raise(rb_eArgError, "Out of range.");
 		// ordered normally
 		(s->data)[NUM2INT(position)] = NUM2DBL(assignment);
@@ -1668,14 +1681,14 @@ VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	if (NUM2INT(position) < 0) {
-		if (NUM2INT(position) < -(s->data).numberOfElements())
+		if (NUM2INT(position) < (int)-(s->data).numberOfElements())
 			rb_raise(rb_eArgError, "Out of range.");
 		return wrap_pointer<rb_RealVector>(
 			rb_optimizer_realvector_klass,
 			new rb_RealVector((s->data).element((s->data).numberOfElements() + NUM2INT(position)))
 		);
 	} else {
-		if (NUM2INT(position) >= (s->data).numberOfElements())
+		if (NUM2INT(position) >= (int)(s->data).numberOfElements())
 			rb_raise(rb_eArgError, "Out of range.");
 		return wrap_pointer<rb_RealVector>(
 			rb_optimizer_realvector_klass,
@@ -1694,11 +1707,11 @@ VALUE method_unlabeleddata_insert (VALUE self, VALUE position, VALUE assignment)
 	rb_RealVector *a;
 	Data_Get_Struct(assignment, rb_RealVector, a);
 	if (NUM2INT(position) < 0) {
-		if (NUM2INT(position) < -(s->data).numberOfElements())
+		if (NUM2INT(position) < (int)-(s->data).numberOfElements())
 			rb_raise(rb_eArgError, "Out of range.");
 		(s->data).element((s->data).numberOfElements() + NUM2INT(position)) = a->data;
 	} else {
-		if (NUM2INT(position) >= (s->data).numberOfElements())
+		if (NUM2INT(position) >= (int)(s->data).numberOfElements())
 			rb_raise(rb_eArgError, "Out of range.");
 		(s->data).element(NUM2INT(position)) = a->data;
 	}
@@ -1862,8 +1875,8 @@ shark::UnlabeledData<shark::RealVector> getSamples(int numSamples, int height, i
 			unsigned int ul = ulx * h + uly;
 			shark::RealVector sample(width * height);
 			const shark::RealVector& img = *it;
-			for (size_t row = 0; row < height; ++row)
-				for (size_t column = 0; column < width; ++column)
+			for (int row = 0; row < height; ++row)
+				for (int column = 0; column < width; ++column)
 					sample(row * width + column) = img(ul + column + row * h);
 			patches.push_back(sample);
 		}

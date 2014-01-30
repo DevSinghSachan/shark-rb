@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-01-27"
+  s.date = "2014-01-30"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -26,6 +26,9 @@ Gem::Specification.new do |s|
     "ext/Optimizer.h",
     "ext/data/images.csv",
     "ext/extconf.rb",
+    "ext/rb_BinaryCD.h",
+    "ext/rb_BinaryRBM.h",
+    "ext/rb_GaussianBinaryRBM.h",
     "ext/rb_LinearModel.cpp",
     "ext/rb_LinearModel.h",
     "ext/rb_PCA.cpp",
@@ -36,15 +39,22 @@ Gem::Specification.new do |s|
     "ext/rb_RealVector.h",
     "ext/rb_RegressionDataset.cpp",
     "ext/rb_RegressionDataset.h",
+    "ext/rb_SteepestDescent.h",
     "ext/rb_UnlabeledData.cpp",
     "ext/rb_UnlabeledData.h",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
+    "face0.pgm",
+    "faceReconstruction0-299.pgm",
+    "facesEigenvalues.csv",
+    "facesMean.pgm",
+    "facesReconstruction0-299.pgm",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/conversion_text/conversion_text.rb",
     "lib/datatypes/datatypes.rb",
     "lib/pca_text/pca_text.rb",
     "lib/shark-rb.rb",
+    "pic.pgm",
     "shark-rb.gemspec"
   ]
   s.homepage = "http://github.com/JonathanRaiman/shark_rb"
