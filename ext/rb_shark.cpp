@@ -9,15 +9,17 @@
 #include "rb_GaussianBinaryRBM.h"
 #include "rb_SteepestDescent.h"
 
-#include "rb_SteepestDescent.cpp"
-
 #include "rb_LBFGS.h"
 #include "rb_BFGS.h"
 #include "rb_Rprop.h"
+
 #include <shark/Data/Pgm.h>
+#include "rb_conversions.h"
 
 using namespace std;
 using namespace shark;
+
+typedef VALUE (*rb_method)(...);
 
 VALUE rb_sym_new(const char *s) {
 	return ID2SYM(rb_intern(s));
@@ -60,7 +62,7 @@ VALUE rb_optimizer_bfgs_klass            = rb_define_class_under(rb_algorithms_m
 VALUE rb_optimizer_lbfgs_klass           = rb_define_class_under(rb_algorithms_module, "LBFGS", rb_cObject);
 
 
-#define StringValueCStr(v) rb_string_value_cstr(&(v))
+/*#define StringValueCStr(v) rb_string_value_cstr(&(v))
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -83,6 +85,7 @@ shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 	}
 	return vector;
 }
+
 RealMatrix rb_ary_to_realmatrix(VALUE ary) {
 
 	int rows = RARRAY_LEN(ary);
@@ -213,7 +216,7 @@ VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector
 		));
 	}
 	return ary;
-}
+}*/
 
 VALUE method_unlabeleddata_remove_NaN (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_replacement;
@@ -2155,8 +2158,6 @@ static VALUE method_autoencode_set_starting_point(VALUE self) {
 	return self;
 }
 
-typedef VALUE (*rb_method)(...);
-
 
 static VALUE method_autoencode_step(VALUE self) {
 	Optimizer *o;
@@ -2280,6 +2281,9 @@ extern "C"  {
 		// TODO:
 		//   - define .each method,
 		//   - define a slice of a matrix as a RealVector.
+
+		Init_Steepest_Descent();
+
 
 		// for better naming conventions:
 		rb_define_global_const("Shark", rb_optimizer_klass);

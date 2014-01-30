@@ -15,6 +15,7 @@
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 rgulariziation
 #include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h> //binds together the regularizer with the Error
 
+
 using namespace std;
 using namespace shark;
 class Optimizer {

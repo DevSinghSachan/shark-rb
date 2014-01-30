@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
     "ext/rb_RegressionDataset.cpp",
     "ext/rb_RegressionDataset.h",
     "ext/rb_Rprop.h",
+    "ext/rb_SteepestDescent.cpp",
     "ext/rb_SteepestDescent.h",
     "ext/rb_UnlabeledData.cpp",
     "ext/rb_UnlabeledData.h",
