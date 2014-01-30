@@ -5,10 +5,8 @@
 #include "rb_RealMatrix.h"
 #include "rb_LinearModel.h"
 #include "rb_PCA.h"
-/*#ifndef SHARK_PGM
-#define SHARK_PGM
-#include <shark/Data/Pgm.h>
-#endif*/
+#include "rb_PGM.h"
+#include "rb_BinaryRBM.h"
 #include <shark/Data/Pgm.h>
 
 using namespace std;

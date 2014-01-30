@@ -1,8 +1,4 @@
 #include "Optimizer.h"
-/*#ifndef SHARK_PGM
-#define SHARK_PGM
-#include <shark/Data/Pgm.h>
-#endif*/
 
 using namespace std;
 using namespace shark;
