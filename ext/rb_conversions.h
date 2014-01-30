@@ -1,3 +1,5 @@
+#ifndef RB_CONVERSIONS_H
+#define RB_CONVERSIONS_H
 #include "ruby.h"
 #include <boost/any.hpp>
 #include <boost/format.hpp>
@@ -5,17 +7,26 @@
 using namespace std;
 using namespace shark;
 
+VALUE rb_sym_new(const char *);
+VALUE method_is_a_directory(VALUE);
+
 template<class Obtype> void delete_objects(Obtype *);
 template<class Obtype> VALUE wrap_pointer(VALUE, Obtype *);
-
 template<class Obtype> VALUE alloc_ob(VALUE);
-shark::RealVector rb_ary_to_1d_realvector(VALUE);
-RealMatrix rb_ary_to_realmatrix(VALUE);
-RealMatrix rb_1d_ary_to_realmatrix(VALUE);
-std::vector<shark::RealMatrix> rb_ary_to_realmatrices(VALUE);
+
+// From Ruby
+shark::RealVector                       rb_ary_to_1d_realvector(VALUE);
+RealMatrix                              rb_ary_to_realmatrix(VALUE);
+RealMatrix                              rb_1d_ary_to_realmatrix(VALUE);
+std::vector<shark::RealVector>          rb_ary_to_realvector(VALUE);
+std::vector<shark::RealMatrix>          rb_ary_to_realmatrices(VALUE);
+shark::UnlabeledData<shark::RealVector> rb_ary_to_unlabeleddata(VALUE);
+
+// To Ruby
 VALUE realmatrix_to_rb_ary(const RealMatrix&);
 VALUE realmatrix_to_rb_ary(const RealMatrix&, bool);
-VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix>);
-std::vector<shark::RealVector> rb_ary_to_realvector(VALUE);
-shark::UnlabeledData<shark::RealVector> rb_ary_to_unlabeleddata(VALUE);
 VALUE realvector_to_rb_ary(const RealVector&);
+VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix>);
+VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector>);
+
+#endif;

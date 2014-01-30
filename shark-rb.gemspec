@@ -46,6 +46,8 @@ Gem::Specification.new do |s|
     "ext/rb_SteepestDescent.h",
     "ext/rb_UnlabeledData.cpp",
     "ext/rb_UnlabeledData.h",
+    "ext/rb_conversions.cpp",
+    "ext/rb_conversions.h",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
     "face0.pgm",

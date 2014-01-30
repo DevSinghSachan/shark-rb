@@ -2,6 +2,15 @@
 
 #define StringValueCStr(v) rb_string_value_cstr(&(v))
 
+
+VALUE rb_sym_new(const char *s) {
+	return ID2SYM(rb_intern(s));
+}
+
+VALUE method_is_a_directory(VALUE path) {
+	return rb_file_directory_p(Qnil, path);
+}
+
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
 }
@@ -141,17 +150,6 @@ VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
 	VALUE ary = rb_ary_new2((int)W.size());
 	for (size_t i = 0; i < W.size(); ++i) {
 		rb_ary_store(ary, (int)i,realvector_to_rb_ary(W[i]));
-	}
-	return ary;
-}
-
-VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector> W) {
-	VALUE ary = rb_ary_new2((int)W.size());
-	for (size_t i = 0; i < W.size(); ++i) {
-		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
-			new rb_RealVector(W[i])
-		));
 	}
 	return ary;
 }
