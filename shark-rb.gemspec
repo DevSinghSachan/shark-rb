@@ -46,21 +46,16 @@ Gem::Specification.new do |s|
     "ext/rb_SteepestDescent.h",
     "ext/rb_UnlabeledData.cpp",
     "ext/rb_UnlabeledData.h",
+    "ext/rb_classes.h",
     "ext/rb_conversions.cpp",
     "ext/rb_conversions.h",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
-    "face0.pgm",
-    "faceReconstruction0-299.pgm",
-    "facesEigenvalues.csv",
-    "facesMean.pgm",
-    "facesReconstruction0-299.pgm",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/conversion_text/conversion_text.rb",
     "lib/datatypes/datatypes.rb",
     "lib/pca_text/pca_text.rb",
     "lib/shark-rb.rb",
-    "pic.pgm",
     "shark-rb.gemspec"
   ]
   s.homepage = "http://github.com/JonathanRaiman/shark_rb"

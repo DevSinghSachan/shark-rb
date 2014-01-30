@@ -15,47 +15,169 @@
 
 #include <shark/Data/Pgm.h>
 #include "rb_conversions.h"
+
+/*
+#define StringValueCStr(v) rb_string_value_cstr(&(v))
+
+
+VALUE rb_sym_new(const char *s) {
+	return ID2SYM(rb_intern(s));
+}
+
+VALUE method_is_a_directory(VALUE path) {
+	return rb_file_directory_p(Qnil, path);
+}
+
+template<class Obtype> void delete_objects(Obtype *ptr){
+	delete ptr;
+}
+
+template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
+	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
+}
+
+template<class Obtype> VALUE alloc_ob(VALUE self) {
+	return wrap_pointer<Obtype>(self,new Obtype());
+}
+
+
+shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
+	int length = RARRAY_LEN(ary);
+	shark::RealVector vector(length);
+	for (int i=0; i < length;i++) {
+		vector(i) = NUM2DBL(rb_ary_entry(ary, i));
+	}
+	return vector;
+}
+
+RealMatrix rb_ary_to_realmatrix(VALUE ary) {
+
+	int rows = RARRAY_LEN(ary);
+	int cols = rows > 0 ? RARRAY_LEN(rb_ary_entry(ary, 0)) : 0;
+	shark::RealMatrix matrix(rows, cols);
+	
+	// accessing ary[i][j] and placing it in matrix(i, j):
+	for (int i=0;i<rows;i++)
+		for (int j=0;j<cols;j++)
+			matrix(i,j) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, i), j));
+
+	return matrix;
+}
+
+RealMatrix rb_1d_ary_to_realmatrix(VALUE ary) {
+	int height = RARRAY_LEN(ary);
+	shark::RealMatrix matrix(1, height);
+	for (int i=0;i<height;i++)
+		matrix(0,i) = NUM2DBL(rb_ary_entry(ary, i));
+	return matrix;
+}
+
+std::vector<shark::RealMatrix> rb_ary_to_realmatrices(VALUE ary) {
+
+	std::vector<shark::RealMatrix> matrices;
+
+	if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
+		// 2D array
+		matrices.push_back(rb_ary_to_realmatrix(ary));
+	} else {
+		// 1D array
+		matrices.push_back(rb_1d_ary_to_realmatrix(ary));
+	}
+	
+	return matrices;
+}
+
+
+VALUE realmatrix_to_rb_ary(const RealMatrix& W) {
+	VALUE matrix = rb_ary_new2((int)W.size1());
+	for (size_t i = 0; i < W.size1(); ++i)
+	{
+		rb_ary_store(matrix, (int)i, rb_ary_new2((int) W.size2()));
+		for (size_t j = 0; j < W.size2(); ++j) {
+			// printf("W(%d,%d) = %f\n", (int)i, (int)j, W(i,j));
+			rb_ary_store(rb_ary_entry(matrix, (int)i), (int)j, rb_float_new(W(i,j)));
+		}
+	}
+	return matrix;
+}
+
+VALUE realmatrix_to_rb_ary(const RealMatrix& W, bool two_d_array) {
+	if (two_d_array == 1 && (W.size1() == 1 || W.size2() == 1)) {
+		VALUE matrix = rb_ary_new2((int)W.size1()*W.size2());
+		bool tall = W.size1() > W.size2() ? 1 : 0;
+		size_t length = tall ? W.size1() : W.size2();
+		for (size_t i = 0; i < length; ++i)
+			rb_ary_store(matrix, (int)i, rb_float_new(tall ? W(i,0) : W(0,i)));
+		return matrix;
+	} else {
+		return realmatrix_to_rb_ary(W);
+	}
+	
+}
+
+VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
+	VALUE ary = rb_ary_new2((int)W.size());
+	for (size_t i = 0; i < W.size(); ++i) {
+		rb_ary_store(ary, (int)i,realmatrix_to_rb_ary(W[i]));
+	}
+	return ary;
+}
+
+std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
+	int width = RARRAY_LEN(ary);
+	std::vector<shark::RealVector> vectors;
+	if (width > 0) {
+		if (TYPE(rb_ary_entry(ary, 0)) == T_ARRAY) {
+			int height = width > 0 ? RARRAY_LEN(rb_ary_entry(ary, 0)) : 0;
+			for (int i=0;i<width;i++) {
+				shark::RealVector vector(height);
+				for (int j=0;j<height;j++) {
+					vector(j) = NUM2DBL(rb_ary_entry(rb_ary_entry(ary, i), j));
+				}
+				vectors.push_back(vector);
+			}
+			return vectors;
+		} else if (TYPE(rb_ary_entry(ary, 0)) == T_FIXNUM || TYPE(rb_ary_entry(ary, 0)) == T_FLOAT) {
+			shark::RealVector vector(width);
+			for (int j=0;j<width;j++) {
+				vector(j) = NUM2DBL(rb_ary_entry(ary, j));
+			}
+			vectors.push_back(vector);
+		}
+	}
+	return vectors;
+}
+
+shark::UnlabeledData<shark::RealVector> rb_ary_to_unlabeleddata(VALUE ary) {
+	std::vector<shark::RealVector> created_data = rb_ary_to_realvector(ary);
+	shark::UnlabeledData<shark::RealVector> samples = shark::createDataFromRange(created_data);
+	return samples;
+}
+
+VALUE realvector_to_rb_ary(const RealVector& W) {
+	VALUE matrix = rb_ary_new2((int)W.size());
+	for (size_t i = 0; i < W.size(); ++i)
+	{
+		rb_ary_store(matrix, (int)i, rb_float_new(W(i)));
+	}
+	return matrix;
+}
+
+VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
+	VALUE ary = rb_ary_new2((int)W.size());
+	for (size_t i = 0; i < W.size(); ++i) {
+		rb_ary_store(ary, (int)i,realvector_to_rb_ary(W[i]));
+	}
+	return ary;
+}*/
+
+
 #include "rb_classes.h"
 
 using namespace std;
 using namespace shark;
 
 typedef VALUE (*rb_method)(...);
-
-
-/*
-VALUE rb_array_klass                   = rb_define_class("Array", rb_cObject);
-
-// Big Wrapper for everything (not good):
-VALUE rb_optimizer_klass               = rb_define_class("Optimizer", rb_cObject);
-
-// Deprecated garbage:
-VALUE rb_optimizer_samples_klass       = rb_define_class_under(rb_optimizer_klass, "Samples", rb_cObject);
-
-// Datatypes:
-VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klass, "RealVector", rb_cObject);
-VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
-VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
-VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
-
-// LinearModel
-VALUE rb_optimizer_linearmodel_klass   = rb_define_class_under(rb_optimizer_klass, "LinearModel", rb_cObject);
-
-// PCA algorithm:
-VALUE rb_optimizer_pca_klass           = rb_define_class_under(rb_optimizer_klass, "PCA", rb_cObject);
-
-// RBM
-VALUE rb_optimizer_binaryrbm_klass     = rb_define_class_under(rb_optimizer_klass, "BinaryRBM", rb_cObject);
-VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_optimizer_klass, "GaussianBinaryRBM", rb_cObject);
-
-VALUE rb_algorithms_module               = rb_define_module_under(rb_optimizer_klass, "Algorithms");
-
-// Algorithms:
-VALUE rb_optimizer_steepestdescent_klass = rb_define_class_under(rb_algorithms_module, "SteepestDescent", rb_cObject);
-VALUE rb_optimizer_rprop_klass           = rb_define_class_under(rb_algorithms_module, "RProp", rb_cObject);
-VALUE rb_optimizer_bfgs_klass            = rb_define_class_under(rb_algorithms_module, "BFGS", rb_cObject);
-VALUE rb_optimizer_lbfgs_klass           = rb_define_class_under(rb_algorithms_module, "LBFGS", rb_cObject);
-*/
 
 extern VALUE rb_array_klass;
 // Big Wrapper for everything (not good);
@@ -2156,8 +2278,9 @@ extern "C"  {
 		//   - define .each method,
 		//   - define a slice of a matrix as a RealVector.
 
-		Init_Steepest_Descent();
+		rb_ary_to_realmatrix(rb_ary_new());
 
+		Init_Steepest_Descent();
 
 		// for better naming conventions:
 		rb_define_global_const("Shark", rb_optimizer_klass);
