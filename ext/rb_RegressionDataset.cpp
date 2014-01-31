@@ -1,7 +1,23 @@
 #include "rb_RegressionDataset.h"
-#include "rb_UnlabeledData.h"
+
 using namespace std;
 using namespace shark;
+
+extern VALUE rb_optimizer_regressionset_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
+extern VALUE rb_optimizer_klass;
+
+template<class Obtype> void delete_objects(Obtype *ptr){
+	delete ptr;
+}
+
+template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
+	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
+}
+
+template<class Obtype> VALUE alloc_ob(VALUE self) {
+	return wrap_pointer<Obtype>(self,new Obtype());
+}
 
 // Or create fake samples:
 shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSamples, int height, int width) {
@@ -94,3 +110,89 @@ rb_RegressionDataset::rb_RegressionDataset(VALUE rb_unlabeled_data, VALUE rb_lab
 	data = RegressionDataset(samples, labels);
 	visibleSize = samples.numberOfElements() > 0 ? samples.element(0).size() : 0;
 }
+
+VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE samples,
+		  labels,
+		  width;
+	// these variables are also:
+	//    numSamples, height, width;
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"12",
+		&samples,
+		&labels,
+		&width);
+
+	if (TYPE(samples) == T_DATA && CLASS_OF(labels) == rb_optimizer_unlabeleddata_klass) {
+		// input is either labels and data or just data:
+		if (TYPE(labels) == T_DATA && CLASS_OF(labels) == rb_optimizer_unlabeleddata_klass) {
+			return wrap_pointer<rb_RegressionDataset>(
+				rb_optimizer_regressionset_klass,
+				new rb_RegressionDataset(samples, labels)
+			);
+		} else {
+			return wrap_pointer<rb_RegressionDataset>(
+				rb_optimizer_regressionset_klass,
+				new rb_RegressionDataset(samples)
+			);
+		}
+	} else {
+		// create a random set from csv file.
+		Check_Type(samples, T_FIXNUM);
+		Check_Type(labels,  T_FIXNUM);
+		Check_Type(width,   T_FIXNUM);
+		return wrap_pointer<rb_RegressionDataset>(
+			rb_optimizer_regressionset_klass,
+			new rb_RegressionDataset(NUM2INT(samples), NUM2INT(labels), NUM2INT(width))
+		);
+	}
+}
+
+VALUE method_regressionset_get_visible_size(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return INT2FIX(s->visibleSize);
+}
+
+VALUE method_regressionset_get_labels(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return wrap_pointer<rb_UnlabeledData>(
+		rb_optimizer_unlabeleddata_klass,
+		new rb_UnlabeledData((s->data).labels())
+		);
+}
+VALUE method_regressionset_get_inputs(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return wrap_pointer<rb_UnlabeledData>(
+		rb_optimizer_unlabeleddata_klass,
+		new rb_UnlabeledData((s->data).inputs())
+		);
+}
+
+VALUE method_regressionset_get_size(VALUE self) {
+	rb_RegressionDataset *s;
+	Data_Get_Struct(self, rb_RegressionDataset, s);
+	return INT2FIX((s->data).numberOfElements());
+}
+
+typedef VALUE (*rb_method)(...);
+
+void Init_RegressionDataset () {
+
+	// Shark Regression sets for supervisied / labeled learning:
+	rb_define_method(rb_optimizer_regressionset_klass, "visible_size",   (rb_method)method_regressionset_get_visible_size, 0);
+	rb_define_method(rb_optimizer_regressionset_klass, "labels",         (rb_method)method_regressionset_get_labels, 0);
+	rb_define_method(rb_optimizer_regressionset_klass, "inputs",         (rb_method)method_regressionset_get_inputs, 0);
+	rb_define_method(rb_optimizer_regressionset_klass, "length",         (rb_method)method_regressionset_get_size,0);
+	rb_define_method(rb_optimizer_regressionset_klass, "size",           (rb_method)method_regressionset_get_size,0);
+	rb_define_method(rb_optimizer_regressionset_klass, "elements",       (rb_method)method_regressionset_get_inputs,0);
+	rb_define_method(rb_optimizer_regressionset_klass, "to_a",           (rb_method)method_regressionset_get_inputs,0);
+	rb_define_singleton_method(rb_optimizer_klass, "regression_dataset", (rb_method)method_regressionset_create,-1);
+
+}
+

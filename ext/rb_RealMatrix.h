@@ -1,6 +1,13 @@
+#ifndef RB_REALMATRIX_H
+#define RB_REALMATRIX_H
+
+#include "ruby.h"
 #include <boost/any.hpp>
 #include <boost/format.hpp>
 #include <shark/Data/Dataset.h>
+#include "rb_conversions.h"
+#include "rb_RealVector.h"
+
 using namespace std;
 using namespace shark;
 class rb_RealMatrix {
@@ -13,3 +20,7 @@ class rb_RealMatrix {
 		RealVector get_column(int);
 
 };
+
+void Init_RealMatrix ();
+
+#endif

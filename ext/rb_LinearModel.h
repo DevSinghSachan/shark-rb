@@ -1,7 +1,16 @@
+#ifndef RB_LINEARMODEL_H
+#define RB_LINEARMODEL_H
+
+#include "ruby.h"
 #include <boost/any.hpp>
 #include <boost/format.hpp>
 #include <shark/Data/Dataset.h>
 #include <shark/Models/LinearModel.h>
+#include "rb_UnlabeledData.h"
+#include "rb_RealVector.h"
+#include "rb_RealMatrix.h"
+
+
 using namespace std;
 using namespace shark;
 class rb_LinearModel {
@@ -28,3 +37,7 @@ class rb_LinearModel {
 		// should add eval as well.
 		LinearModel<> model;
 };
+
+void Init_LinearModel();
+
+#endif

@@ -13,7 +13,7 @@ class rb_BinaryCD {
 
 	public:
 		BinaryCD objective;
-		rb_BinaryCD();
+		rb_BinaryCD(BinaryRBM *);
 
 };
 

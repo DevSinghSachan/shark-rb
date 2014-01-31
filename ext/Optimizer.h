@@ -47,11 +47,11 @@ class Optimizer {
 		void setStartingPoint();
 };
 
-class Samples {
+/*class Samples {
 	public:
 		int visibleSize;
 		Samples(int,int,int);
 		Samples(VALUE, VALUE);
 		shark::RegressionDataset data;
 		std::vector<shark::RealVector> input ();
-};
+};*/

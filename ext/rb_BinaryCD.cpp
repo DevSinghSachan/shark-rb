@@ -1,6 +1,7 @@
 #include "rb_BinaryCD.h"
 
 extern VALUE rb_optimizer_binarycd_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -14,18 +15,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
-VALUE method_binarycd_allocate (VALUE klass) {
-	return wrap_pointer<rb_BinaryCD>(
-		rb_optimizer_binarycd_klass,
-		new rb_BinaryCD()
-	);
-};
-
-VALUE method_binarycd_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
-	return self;
-};
-
-rb_BinaryCD::rb_BinaryCD() {};
+rb_BinaryCD::rb_BinaryCD(BinaryRBM *rbm): objective(rbm) {};
 
 void static raise_objective_func_data_error () {
 	rb_raise(rb_eArgError, "An objective function's data can only be set using UnlabeledData or Arrays.");
@@ -76,8 +66,6 @@ VALUE method_binarycd_set_data (VALUE self, VALUE rb_data) {
 typedef VALUE (*rb_method)(...);
 
 void Init_BinaryCD () {
-	rb_define_alloc_func(rb_optimizer_binarycd_klass,  (rb_alloc_func_t) method_binarycd_allocate);
-	rb_define_method(rb_optimizer_binarycd_klass, "initialize", (rb_method) method_binarycd_initialize, -1);
 	rb_define_method(rb_optimizer_binarycd_klass, "data=", (rb_method) method_binarycd_set_data, 1);
 	rb_define_method(rb_optimizer_binarycd_klass, "number_of_variables", (rb_method) method_binarycd_get_number_of_variables, 0);
 	rb_define_method(rb_optimizer_binarycd_klass, "k=", (rb_method) method_binarycd_set_k, 1);

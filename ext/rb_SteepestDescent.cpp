@@ -1,11 +1,8 @@
 #include "rb_SteepestDescent.h"
 
-
-// VALUE rb_optimizer_klass                 = rb_define_class("Optimizer", rb_cObject);
-// VALUE rb_algorithms_module               = rb_define_module_under(rb_optimizer_klass, "Algorithms");
-// VALUE rb_optimizer_steepestdescent_klass = rb_define_class_under(rb_algorithms_module, "SteepestDescent", rb_cObject);
-
 extern VALUE rb_optimizer_steepestdescent_klass;
+extern VALUE rb_optimizer_binarycd_klass;
+extern VALUE rb_optimizer_objective_function_klass;
 
 rb_SteepestDescent::rb_SteepestDescent() {};
 
@@ -55,14 +52,18 @@ VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 
 	Check_Type(rb_objective_func, T_DATA);
 	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
+		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
+		
 		rb_SteepestDescent *s;
 		Data_Get_Struct(self, rb_SteepestDescent, s);
 
-		rb_ObjectiveFunc *f;
-		Data_Get_Struct(rb_objective_func, rb_ObjectiveFunc, f);
+		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+			rb_BinaryCD *f;
+			Data_Get_Struct(rb_objective_func, rb_BinaryCD, f);
+			s->algorithm.step(f->objective);
+		}
 
-		s->step(f->objective);
-
+		// else test for other subclasses.
 	} else {
 		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
 	}
@@ -72,8 +73,6 @@ VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 }
 
 typedef VALUE (*rb_method)(...);
-
-//rb_obj_is_kind_of answers inheritance questions
 
 void Init_Steepest_Descent () {
 

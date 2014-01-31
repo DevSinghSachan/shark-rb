@@ -1,7 +1,16 @@
+#ifndef RB_PCA_H
+#define RB_PCA_H
+
+#include "ruby.h"
 #include <boost/any.hpp>
 #include <boost/format.hpp>
 #include <shark/Data/Dataset.h>
 #include <shark/Algorithms/Trainers/PCA.h>
+#include "rb_conversions.h"
+#include "rb_RealMatrix.h"
+#include "rb_RealVector.h"
+#include "rb_LinearModel.h"
+#include "rb_UnlabeledData.h"
 
 using namespace shark;
 using namespace std;
@@ -25,3 +34,7 @@ class rb_PCA {
 		RealMatrix const& eigenvectors();
 		RealVector const& mean();
 };
+
+void Init_PCA();
+
+#endif
