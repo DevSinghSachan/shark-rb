@@ -1,3 +1,6 @@
+#ifndef RB_UNLABELEDDATA_H
+#define RB_UNLABELEDDATA_H
+
 #include <boost/any.hpp>
 #include <boost/format.hpp>
 #include <shark/Data/Dataset.h>
@@ -12,3 +15,5 @@ class rb_UnlabeledData {
 		void fill(double);
 		void remove_NaN(double);
 };
+
+#endif
