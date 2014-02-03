@@ -39,6 +39,8 @@ Gem::Specification.new do |s|
     "ext/rb_LinearModel.h",
     "ext/rb_PCA.cpp",
     "ext/rb_PCA.h",
+    "ext/rb_RBM_Analytics.cpp",
+    "ext/rb_RBM_Analytics.h",
     "ext/rb_RealMatrix.cpp",
     "ext/rb_RealMatrix.h",
     "ext/rb_RealVector.cpp",

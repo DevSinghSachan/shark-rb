@@ -390,16 +390,4 @@ The results can then be compared as follows:
 There you go!
 
 ## Issues ##
-
-
-
-	Incredible and beautiful memory leaks? Niagara fall memory leaks? Maybe(s).. we would have to inspect this.
-
-
-## Next steps ##
-
-It would be great to create Lisp, Java, and other language bindings to this package. The C++ part is done, and bindings are easy to create in Ruby (and I hear the same is true about Lisp and Python).
-
-Also Shark offers many other algorithms that are interesting to experiment with (SVM and others).
-
-
+	Unexplored territory.
