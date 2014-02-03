@@ -51,6 +51,6 @@ typedef VALUE (*rb_method)(...);
 void Init_BarsAndStripes () {
 	rb_define_alloc_func(rb_optimizer_barsandstripes_klass, (rb_alloc_func_t) method_barsandstripes_allocate);
 	rb_define_method(rb_optimizer_barsandstripes_klass, "initialize", (rb_method) method_barsandstripes_initialize, 0);
-	rb_define_method(rb_optimizer_barsandstripes_klass, "input_dimensions", (rb_method) method_barsandstripes_get_input_dimensions, 0);
+	rb_define_method(rb_optimizer_barsandstripes_klass, "input_dimension", (rb_method) method_barsandstripes_get_input_dimensions, 0);
 	rb_define_method(rb_optimizer_barsandstripes_klass, "data", (rb_method) method_barsandstripes_get_data, 0);
 }

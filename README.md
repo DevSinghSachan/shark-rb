@@ -204,7 +204,7 @@ Now we can create the RBM. We have to define how many input variables (visible u
 
 
 	numberOfHidden = 32 #hidden units of the rbm
-	numberOfVisible = problem.inputDimension #visible units of the inputs
+	numberOfVisible = problem.input_dimension #visible units of the inputs
 
 	#create rbm with simple binary units:
 	rbm = Shark::BinaryRBM.new
@@ -235,7 +235,7 @@ Since our problem is small, we can actually evaluate the negative log-likelihood
 	numTrials = 10 #number of trials for training
 	meanResult = 0.0
 	numTrials.times do |trial|
-		Shark::initialize_weights rbm
+		initializeWeights rbm
 		optimizer.init cd
 		numIterations.times do |iteration|
 			optimizer.step cd
