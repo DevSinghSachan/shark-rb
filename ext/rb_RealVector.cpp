@@ -464,6 +464,7 @@ void Init_RealVector () {
 	rb_define_method(rb_optimizer_realvector_klass, "-=", (rb_method)method_realvector_remove_equals, 1);
 	rb_define_method(rb_optimizer_realvector_klass, "-", (rb_method)method_realvector_remove, 1);
 	rb_define_method(rb_optimizer_realvector_klass, "length", (rb_method)method_realvector_length, 0);
+	rb_define_method(rb_optimizer_realvector_klass, "size", (rb_method)method_realvector_length, 0);
 	rb_define_method(rb_optimizer_realvector_klass, "-@", (rb_method)method_realvector_negate,0);
 	rb_define_method(rb_optimizer_realvector_klass, "stride", (rb_method)method_realvector_stride,0);
 	rb_define_method(rb_optimizer_realvector_klass, "resize", (rb_method)method_realvector_resize,1);

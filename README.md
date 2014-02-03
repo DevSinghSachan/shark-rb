@@ -18,7 +18,7 @@ A sparse autoencoder is a 1 hidden layer Neural Network trained to output its in
 
 While Ruby is not a typical AI language, it is rather practical for interfacing with web-based content sources. In particular Twitter, Yelp, WikiPedia, and other *Big Data* sources. Unsupervised learning algorithms are well suited for these large scale learning tasks due to the impracticality of hand labeling these humongous datasets. Thus this is how this rubygem was born: give a simple Ruby interface to a sparse autoencoder that is C/C++ fast.
 
-**author (translator):** Jonathan Raiman
+**author (translator/binder):** Jonathan Raiman
 
 ## Installation ##
 To install this package run `git clone` on this repo. Once the repo is downloaded navigate into it and:
@@ -215,7 +215,7 @@ Using the RBM, we can now construct the k-step Contrastive Divergence error func
 
 
 	cd = Shark::BinaryCD.new rbm
-	cd.k = 1.0
+	cd.k = 1
 	cd.data = data # which we obtained earlier using: "problem.data"
 
 
