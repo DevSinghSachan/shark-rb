@@ -2,6 +2,7 @@
 
 extern VALUE rb_optimizer_binaryrbm_klass;
 extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -27,20 +28,20 @@ VALUE method_binaryrbm_initialize (VALUE self) {
 	return self;
 }
 
-rb_BinaryRBM::rb_BinaryRBM (): rbm(Rng::globalRng) {};
+rb_BinaryRBM::rb_BinaryRBM (): rbm(Rng::globalRng) {};
 
 VALUE method_binaryrbm_get_number_of_parameters (VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return INT2FIX((r->rbm).numberOfParameters());
+	return INT2FIX(r->rbm.numberOfParameters());
 }
 
-VALUE method_binaryrbm_get_parameter_vector (VALUE self) {
+VALUE method_binaryrbm_get_parameter_vector (VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 	return wrap_pointer<rb_RealVector>(
 		rb_optimizer_realvector_klass,
-		new rb_RealVector(r->parameterVector())
+		new rb_RealVector(r->rbm.parameterVector())
 	);
 }
 
@@ -55,11 +56,11 @@ VALUE method_binaryrbm_set_parameter_vector (VALUE self, VALUE rb_parameter) {
 	rb_RealVector *vec;
 	Data_Get_Struct(rb_parameter, rb_RealVector, vec);
 
-	r->setParameterVector(vec->data);
+	r->rbm.setParameterVector(vec->data);
 	return self;
 }
 
-VALUE method_binaryrbm_set_structure (VALUE self, VALUE rb_visible, VALUE rb_hidden) {
+VALUE method_binaryrbm_set_structure (VALUE self, VALUE rb_visible, VALUE rb_hidden) {
 
 	Check_Type(rb_visible, T_FIXNUM);
 	Check_Type(rb_hidden, T_FIXNUM);
@@ -102,10 +103,10 @@ VALUE method_binaryrbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_e
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 
-	r->evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
+	r->rbm.evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
 	return self;
 }
-VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
+/*VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 
@@ -117,7 +118,7 @@ VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
 
 			return wrap_pointer<rb_UnlabeledData>(
 				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->eval(rb_ary_to_unlabeleddata(rb_data)))
+				new rb_UnlabeledData(r->rbm.eval(rb_ary_to_unlabeleddata(rb_data)))
 			);
 		} else {
 			rb_raise(rb_eArgError, "Can only evaluate non-empty data.");
@@ -131,7 +132,7 @@ VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
 
 			return wrap_pointer<rb_UnlabeledData>(
 				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->eval(d->data))
+				new rb_UnlabeledData(r->rbm.eval(d->data))
 			);
 		} else if (CLASS_OF(rb_data) == rb_optimizer_realvector_klass) {
 			rb_RealVector *d;
@@ -143,7 +144,7 @@ VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
 			// could also return a realvector with just the results... but why break the expected format?
 			return wrap_pointer<rb_UnlabeledData>(
 				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->eval(samples))
+				new rb_UnlabeledData(r->rbm.eval(samples))
 			);
 		} else {
 			rb_raise(rb_eArgError, "BinaryRBM can evalute UnlabeledData, RealVectors, or Arrays.");
@@ -151,7 +152,7 @@ VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
 		return self;
 	}
 	return self;
-}
+}*/
 VALUE method_binaryrbm_number_of_hidden_neurons(VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
@@ -162,6 +163,9 @@ VALUE method_binaryrbm_number_of_visible_neurons(VALUE self) {
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 	return INT2FIX((r->rbm).numberOfVN());
 }
+
+typedef VALUE (*rb_method)(...);
+
 
 void Init_BinaryRBM () {
 

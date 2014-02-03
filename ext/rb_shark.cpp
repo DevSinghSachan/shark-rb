@@ -17,6 +17,9 @@
 #include "rb_Rprop.h"
 #include "rb_BinaryCD.h"
 
+// samples problems:
+#include "rb_BarsAndStripes.h"
+
 #include <shark/Data/Pgm.h>
 
 template<class Obtype> void delete_objects(Obtype *ptr){
@@ -430,6 +433,10 @@ extern "C"  {
 		Init_LinearModel();
 		Init_PCA();
 		Init_BinaryRBM();
+
+		// Sample Problems:
+
+		Init_BarsAndStripes();
 
 
 	}
