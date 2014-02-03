@@ -2,6 +2,7 @@
 
 extern VALUE rb_optimizer_binarycd_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
+extern VALUE rb_optimizer_binaryrbm_klass;
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -15,10 +16,31 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
-rb_BinaryCD::rb_BinaryCD(BinaryRBM *rbm): objective(rbm) {};
+rb_BinaryCD::rb_BinaryCD(BinaryRBM &rbm): objective(&rbm) {};
 
 void static raise_objective_func_data_error () {
 	rb_raise(rb_eArgError, "An objective function's data can only be set using UnlabeledData or Arrays.");
+}
+
+VALUE method_binarycd_allocate (VALUE klass) {
+	rb_BinaryCD *ptr = (rb_BinaryCD*) malloc(sizeof(rb_BinaryCD));
+	return Data_Wrap_Struct(klass, 0, delete_objects<rb_BinaryCD>, ptr);
+}
+
+VALUE method_binarycd_initialize (VALUE self, VALUE rb_rbm) {
+	rb_BinaryCD *b;
+	Data_Get_Struct(self, rb_BinaryCD, b);
+
+	Check_Type(rb_rbm, T_DATA);
+
+	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass) 
+		rb_raise(rb_eArgError, "BinaryCD (Contrastive Divergence) is initiliazed using a Binary RBM.");
+
+	rb_BinaryRBM *r;
+	Data_Get_Struct(rb_rbm, rb_BinaryRBM, r);
+	b = new rb_BinaryCD(r->rbm);
+
+	return self;
 }
 
 VALUE method_binarycd_set_k (VALUE self, VALUE rb_k) {
@@ -66,6 +88,7 @@ VALUE method_binarycd_set_data (VALUE self, VALUE rb_data) {
 typedef VALUE (*rb_method)(...);
 
 void Init_BinaryCD () {
+	rb_define_alloc_func(rb_optimizer_binarycd_klass, (rb_alloc_func_t) method_binarycd_allocate);
 	rb_define_method(rb_optimizer_binarycd_klass, "data=", (rb_method) method_binarycd_set_data, 1);
 	rb_define_method(rb_optimizer_binarycd_klass, "number_of_variables", (rb_method) method_binarycd_get_number_of_variables, 0);
 	rb_define_method(rb_optimizer_binarycd_klass, "k=", (rb_method) method_binarycd_set_k, 1);

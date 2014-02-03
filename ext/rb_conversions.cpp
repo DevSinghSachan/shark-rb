@@ -94,6 +94,12 @@ VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
 	return ary;
 }
 
+std::vector<shark::RealVector> realvector_to_stdvector(RealVector vector) {
+	std::vector<shark::RealVector> vectors;
+	vectors.push_back(vector);
+	return vectors;
+}
+
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 	int width = RARRAY_LEN(ary);
 	std::vector<shark::RealVector> vectors;

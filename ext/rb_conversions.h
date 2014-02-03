@@ -10,9 +10,8 @@ using namespace shark;
 VALUE rb_sym_new(const char *);
 VALUE method_is_a_directory(VALUE);
 
-// template<class Obtype> void delete_objects(Obtype *);
-// template<class Obtype> VALUE wrap_pointer(VALUE, Obtype *);
-// template<class Obtype> VALUE alloc_ob(VALUE);
+// STD and Shark helpers:
+std::vector<shark::RealVector>          realvector_to_stdvector(RealVector);
 
 // From Ruby
 shark::RealVector                       rb_ary_to_1d_realvector(VALUE);

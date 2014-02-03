@@ -429,6 +429,7 @@ extern "C"  {
 		Init_BinaryCD();
 		Init_LinearModel();
 		Init_PCA();
+		Init_BinaryRBM();
 
 
 	}

@@ -210,7 +210,7 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 
 				return wrap_pointer<rb_UnlabeledData>(
 					rb_optimizer_unlabeleddata_klass,
-					new rb_UnlabeledData(rb_ary_to_unlabeleddata(dataset))
+					new rb_UnlabeledData(m->eval(rb_ary_to_unlabeleddata(dataset)))
 				);
 
 			} else {
@@ -223,7 +223,6 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 			rb_raise(rb_eArgError, "Can only evaluate non-empty data. Look at LinearModel#offset for the constant part of the transformation.");
 		}
 	} else {
-		// add the ability to eval Arrays here!!
 		Check_Type(dataset, T_DATA);
 
 		if (CLASS_OF(dataset) == rb_optimizer_unlabeleddata_klass) {
