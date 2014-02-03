@@ -27,6 +27,8 @@ Gem::Specification.new do |s|
     "ext/data/images.csv",
     "ext/extconf.rb",
     "ext/rb_BFGS.h",
+    "ext/rb_BarsAndStripes.cpp",
+    "ext/rb_BarsAndStripes.h",
     "ext/rb_BinaryCD.cpp",
     "ext/rb_BinaryCD.h",
     "ext/rb_BinaryRBM.cpp",

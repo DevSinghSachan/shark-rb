@@ -510,19 +510,23 @@ VALUE method_realmatrix_allocate (VALUE klass) {
 			);
 }
 VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
-	VALUE dataset;
+	VALUE dataset, rb_columns;
 	rb_scan_args(
 		number_of_arguments,
 		ruby_arguments,
 		"01",
-		&dataset);
+		&dataset,
+		&rb_columns);
 	rb_RealMatrix *m;
 	Data_Get_Struct(self, rb_RealMatrix, m);
 
-	if (TYPE(dataset) == T_ARRAY)
+	if (TYPE(dataset) == T_ARRAY) {
 		m->data = (RARRAY_LEN(dataset) > 0 && TYPE(rb_ary_entry(dataset, 0)) == T_ARRAY) ?
 						rb_ary_to_realmatrix(dataset) : 
 						rb_1d_ary_to_realmatrix(dataset);
+	} else if (TYPE(rb_columns) == T_FIXNUM && TYPE(dataset) == T_FIXNUM) {
+		method_realmatrix_resize(self, dataset, rb_columns);
+	}
 
 	return self;
 }

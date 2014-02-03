@@ -1,6 +1,5 @@
 #include "rb_BarsAndStripes.h"
 
-
 extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_barsandstripes_klass;
 
@@ -24,7 +23,7 @@ VALUE method_barsandstripes_get_data(VALUE self) {
 
 	return wrap_pointer<rb_UnlabeledData>(
 		rb_optimizer_unlabeleddata_klass,
-		p->problem.data()
+		new rb_UnlabeledData(p->problem.data())
 		);
 }
 
@@ -43,14 +42,7 @@ VALUE method_barsandstripes_get_input_dimensions (VALUE self) {
 	rb_BarsAndStripes *p;
 	Data_Get_Struct(self, rb_BarsAndStripes, p);
 
-	return NUM2INT(p->problem.inputDimension());
-}
-
-VALUE method_barsandstripes_get_input_dimensions (VALUE self) {
-	rb_BarsAndStripes *p;
-	Data_Get_Struct(self, rb_BarsAndStripes, p);
-
-	return NUM2INT(p->problem.inputDimension());
+	return INT2FIX(p->problem.inputDimension());
 }
 
 typedef VALUE (*rb_method)(...);

@@ -172,6 +172,112 @@ What can we cast?
 Reponse: any array can be cast during a sum to a RealVector for convenience!
 
 
+Binary Restricted Boltzmann Machines
+------------------------------------
+
+Let us go off the [Binary RBM tutorial given on the Shark website](http://image.diku.dk/shark/sphinx_pages/build/html/rest_sources/tutorials/algorithms/binary_rbm.html):
+
+#### Introduction ####
+
+Shark has a module for training restricted Boltzmann machines (RBMs) **[Hinton2007](http://image.diku.dk/shark/sphinx_pages/build/html/rest_sources/tutorials/algorithms/rbm_module.html#hinton2007)** **[Welling2007](http://image.diku.dk/shark/sphinx_pages/build/html/rest_sources/tutorials/algorithms/rbm_module.html#welling2007)**. All corresponding header files are located in the subdirectory `<SHARK_SRC_DIR>/include/shark/Unsupervised/RBM/`. We will assume that you already read the introduction to the RBM module The RBM Module.
+
+In the following, we will train and evaluate a Binary RBM using Contrastive Divergence (CD-1) learning on a toy example. We choose this example as a starting point because its setup is quite common, and we provide a set of predefined types for it for convenience.
+
+The example file for this tutorial can be found in `BinaryRBM.cpp.`
+
+#### Contrastive Divergence learning - Code ####
+
+First, we need to include the following files:
+
+	
+	require 'shark-rb'
+
+
+As an example problem, we consider one of the predefined benchmark problems in `RBM/Problems/`, namely, the Bars-and-Stripes data set:
+
+
+	problem = Shark::Problems::BarsAndStripes.new
+	data = problem.data
+
+
+Now we can create the RBM. We have to define how many input variables (visible units/observable variables) our RBM shall have. This depends on the data set from which we want to learn, since the number of visible neurons has to correspond to the dimensionality of the training data. Further, we have to choose how many hidden neurons (latent variables) we want. Also, to construct the RBM, we need to choose a random number generator. Since RBM training is time consuming, we might later want to start several trials in separate instances. In this setup, being able to choose a random number generator is crucial. But now, let’s construct the beast:
+
+
+	numberOfHidden = 32 #hidden units of the rbm
+	numberOfVisible = problem.inputDimension #visible units of the inputs
+
+	#create rbm with simple binary units:
+	rbm = Shark::BinaryRBM.new
+	rbm.set_structure numberOfVisible, numberOfHidden
+
+
+Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we want to model Hinton’s famous algorithm we will set k to 1. Throughout the library we use the convention that all kinds of initialization of the structure must be set before calling setData. This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but you should get used to it before trying more elaborate gradient approximators:
+
+
+	cd = Shark::BinaryCD.new rbm
+	cd.k = 1.0
+	cd.data = data # which we obtained earlier using: "problem.data"
+
+
+
+The RBM optimization problem is special in the sense that the error function can not be evaluated exactly for more complex problems than trivial toy problems, and the gradient can only be estimated. This is reflected by the fact that all RBM derivatives have the Flag HAS_VALUE deactivated. Thus, most optimizers will not be able to optimize it. One which is capable of optimizing it is the GradientDescent algorithm, which we will use in the following
+
+	
+	optimizer = Shark::Algorithms::SteepestDescent.new
+	optimizer.momentum = 0.0
+	optimizer.learning_rate = 0.1
+
+
+
+Since our problem is small, we can actually evaluate the negative log-likelihood. So we use it at the end to evaluate our training success after training several trials
+
+	numIterations = 1000 #iterations for training
+	numTrials = 10 #number of trials for training
+	meanResult = 0.0
+	numTrials.times do |trial|
+		Shark::initialize_weights rbm
+		optimizer.init cd
+		numIterations.times do |iteration|
+			optimizer.step cd
+		end
+
+		# evaluate exact likelihood after training. this is only possible for small problems!
+		likelihood = Shark::Statistics.negativeLogLikelihood rbm, data
+
+		prints trial, " ", likelihood, "\n"
+
+		meanResult += likelihood
+	end
+
+	meanresult /= numTrials
+
+
+Now we can print the results as usual with:
+
+
+	prints "RESULTS: ", "\n"
+	prints "======== ", "\n"
+	prints "mean negative log likelihood: ", meanResult, "\n"
+
+
+and the result will read something like:
+
+
+	RESULTS:
+	========
+	mean log likelihood: 192.544
+
+
+PS: there's a missing step we find the in the tutorial file:
+
+	def initializeWeights rbm
+		weights = Shark::RealVector.new rbm.number_of_parameters
+		weights.size.times do |i|
+			weights[i] = Random.rand(0.2) - 0.1 # uniform sampling between -0.1 and +0.1
+		end
+		rbm.parameter_vector = weights
+	end
+
 
 Dimension Reduction comparisions
 --------------------------------

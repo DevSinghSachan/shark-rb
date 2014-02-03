@@ -17,6 +17,8 @@
 #include "rb_Rprop.h"
 #include "rb_BinaryCD.h"
 
+#include "rb_RBM_Analytics.h"
+
 // samples problems:
 #include "rb_BarsAndStripes.h"
 
@@ -437,6 +439,8 @@ extern "C"  {
 		// Sample Problems:
 
 		Init_BarsAndStripes();
+
+		Init_RBM_Analytics();
 
 
 	}

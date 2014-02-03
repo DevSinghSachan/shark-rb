@@ -48,6 +48,25 @@ VALUE method_steepestdescent_get_momentum (VALUE self) {
 	return rb_float_new(s->algorithm.momentum());
 }
 
+VALUE method_steepestdescent_set_learning_rate (VALUE self, VALUE rb_learning_rate) {
+	if (TYPE(rb_learning_rate) != T_FIXNUM && TYPE(rb_learning_rate) != T_FLOAT)
+		rb_raise(rb_eArgError, "learning_rate is set using a Float of Fixnum.");
+
+	rb_SteepestDescent *s;
+	Data_Get_Struct(self, rb_SteepestDescent, s);
+
+	s->algorithm.setLearningRate(NUM2DBL(rb_learning_rate));
+
+	return self;
+}
+
+VALUE method_steepestdescent_get_learning_rate (VALUE self) {
+	rb_SteepestDescent *s;
+	Data_Get_Struct(self, rb_SteepestDescent, s);
+
+	return rb_float_new(s->algorithm.learningRate());
+}
+
 VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 
 	Check_Type(rb_objective_func, T_DATA);
@@ -81,5 +100,7 @@ void Init_Steepest_Descent () {
 	rb_define_method(rb_optimizer_steepestdescent_klass, "initialize", (rb_method) method_steepestdescent_initialize, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum=", (rb_method) method_steepestdescent_set_momentum, 1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum", (rb_method) method_steepestdescent_get_momentum, 0);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "learning_rate=", (rb_method) method_steepestdescent_set_learning_rate, 1);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "learning_rate", (rb_method) method_steepestdescent_get_learning_rate, 0);
 
 }

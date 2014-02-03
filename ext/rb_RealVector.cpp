@@ -420,9 +420,11 @@ VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_argumen
 	rb_RealVector *v;
 	Data_Get_Struct(self, rb_RealVector, v);
 
-	if (TYPE(dataset) == T_ARRAY)
+	if (TYPE(dataset) == T_ARRAY) {
 		v->data = rb_ary_to_1d_realvector(dataset);
-
+	} else if (TYPE(dataset) == T_FIXNUM) {
+		method_realvector_resize(self, dataset);
+	}
 	return self;
 }
 
