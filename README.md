@@ -12,7 +12,7 @@ A sparse autoencoder is a 1 hidden layer Neural Network trained to output its in
 
 ### What is Shark? ###
 
-[Shark](http://image.diku.dk/shark/) is a C++ library that implements many Machine learnign algorithms as well as some pretty extensible Neural Net building blocks. One of their suggested neural nets is a [sparse autoencoder](http://www.stanford.edu/class/cs294a/handouts.html) similar to the one built in MatLab for the Stanford course CS294A taught by Richard Socher / Andrew Ng / and others from the deep-learning community there.
+[Shark](http://image.diku.dk/shark/) is a C++ library that implements many Machine learnign algorithms as well as some pretty extensible Neural Net building blocks. One of their suggested neural nets is a [sparse autoencoder](http://www.stanford.edu/class/cs294a/handouts.html) similar to the one built in MatLab for the Stanford course CS294A on unsupervised learning.
 
 ### Why Ruby? ###
 
