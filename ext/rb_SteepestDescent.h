@@ -2,14 +2,17 @@
 #define RB_STEEPEST_DESCENT_H
 
 #include "ruby.h"
+#include "rb_AbstractSingleObjectiveOptimizer.h"
 #include <shark/Algorithms/GradientDescent/SteepestDescent.h> //resilient propagation as optimizer
 #include "rb_BinaryCD.h"
 
 using namespace shark;
-class rb_SteepestDescent {
+class rb_SteepestDescent : rb_AbstractSingleObjectiveOptimizer {
 
 	public:
-		SteepestDescent algorithm;
+		SteepestDescent _algorithm;
+		SteepestDescent algorithm();
+		void step(const ObjectiveFunctionType &);
 		rb_SteepestDescent();
 
 };

@@ -6,6 +6,10 @@ extern VALUE rb_optimizer_objective_function_klass;
 
 rb_SteepestDescent::rb_SteepestDescent() {};
 
+SteepestDescent rb_SteepestDescent::algorithm() {
+	return _algorithm;
+}
+
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
 }
@@ -60,6 +64,57 @@ VALUE method_steepestdescent_set_learning_rate (VALUE self, VALUE rb_learning_ra
 	return self;
 }
 
+VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_objective_func, rb_startpoint;
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"11",
+		&rb_objective_func,
+		&rb_startpoint);
+
+	rb_SteepestDescent *s;
+	Data_Get_Struct(self, rb_SteepestDescent, s);
+
+	Check_Type(rb_objective_func, T_DATA);
+	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
+		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
+		
+		rb_SteepestDescent *s;
+		Data_Get_Struct(self, rb_SteepestDescent, s);
+
+		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+			rb_BinaryCD *f;
+			Data_Get_Struct(rb_objective_func, rb_BinaryCD, f);
+			s->algorithm.init(f->objective);
+		}
+
+		if (rb_startpoint != Qnil) {
+			Check_Type(rb_startpoint, T_DATA);
+			if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+				rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
+
+			rb_RealVector *v;
+			Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+
+
+
+
+
+
+		} else {
+
+
+		}
+
+		// else test for other subclasses.
+	} else {
+		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
+	}
+	return self;
+}
+
 VALUE method_steepestdescent_get_learning_rate (VALUE self) {
 	rb_SteepestDescent *s;
 	Data_Get_Struct(self, rb_SteepestDescent, s);
@@ -76,13 +131,21 @@ VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 		rb_SteepestDescent *s;
 		Data_Get_Struct(self, rb_SteepestDescent, s);
 
+		rb_UnsupervisedObjectiveFunction *f;
+		Data_Get_Struct(rb_objective_func, rb_UnsupervisedObjectiveFunction, f);
+		s->step(f->objective());
+
+
+		/*
+		// case specific implementation:
 		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
 			rb_BinaryCD *f;
 			Data_Get_Struct(rb_objective_func, rb_BinaryCD, f);
-			s->algorithm.step(f->objective);
+			s->step(f->objective);
 		}
-
 		// else test for other subclasses.
+		*/
+
 	} else {
 		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
 	}
@@ -97,6 +160,7 @@ void Init_Steepest_Descent () {
 
 	rb_define_alloc_func(rb_optimizer_steepestdescent_klass,  (rb_alloc_func_t) method_steepestdescent_allocate);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "step", (rb_method) method_steepestdescent_step, 1);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "init", (rb_method) method_steepestdescent_init, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "initialize", (rb_method) method_steepestdescent_initialize, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum=", (rb_method) method_steepestdescent_set_momentum, 1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum", (rb_method) method_steepestdescent_get_momentum, 0);
