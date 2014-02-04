@@ -15,7 +15,11 @@
 #include "rb_LBFGS.h"
 #include "rb_BFGS.h"
 #include "rb_Rprop.h"
+
+
+// Objective functions:
 #include "rb_BinaryCD.h"
+#include "rb_ExactGradient.h"
 
 #include "rb_RBM_Analytics.h"
 
@@ -430,11 +434,18 @@ extern "C"  {
 
 		// Algorithms:
 
+		// Objective Function optimizers:
 		Init_Steepest_Descent();
-		Init_BinaryCD();
+		// Add lbfgs and friends.
+		
+		// Rando other stuff:
 		Init_LinearModel();
 		Init_PCA();
 		Init_BinaryRBM();
+
+		// Objective functions:
+		Init_BinaryCD();
+		Init_ExactGradient();
 
 		// Sample Problems:
 

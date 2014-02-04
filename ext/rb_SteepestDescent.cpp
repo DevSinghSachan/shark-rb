@@ -2,6 +2,7 @@
 
 extern VALUE rb_optimizer_steepestdescent_klass;
 extern VALUE rb_optimizer_binarycd_klass;
+extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_objective_function_klass;
 
 rb_SteepestDescent::rb_SteepestDescent() {};
@@ -40,7 +41,7 @@ VALUE method_steepestdescent_set_momentum (VALUE self, VALUE rb_momentum) {
 	rb_SteepestDescent *s;
 	Data_Get_Struct(self, rb_SteepestDescent, s);
 
-	s->algorithm.setMomentum(NUM2DBL(rb_momentum));
+	s->algorithm().setMomentum(NUM2DBL(rb_momentum));
 
 	return self;
 }
@@ -49,7 +50,7 @@ VALUE method_steepestdescent_get_momentum (VALUE self) {
 	rb_SteepestDescent *s;
 	Data_Get_Struct(self, rb_SteepestDescent, s);
 
-	return rb_float_new(s->algorithm.momentum());
+	return rb_float_new(s->algorithm().momentum());
 }
 
 VALUE method_steepestdescent_set_learning_rate (VALUE self, VALUE rb_learning_rate) {
@@ -59,7 +60,7 @@ VALUE method_steepestdescent_set_learning_rate (VALUE self, VALUE rb_learning_ra
 	rb_SteepestDescent *s;
 	Data_Get_Struct(self, rb_SteepestDescent, s);
 
-	s->algorithm.setLearningRate(NUM2DBL(rb_learning_rate));
+	s->algorithm().setLearningRate(NUM2DBL(rb_learning_rate));
 
 	return self;
 }
@@ -79,36 +80,28 @@ VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_argument
 
 	Check_Type(rb_objective_func, T_DATA);
 	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
-		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
 		
 		rb_SteepestDescent *s;
 		Data_Get_Struct(self, rb_SteepestDescent, s);
 
+		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
+
 		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
-			rb_BinaryCD *f;
-			Data_Get_Struct(rb_objective_func, rb_BinaryCD, f);
-			s->algorithm.init(f->objective);
-		}
-
-		if (rb_startpoint != Qnil) {
-			Check_Type(rb_startpoint, T_DATA);
-			if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
-				rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
-
-			rb_RealVector *v;
-			Data_Get_Struct(rb_startpoint, rb_RealVector, v);
-
-
-
-
-
-
+			rb_BinaryCD *obj;
+			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
+			if (rb_startpoint != Qnil) {
+				Check_Type(rb_startpoint, T_DATA);
+				if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+					rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
+				rb_RealVector *v;
+				Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+				s->algorithm().init(obj->objective(), v->data);
+			} else {
+				s->algorithm().init(obj->objective());
+			}
 		} else {
-
-
+			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
 		}
-
-		// else test for other subclasses.
 	} else {
 		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
 	}
@@ -119,32 +112,25 @@ VALUE method_steepestdescent_get_learning_rate (VALUE self) {
 	rb_SteepestDescent *s;
 	Data_Get_Struct(self, rb_SteepestDescent, s);
 
-	return rb_float_new(s->algorithm.learningRate());
+	return rb_float_new(s->algorithm().learningRate());
 }
 
 VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 
 	Check_Type(rb_objective_func, T_DATA);
 	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
-		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
 		
 		rb_SteepestDescent *s;
 		Data_Get_Struct(self, rb_SteepestDescent, s);
 
-		rb_UnsupervisedObjectiveFunction *f;
-		Data_Get_Struct(rb_objective_func, rb_UnsupervisedObjectiveFunction, f);
-		s->step(f->objective());
-
-
-		/*
-		// case specific implementation:
+		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
 		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
-			rb_BinaryCD *f;
-			Data_Get_Struct(rb_objective_func, rb_BinaryCD, f);
-			s->step(f->objective);
+			rb_BinaryCD *obj;
+			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
+			s->algorithm().step(obj->objective());
+		} else {
+			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
 		}
-		// else test for other subclasses.
-		*/
 
 	} else {
 		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");

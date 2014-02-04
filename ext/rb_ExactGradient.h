@@ -2,6 +2,7 @@
 #define RB_BINARYCD_H
 
 #include "ruby.h"
+#include <shark/Unsupervised/RBM/GradientApproximations/ExactGradient.h>
 #include <shark/Unsupervised/RBM/BinaryRBM.h>
 #include "rb_UnlabeledData.h"
 #include "rb_conversions.h"
@@ -10,15 +11,15 @@
 using namespace shark;
 using namespace std;
 
-class rb_BinaryCD {
+class rb_ExactGradient {
 
 	public:
-		BinaryCD _objective;
-		BinaryCD objective();
-		rb_BinaryCD(BinaryRBM &);
+		ExactGradient _objective;
+		ExactGradient objective();
+		rb_ExactGradient(BinaryRBM &);
 
 };
 
-void Init_BinaryCD();
+void Init_ExactGradient();
 
 #endif

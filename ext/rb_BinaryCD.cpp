@@ -20,8 +20,9 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 }
 
 rb_BinaryCD::rb_BinaryCD(BinaryRBM &rbm): _objective(&rbm) {};
+
 BinaryCD rb_BinaryCD::objective() {
-	return _objective;
+	return (BinaryCD) _objective;
 }
 
 void static raise_objective_func_data_error () {
