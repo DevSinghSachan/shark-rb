@@ -2,7 +2,8 @@
 class rb_LBFGS {
 
 	public:
-		LBFGS algorithm;
+		LBFGS _algorithm;
+		LBFGS algorithm();
 		rb_LBFGS();
 
 };

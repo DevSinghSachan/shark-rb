@@ -1,31 +1,40 @@
+// Ruby helpers and classes:
 #include "rb_conversions.h"
 #include "rb_classes.h"
 
+// datatypes:
 #include "rb_RealVector.h"
+#include "rb_RealMatrix.h"
 #include "rb_UnlabeledData.h"
 #include "rb_RegressionDataset.h"
-#include "rb_RealMatrix.h"
+
+// algorithms:
 #include "rb_LinearModel.h"
 #include "rb_PCA.h"
+
+// RBM types:
 #include "rb_BinaryRBM.h"
 #include "rb_GaussianBinaryRBM.h"
-#include "rb_SteepestDescent.h"
+// additional RBM goodies:
+#include "rb_RBM_Analytics.h"
 
-#include "Optimizer.h"
+// Objective function optimizers:
+#include "rb_SteepestDescent.h"
 #include "rb_LBFGS.h"
+
+// non-implemented:
+#include "Optimizer.h"
 #include "rb_BFGS.h"
 #include "rb_Rprop.h"
-
 
 // Objective functions:
 #include "rb_BinaryCD.h"
 #include "rb_ExactGradient.h"
 
-#include "rb_RBM_Analytics.h"
-
 // samples problems:
 #include "rb_BarsAndStripes.h"
 
+// miscellaneous:
 #include <shark/Data/Pgm.h>
 
 template<class Obtype> void delete_objects(Obtype *ptr){

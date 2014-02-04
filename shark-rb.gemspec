@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-02-03"
+  s.date = "2014-02-04"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -26,8 +26,6 @@ Gem::Specification.new do |s|
     "ext/Optimizer.h",
     "ext/data/images.csv",
     "ext/extconf.rb",
-    "ext/rb_AbstractSingleObjectiveOptimizer.cpp",
-    "ext/rb_AbstractSingleObjectiveOptimizer.h",
     "ext/rb_BFGS.h",
     "ext/rb_BarsAndStripes.cpp",
     "ext/rb_BarsAndStripes.h",
@@ -35,6 +33,8 @@ Gem::Specification.new do |s|
     "ext/rb_BinaryCD.h",
     "ext/rb_BinaryRBM.cpp",
     "ext/rb_BinaryRBM.h",
+    "ext/rb_ExactGradient.cpp",
+    "ext/rb_ExactGradient.h",
     "ext/rb_GaussianBinaryRBM.h",
     "ext/rb_LBFGS.h",
     "ext/rb_LinearModel.cpp",
@@ -54,7 +54,6 @@ Gem::Specification.new do |s|
     "ext/rb_SteepestDescent.h",
     "ext/rb_UnlabeledData.cpp",
     "ext/rb_UnlabeledData.h",
-    "ext/rb_UnsupervisedObjectiveFunction.h",
     "ext/rb_classes.h",
     "ext/rb_conversions.cpp",
     "ext/rb_conversions.h",

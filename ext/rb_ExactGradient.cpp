@@ -21,7 +21,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 
 rb_ExactGradient::rb_ExactGradient(BinaryRBM &rbm): _objective(&rbm) {};
 
-Exact Gradient rb_ExactGradient::objective() {
+ExactGradient rb_ExactGradient::objective() {
 	return (BinaryCD) _objective;
 }
 
@@ -84,7 +84,7 @@ VALUE method_exactgradient_set_data (VALUE self, VALUE rb_data) {
 
 typedef VALUE (*rb_method)(...);
 
-void Init_Exact Gradient () {
+void Init_ExactGradient () {
 	rb_define_alloc_func(rb_optimizer_exactgradient_klass, (rb_alloc_func_t) method_exactgradient_allocate);
 	rb_define_method(rb_optimizer_exactgradient_klass, "data=", (rb_method) method_exactgradient_set_data, 1);
 	rb_define_method(rb_optimizer_exactgradient_klass, "initialize", (rb_method) method_exactgradient_initialize, 1);
