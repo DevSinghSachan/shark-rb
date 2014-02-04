@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
     "ext/rb_ExactGradient.cpp",
     "ext/rb_ExactGradient.h",
     "ext/rb_GaussianBinaryRBM.h",
+    "ext/rb_LBFGS.cpp",
     "ext/rb_LBFGS.h",
     "ext/rb_LinearModel.cpp",
     "ext/rb_LinearModel.h",

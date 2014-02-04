@@ -20,12 +20,17 @@
 
 // Objective function optimizers:
 #include "rb_SteepestDescent.h"
+#include "rb_ExactGradient.h"
 #include "rb_LBFGS.h"
-
+// Objective functions should return their value / assignments.
 // non-implemented:
-#include "Optimizer.h"
-#include "rb_BFGS.h"
-#include "rb_Rprop.h"
+// Quickprop
+// Noisy R Prop
+// LineSearch
+// IRLS
+// CG
+// #include "rb_BFGS.h"
+// #include "rb_Rprop.h"
 
 // Objective functions:
 #include "rb_BinaryCD.h"
@@ -36,6 +41,7 @@
 
 // miscellaneous:
 #include <shark/Data/Pgm.h>
+#include "Optimizer.h"
 
 template<class Obtype> void delete_objects(Obtype *ptr){
 	delete ptr;
@@ -455,6 +461,7 @@ extern "C"  {
 		// Objective functions:
 		Init_BinaryCD();
 		Init_ExactGradient();
+		Init_LBFGS();
 
 		// Sample Problems:
 

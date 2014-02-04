@@ -34,37 +34,6 @@ VALUE method_lbfgs_initialize (int number_of_arguments, VALUE* ruby_arguments, V
 	return self;
 };
 
-VALUE method_lbfgs_set_momentum (VALUE self, VALUE rb_momentum) {
-	if (TYPE(rb_momentum) != T_FIXNUM && TYPE(rb_momentum) != T_FLOAT)
-		rb_raise(rb_eArgError, "Momentum is set using a Float of Fixnum.");
-
-	rb_LBFGS *s;
-	Data_Get_Struct(self, rb_LBFGS, s);
-
-	s->algorithm().setMomentum(NUM2DBL(rb_momentum));
-
-	return self;
-}
-
-VALUE method_lbfgs_get_momentum (VALUE self) {
-	rb_LBFGS *s;
-	Data_Get_Struct(self, rb_LBFGS, s);
-
-	return rb_float_new(s->algorithm().momentum());
-}
-
-VALUE method_lbfgs_set_learning_rate (VALUE self, VALUE rb_learning_rate) {
-	if (TYPE(rb_learning_rate) != T_FIXNUM && TYPE(rb_learning_rate) != T_FLOAT)
-		rb_raise(rb_eArgError, "learning_rate is set using a Float of Fixnum.");
-
-	rb_LBFGS *s;
-	Data_Get_Struct(self, rb_LBFGS, s);
-
-	s->algorithm().setLearningRate(NUM2DBL(rb_learning_rate));
-
-	return self;
-}
-
 VALUE method_lbfgs_init (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_objective_func, rb_startpoint;
 
@@ -110,7 +79,7 @@ VALUE method_lbfgs_init (int number_of_arguments, VALUE* ruby_arguments, VALUE s
 
 VALUE method_lbfgs_set_history_count (VALUE self, VALUE rb_history_count) {
 	Check_Type(rb_history_count, T_FIXNUM);
-	
+
 	rb_LBFGS *s;
 	Data_Get_Struct(self, rb_LBFGS, s);
 
@@ -148,12 +117,12 @@ VALUE method_lbfgs_step (VALUE self, VALUE rb_objective_func) {
 
 typedef VALUE (*rb_method)(...);
 
-void Init_Steepest_Descent () {
+void Init_LBFGS () {
 
 	rb_define_alloc_func(rb_optimizer_lbfgs_klass,  (rb_alloc_func_t) method_lbfgs_allocate);
 	rb_define_method(rb_optimizer_lbfgs_klass, "step", (rb_method) method_lbfgs_step, 1);
 	rb_define_method(rb_optimizer_lbfgs_klass, "init", (rb_method) method_lbfgs_init, -1);
 	rb_define_method(rb_optimizer_lbfgs_klass, "initialize", (rb_method) method_lbfgs_initialize, -1);
-	rb_define_method(rb_optimizer_lbfgs_klass, "history_count=" (rb_method) method_lbfgs_set_history_count, 1);
+	rb_define_method(rb_optimizer_lbfgs_klass, "history_count=", (rb_method) method_lbfgs_set_history_count, 1);
 
 }

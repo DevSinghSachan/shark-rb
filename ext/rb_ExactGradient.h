@@ -14,8 +14,8 @@ using namespace std;
 class rb_ExactGradient {
 
 	public:
-		ExactGradient _objective;
-		ExactGradient objective();
+		ExactGradient<BinaryRBM> _objective;
+		ExactGradient<BinaryRBM> objective();
 		rb_ExactGradient(BinaryRBM &);
 
 };

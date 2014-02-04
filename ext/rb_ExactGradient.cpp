@@ -21,8 +21,8 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 
 rb_ExactGradient::rb_ExactGradient(BinaryRBM &rbm): _objective(&rbm) {};
 
-ExactGradient rb_ExactGradient::objective() {
-	return (BinaryCD) _objective;
+ExactGradient<BinaryRBM> rb_ExactGradient::objective() {
+	return _objective;
 }
 
 void static raise_objective_func_data_error () {
