@@ -31,6 +31,7 @@ VALUE rb_optimizer_steepestdescent_klass = rb_define_class_under(rb_algorithms_m
 VALUE rb_optimizer_rprop_klass           = rb_define_class_under(rb_algorithms_module, "RProp", rb_cObject);
 VALUE rb_optimizer_bfgs_klass            = rb_define_class_under(rb_algorithms_module, "BFGS", rb_cObject);
 VALUE rb_optimizer_lbfgs_klass           = rb_define_class_under(rb_algorithms_module, "LBFGS", rb_cObject);
+VALUE rb_optimizer_exactgradient_klass   = rb_define_class_under(rb_algorithms_module, "ExactGradient", rb_cObject);
 
 VALUE rb_problems_module                 = rb_define_module_under(rb_optimizer_klass, "Problems");
 

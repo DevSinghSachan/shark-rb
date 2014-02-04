@@ -1,5 +1,5 @@
-#ifndef RB_BINARYCD_H
-#define RB_BINARYCD_H
+#ifndef RB_EXACTGRADIENT_H
+#define RB_EXACTGRADIENT_H
 
 #include "ruby.h"
 #include <shark/Unsupervised/RBM/GradientApproximations/ExactGradient.h>

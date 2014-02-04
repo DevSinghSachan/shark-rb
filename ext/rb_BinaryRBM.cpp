@@ -166,7 +166,6 @@ VALUE method_binaryrbm_number_of_visible_neurons(VALUE self) {
 
 typedef VALUE (*rb_method)(...);
 
-
 void Init_BinaryRBM () {
 
 	rb_define_alloc_func(rb_optimizer_binaryrbm_klass, (rb_alloc_func_t) method_binaryrbm_allocate);
@@ -177,7 +176,7 @@ void Init_BinaryRBM () {
 	rb_define_method(rb_optimizer_binaryrbm_klass, "parameter_vector", (rb_method) method_binaryrbm_get_parameter_vector, 0);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_parameters", (rb_method) method_binaryrbm_get_number_of_parameters, 0);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_hidden_neurons", (rb_method) method_binaryrbm_number_of_hidden_neurons, 0);
-	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_visible_neurons", (rb_method) method_binaryrbm_number_of_hidden_neurons, 0);
+	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_visible_neurons", (rb_method) method_binaryrbm_number_of_visible_neurons, 0);
 
 }
 

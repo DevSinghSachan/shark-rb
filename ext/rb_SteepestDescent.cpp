@@ -90,11 +90,13 @@ VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_argument
 			rb_BinaryCD *obj;
 			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
 			if (rb_startpoint != Qnil) {
+
 				Check_Type(rb_startpoint, T_DATA);
 				if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
 					rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
 				rb_RealVector *v;
 				Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+				
 				s->algorithm().init(obj->objective(), v->data);
 			} else {
 				s->algorithm().init(obj->objective());

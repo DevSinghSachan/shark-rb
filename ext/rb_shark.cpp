@@ -7,6 +7,7 @@
 #include "rb_RealMatrix.h"
 #include "rb_UnlabeledData.h"
 #include "rb_RegressionDataset.h"
+#include "rb_SolutionSet.h"
 
 // algorithms:
 #include "rb_LinearModel.h"
@@ -20,7 +21,6 @@
 
 // Objective function optimizers:
 #include "rb_SteepestDescent.h"
-#include "rb_ExactGradient.h"
 #include "rb_LBFGS.h"
 // Objective functions should return their value / assignments.
 // non-implemented:
@@ -446,6 +446,7 @@ extern "C"  {
 		Init_RealMatrix();
 		Init_RegressionDataset();
 		Init_UnlabeledData();
+		Init_SolutionSet();
 
 		// Algorithms:
 

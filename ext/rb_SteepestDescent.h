@@ -6,6 +6,7 @@
 #include "rb_BinaryCD.h"
 
 using namespace shark;
+
 class rb_SteepestDescent {
 
 	public:

@@ -6,6 +6,7 @@
 #include "rb_UnlabeledData.h"
 #include "rb_conversions.h"
 #include "rb_BinaryRBM.h"
+#include "rb_RealVector.h"
 
 using namespace shark;
 using namespace std;

@@ -5,6 +5,7 @@
 #include "rb_RealVector.h"
 #include "rb_UnlabeledData.h"
 #include "rb_conversions.h"
+#include "rb_SteepestDescent.h"
 #include <shark/Unsupervised/RBM/BinaryRBM.h>
 class rb_BinaryRBM {
 

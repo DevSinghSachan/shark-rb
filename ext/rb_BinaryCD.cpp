@@ -3,6 +3,7 @@
 extern VALUE rb_optimizer_binarycd_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_binaryrbm_klass;
+extern VALUE rb_optimizer_realvector_klass;
 
 using namespace shark;
 using namespace std;
@@ -19,6 +20,8 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
+
+
 rb_BinaryCD::rb_BinaryCD(BinaryRBM &rbm): _objective(&rbm) {};
 
 BinaryCD rb_BinaryCD::objective() {
@@ -34,6 +37,18 @@ VALUE method_binarycd_allocate (VALUE klass) {
 	return Data_Wrap_Struct(klass, 0, delete_objects<rb_BinaryCD>, ptr);
 }
 
+VALUE method_binarycd_propose_starting_point (VALUE self) {
+	rb_BinaryCD *b;
+	Data_Get_Struct(self, rb_BinaryCD, b);
+	RealVector vec;
+	b->objective().proposeStartingPoint(vec);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(vec)
+		);
+}
+
 VALUE method_binarycd_initialize (VALUE self, VALUE rb_rbm) {
 	rb_BinaryCD *b;
 	Data_Get_Struct(self, rb_BinaryCD, b);
@@ -45,7 +60,8 @@ VALUE method_binarycd_initialize (VALUE self, VALUE rb_rbm) {
 
 	rb_BinaryRBM *r;
 	Data_Get_Struct(rb_rbm, rb_BinaryRBM, r);
-	b = new rb_BinaryCD(r->rbm);
+	// Placement new puts an object in a pre-allocated memory area.
+	rb_BinaryCD *bplaced = new(b) rb_BinaryCD(r->rbm);
 
 	return self;
 }
@@ -97,6 +113,7 @@ typedef VALUE (*rb_method)(...);
 void Init_BinaryCD () {
 	rb_define_alloc_func(rb_optimizer_binarycd_klass, (rb_alloc_func_t) method_binarycd_allocate);
 	rb_define_method(rb_optimizer_binarycd_klass, "data=", (rb_method) method_binarycd_set_data, 1);
+	rb_define_method(rb_optimizer_binarycd_klass, "propose_starting_point", (rb_method) method_binarycd_propose_starting_point, 0);
 	rb_define_method(rb_optimizer_binarycd_klass, "initialize", (rb_method) method_binarycd_initialize, 1);
 	rb_define_method(rb_optimizer_binarycd_klass, "data=", (rb_method) method_binarycd_set_data, 1);
 	rb_define_method(rb_optimizer_binarycd_klass, "number_of_variables", (rb_method) method_binarycd_get_number_of_variables, 0);
