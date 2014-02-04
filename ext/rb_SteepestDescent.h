@@ -4,6 +4,8 @@
 #include "ruby.h"
 #include <shark/Algorithms/GradientDescent/SteepestDescent.h> //resilient propagation as optimizer
 #include "rb_BinaryCD.h"
+#include "rb_ExactGradient.h"
+#include "rb_SolutionSet.h"
 
 using namespace shark;
 

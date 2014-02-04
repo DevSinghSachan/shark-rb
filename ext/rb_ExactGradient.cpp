@@ -3,6 +3,7 @@
 extern VALUE rb_optimizer_exactgradient_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_binaryrbm_klass;
+extern VALUE rb_optimizer_solutionset_klass;
 
 using namespace shark;
 using namespace std;
@@ -45,7 +46,7 @@ VALUE method_exactgradient_initialize (VALUE self, VALUE rb_rbm) {
 
 	rb_BinaryRBM *r;
 	Data_Get_Struct(rb_rbm, rb_BinaryRBM, r);
-	b = new rb_ExactGradient(r->rbm);
+	rb_ExactGradient *bupdated = new(b) rb_ExactGradient(r->rbm);
 
 	return self;
 }

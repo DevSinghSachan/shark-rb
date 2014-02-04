@@ -2,8 +2,8 @@
 #define RB_SOLUTIONSET_H
 
 #include "ruby.h"
-#include <shark/Core/ResultSets.h>
 #include "rb_RealVector.h"
+#include "rb_conversions.h"
 
 using namespace shark;
 using namespace std;
@@ -11,8 +11,9 @@ using namespace std;
 class rb_SolutionSet {
 
 	public:
-		ResultSet<RealVector, Double> result;
-		rb_SolutionSet(const ResultSet&);
+		RealVector point;
+		double value;
+		rb_SolutionSet(RealVector, double);
 		rb_SolutionSet();
 
 };

@@ -13,6 +13,7 @@ VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klas
 VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
 VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
 VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
+VALUE rb_optimizer_solutionset_klass   = rb_define_class_under(rb_optimizer_klass, "SolutionSet", rb_cObject);
 
 // LinearModel
 VALUE rb_optimizer_linearmodel_klass   = rb_define_class_under(rb_optimizer_klass, "LinearModel", rb_cObject);
@@ -31,7 +32,7 @@ VALUE rb_optimizer_steepestdescent_klass = rb_define_class_under(rb_algorithms_m
 VALUE rb_optimizer_rprop_klass           = rb_define_class_under(rb_algorithms_module, "RProp", rb_cObject);
 VALUE rb_optimizer_bfgs_klass            = rb_define_class_under(rb_algorithms_module, "BFGS", rb_cObject);
 VALUE rb_optimizer_lbfgs_klass           = rb_define_class_under(rb_algorithms_module, "LBFGS", rb_cObject);
-VALUE rb_optimizer_exactgradient_klass   = rb_define_class_under(rb_algorithms_module, "ExactGradient", rb_cObject);
+
 
 VALUE rb_problems_module                 = rb_define_module_under(rb_optimizer_klass, "Problems");
 
@@ -50,6 +51,7 @@ VALUE rb_optimizer_rbm_analytics_module = rb_define_module_under(rb_optimizer_rb
 // Abstract Objective function
 VALUE rb_optimizer_objective_function_klass = rb_define_class_under(rb_optimizer_klass, "ObjectiveFunction", rb_cObject);
 VALUE rb_optimizer_binarycd_klass           = rb_define_class_under(rb_optimizer_klass, "BinaryCD", rb_optimizer_objective_function_klass);
+VALUE rb_optimizer_exactgradient_klass      = rb_define_class_under(rb_optimizer_klass, "ExactGradient", rb_optimizer_objective_function_klass);
 
 
 #endif

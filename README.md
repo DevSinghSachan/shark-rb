@@ -1,7 +1,7 @@
 Shark Machine Learning Library
 ==============================
 
-tl;dr : The Beauty of Ruby and the extensibility of Shark.
+tl;dr : The extensibility of Shark and the beauty of Ruby.
 
 Sparse Autoencoder
 ------------------
@@ -390,4 +390,5 @@ The results can then be compared as follows:
 There you go!
 
 ## Issues ##
-	Unexplored territory.
+
+Unexplored territory.

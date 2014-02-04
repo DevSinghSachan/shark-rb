@@ -1,9 +1,14 @@
 #include "rb_SteepestDescent.h"
 
 extern VALUE rb_optimizer_steepestdescent_klass;
-extern VALUE rb_optimizer_binarycd_klass;
+// Datatypes:
 extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_solutionset_klass;
+
+// Objective Functions:
 extern VALUE rb_optimizer_objective_function_klass;
+extern VALUE rb_optimizer_binarycd_klass;
+extern VALUE rb_optimizer_exactgradient_klass;
 
 rb_SteepestDescent::rb_SteepestDescent() {};
 
@@ -101,6 +106,21 @@ VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_argument
 			} else {
 				s->algorithm().init(obj->objective());
 			}
+		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+			rb_ExactGradient *obj;
+			Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
+			if (rb_startpoint != Qnil) {
+
+				Check_Type(rb_startpoint, T_DATA);
+				if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+					rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
+				rb_RealVector *v;
+				Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+				
+				s->algorithm().init(obj->objective(), v->data);
+			} else {
+				s->algorithm().init(obj->objective());
+			}
 		} else {
 			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
 		}
@@ -117,6 +137,16 @@ VALUE method_steepestdescent_get_learning_rate (VALUE self) {
 	return rb_float_new(s->algorithm().learningRate());
 }
 
+VALUE method_steepestdescent_solution (VALUE self) {
+	rb_SteepestDescent *s;
+	Data_Get_Struct(self, rb_SteepestDescent, s);
+
+	return wrap_pointer<rb_SolutionSet>(
+		rb_optimizer_solutionset_klass,
+		new rb_SolutionSet(s->algorithm().solution().point, s->algorithm().solution().value)
+		);
+}
+
 VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 
 	Check_Type(rb_objective_func, T_DATA);
@@ -130,10 +160,13 @@ VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
 			rb_BinaryCD *obj;
 			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
 			s->algorithm().step(obj->objective());
+		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+			rb_ExactGradient *obj;
+			Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
+			s->algorithm().step(obj->objective());
 		} else {
 			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
 		}
-
 	} else {
 		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
 	}
@@ -149,6 +182,7 @@ void Init_Steepest_Descent () {
 	rb_define_alloc_func(rb_optimizer_steepestdescent_klass,  (rb_alloc_func_t) method_steepestdescent_allocate);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "step", (rb_method) method_steepestdescent_step, 1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "init", (rb_method) method_steepestdescent_init, -1);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "solution", (rb_method) method_steepestdescent_solution, 0);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "initialize", (rb_method) method_steepestdescent_initialize, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum=", (rb_method) method_steepestdescent_set_momentum, 1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum", (rb_method) method_steepestdescent_get_momentum, 0);

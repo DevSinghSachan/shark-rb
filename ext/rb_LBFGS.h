@@ -8,6 +8,7 @@
 #include "rb_conversions.h"
 #include "rb_BinaryRBM.h"
 #include "rb_BinaryCD.h"
+#include "rb_SolutionSet.h"
 
 using namespace shark;
 using namespace std;
