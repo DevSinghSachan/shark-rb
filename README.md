@@ -214,7 +214,7 @@ Now we can create the RBM. We have to define how many input variables (visible u
 Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we want to model Hinton’s famous algorithm we will set k to 1. Throughout the library we use the convention that all kinds of initialization of the structure must be set before calling `data=(val)`. This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but you should get used to it before trying more elaborate gradient approximators:
 
 
-	cd = Shark::BinaryCD.new rbm
+	cd = Shark::BinaryCD.new rbm # you can also replace Shark::BinaryCD by Shark::ExactGradient, however it is much slower.
 	cd.k = 1
 	cd.data = data # which we obtained earlier using: "problem.data"
 
