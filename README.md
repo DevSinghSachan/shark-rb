@@ -211,7 +211,7 @@ Now we can create the RBM. We have to define how many input variables (visible u
 	rbm.set_structure numberOfVisible, numberOfHidden
 
 
-Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we want to model Hinton’s famous algorithm we will set k to 1. Throughout the library we use the convention that all kinds of initialization of the structure must be set before calling setData. This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but you should get used to it before trying more elaborate gradient approximators:
+Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we want to model Hinton’s famous algorithm we will set k to 1. Throughout the library we use the convention that all kinds of initialization of the structure must be set before calling `data=(val)`. This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but you should get used to it before trying more elaborate gradient approximators:
 
 
 	cd = Shark::BinaryCD.new rbm
@@ -220,14 +220,11 @@ Using the RBM, we can now construct the k-step Contrastive Divergence error func
 
 
 
-The RBM optimization problem is special in the sense that the error function can not be evaluated exactly for more complex problems than trivial toy problems, and the gradient can only be estimated. This is reflected by the fact that all RBM derivatives have the Flag HAS_VALUE deactivated. Thus, most optimizers will not be able to optimize it. One which is capable of optimizing it is the GradientDescent algorithm, which we will use in the following
-
+The RBM optimization problem is special in the sense that the error function can not be evaluated exactly for more complex problems than trivial toy problems, and the gradient can only be estimated. This is reflected by the fact that all RBM derivatives have the Flag `HAS_VALUE` (this is a Shark class property that is not exposed to Ruby yet -- this is why `Shark::Algorithms::LBFGS` will not work here.) deactivated. Thus, most optimizers will not be able to optimize it. One which is capable of optimizing it is the GradientDescent algorithm, which we will use in the following
 	
 	optimizer = Shark::Algorithms::SteepestDescent.new
 	optimizer.momentum = 0.0
 	optimizer.learning_rate = 0.1
-
-
 
 Since our problem is small, we can actually evaluate the negative log-likelihood. So we use it at the end to evaluate our training success after training several trials
 
@@ -386,8 +383,7 @@ The results can then be compared as follows:
 			"Paris"               => -1.3169276240654713
 		}
 
-
-There you go!
+You can now compare how dimensions (of mixtures of features in the autoencoder's filters) are represented by both methodologies. There you go!
 
 ## Issues ##
 

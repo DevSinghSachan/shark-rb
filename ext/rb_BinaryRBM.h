@@ -17,8 +17,6 @@ class rb_BinaryRBM {
 
 };
 
-//void Test_RBM();
-
 void Init_BinaryRBM ();
 
 #endif

@@ -84,48 +84,52 @@ VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_argument
 	Data_Get_Struct(self, rb_SteepestDescent, s);
 
 	Check_Type(rb_objective_func, T_DATA);
-	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
-		
-		rb_SteepestDescent *s;
-		Data_Get_Struct(self, rb_SteepestDescent, s);
+	try {
+		if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
+			
+			rb_SteepestDescent *s;
+			Data_Get_Struct(self, rb_SteepestDescent, s);
 
-		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
+			VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
 
-		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
-			rb_BinaryCD *obj;
-			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
-			if (rb_startpoint != Qnil) {
+			if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+				rb_BinaryCD *obj;
+				Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
+				if (rb_startpoint != Qnil) {
 
-				Check_Type(rb_startpoint, T_DATA);
-				if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
-					rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
-				rb_RealVector *v;
-				Data_Get_Struct(rb_startpoint, rb_RealVector, v);
-				
-				s->algorithm().init(obj->objective(), v->data);
+					Check_Type(rb_startpoint, T_DATA);
+					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+						rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
+					rb_RealVector *v;
+					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+					
+					s->algorithm().init(obj->objective(), v->data);
+				} else {
+					s->algorithm().init(obj->objective());
+				}
+			} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+				rb_ExactGradient *obj;
+				Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
+				if (rb_startpoint != Qnil) {
+
+					Check_Type(rb_startpoint, T_DATA);
+					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+						rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
+					rb_RealVector *v;
+					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+					
+					s->algorithm().init(obj->objective(), v->data);
+				} else {
+					s->algorithm().init(obj->objective());
+				}
 			} else {
-				s->algorithm().init(obj->objective());
-			}
-		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
-			rb_ExactGradient *obj;
-			Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
-			if (rb_startpoint != Qnil) {
-
-				Check_Type(rb_startpoint, T_DATA);
-				if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
-					rb_raise(rb_eArgError, "Steepest Descent is initialized using a RealVector.");
-				rb_RealVector *v;
-				Data_Get_Struct(rb_startpoint, rb_RealVector, v);
-				
-				s->algorithm().init(obj->objective(), v->data);
-			} else {
-				s->algorithm().init(obj->objective());
+				rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
 			}
 		} else {
-			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
+			rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
 		}
-	} else {
-		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
+	} catch (shark::Exception e) {
+		rb_raise(rb_eRuntimeError, e.what());
 	}
 	return self;
 }
