@@ -104,11 +104,6 @@ VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_argument
 				
 				s->algorithm().init(obj->objective(), v->data);
 			} else {
-				RealVector startingPoint;
-				obj->objective().proposeStartingPoint(startingPoint);
-
-				cout << "obj->objective().proposeStartingPoint(startingPoint) = " << startingPoint << endl;
-
 				s->algorithm().init(obj->objective());
 			}
 		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {

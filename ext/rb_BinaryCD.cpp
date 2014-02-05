@@ -55,6 +55,8 @@ VALUE method_binarycd_initialize (VALUE self, VALUE rb_rbm) {
 
 	Check_Type(rb_rbm, T_DATA);
 
+	Check_Class(rb_rbm, rb_optimizer_binaryrbm_klass);
+
 	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass) 
 		rb_raise(rb_eArgError, "BinaryCD (Contrastive Divergence) is initiliazed using a Binary RBM.");
 
