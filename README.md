@@ -244,7 +244,7 @@ Since our problem is small, we can actually evaluate the negative log-likelihood
 		# evaluate exact likelihood after training. this is only possible for small problems!
 		likelihood = Shark::RBM::Analytics.negative_log_likelihood rbm, data
 
-		prints trial, " ", likelihood, "\n"
+		print trial, " ", likelihood, "\n"
 
 		meanResult += likelihood
 	end
@@ -255,9 +255,9 @@ Since our problem is small, we can actually evaluate the negative log-likelihood
 Now we can print the results as usual with:
 
 
-	prints "RESULTS: ", "\n"
-	prints "======== ", "\n"
-	prints "mean negative log likelihood: ", meanResult, "\n"
+	print "RESULTS: ", "\n"
+	print "======== ", "\n"
+	print "mean negative log likelihood: ", meanResult, "\n"
 
 
 and the result will read something like:
