@@ -24,7 +24,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 
 rb_BinaryCD::rb_BinaryCD(BinaryRBM &rbm): _objective(&rbm) {};
 
-BinaryCD rb_BinaryCD::objective() {
+BinaryCD& rb_BinaryCD::objective() {
 	return _objective;
 }
 

@@ -12,7 +12,7 @@ using namespace std;
 using namespace shark;
 class rb_RealMatrix {
 	public:
-		rb_RealMatrix(RealMatrix);
+		rb_RealMatrix(RealMatrix const &);
 		rb_RealMatrix();
 		void fill(double);
 		RealMatrix data;

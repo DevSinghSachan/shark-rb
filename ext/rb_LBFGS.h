@@ -14,9 +14,9 @@ using namespace shark;
 using namespace std;
 
 class rb_LBFGS {
-	public:
 		LBFGS _algorithm;
-		LBFGS algorithm();
+	public:
+		LBFGS & algorithm();
 		rb_LBFGS();
 
 };

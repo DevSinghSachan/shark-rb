@@ -12,7 +12,7 @@ using namespace std;
 using namespace shark;
 class rb_RealVector {
 	public:
-		rb_RealVector(RealVector);
+		rb_RealVector(RealVector const &);
 		rb_RealVector();
 		void fill(double);
 		void remove_NaN(double);

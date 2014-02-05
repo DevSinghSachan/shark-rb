@@ -15,7 +15,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
-rb_SolutionSet::rb_SolutionSet (RealVector _point, double _value) : point(_point), value(_value) {};
+rb_SolutionSet::rb_SolutionSet (RealVector const& _point, double _value) : point(_point), value(_value) {};
 rb_SolutionSet::rb_SolutionSet () {};
 
 VALUE method_solutionset_point (VALUE self) {

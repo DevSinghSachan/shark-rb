@@ -12,10 +12,9 @@ using namespace shark;
 using namespace std;
 
 class rb_BinaryCD {
-
-	public:
 		BinaryCD _objective;
-		BinaryCD objective();
+	public:
+		BinaryCD& objective();
 		rb_BinaryCD(BinaryRBM &);
 
 };

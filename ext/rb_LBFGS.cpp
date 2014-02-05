@@ -13,7 +13,7 @@ extern VALUE rb_optimizer_exactgradient_klass;
 
 rb_LBFGS::rb_LBFGS() {};
 
-LBFGS rb_LBFGS::algorithm() {
+LBFGS& rb_LBFGS::algorithm() {
 	return _algorithm;
 }
 

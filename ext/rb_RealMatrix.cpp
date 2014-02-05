@@ -18,7 +18,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
-rb_RealMatrix::rb_RealMatrix(RealMatrix _data) {
+rb_RealMatrix::rb_RealMatrix(RealMatrix const& _data) {
 	data = _data;
 }
 rb_RealMatrix::rb_RealMatrix() {
@@ -222,8 +222,7 @@ VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 			rb_RealMatrix *multi_matrix;
 			Data_Get_Struct(multiplier, rb_RealMatrix, multi_matrix);
 			if ((m->data).size2() != (multi_matrix->data).size1()) {
-				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size2() % (multi_matrix->data).size1()).str().c_str());
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.", int((m->data).size2()), int((multi_matrix->data).size1()));
 			}/*
 			RealMatrix temp(multi_matrix->data.size1(),m->data.size2());
 			axpy_prod(m->data, multi_matrix->data, temp);*/
@@ -235,8 +234,7 @@ VALUE method_realmatrix_multiply (VALUE self, VALUE multiplier) {
 			rb_RealVector *vec;
 			Data_Get_Struct(multiplier, rb_RealVector, vec);
 			if ((m->data).size2() != (vec->data).size()) {
-				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % (m->data).size2() % (vec->data).size()).str().c_str());
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.", int((m->data).size2()), int((vec->data).size()));
 			}
 			/*RealVector temp(m->data.size2());
 			axpy_prod(m->data, vec->data, temp);*/
@@ -531,7 +529,7 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 	return self;
 }
 
-VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector> W) {
+VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector>& W) {
 	VALUE ary = rb_ary_new2((int)W.size());
 	for (size_t i = 0; i < W.size(); ++i) {
 		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealVector>(

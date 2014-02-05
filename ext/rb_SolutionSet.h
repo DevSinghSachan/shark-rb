@@ -13,7 +13,7 @@ class rb_SolutionSet {
 	public:
 		RealVector point;
 		double value;
-		rb_SolutionSet(RealVector, double);
+		rb_SolutionSet(RealVector const&, double);
 		rb_SolutionSet();
 
 };

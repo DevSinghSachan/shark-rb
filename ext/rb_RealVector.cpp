@@ -23,7 +23,7 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
-rb_RealVector::rb_RealVector(RealVector _data) {
+rb_RealVector::rb_RealVector(RealVector const& _data) {
 	data = _data;
 }
 rb_RealVector::rb_RealVector() {};

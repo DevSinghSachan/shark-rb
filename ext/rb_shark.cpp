@@ -470,7 +470,7 @@ extern "C"  {
 
 		Init_RBM_Analytics();
 
-		Test_RBM();
+		//Test_RBM();
 
 
 	}

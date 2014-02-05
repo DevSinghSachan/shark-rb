@@ -156,12 +156,12 @@ VALUE method_binaryrbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_e
 VALUE method_binaryrbm_number_of_hidden_neurons(VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return INT2FIX((r->rbm).numberOfHN());
+	return INT2FIX(r->rbm.numberOfHN());
 }
 VALUE method_binaryrbm_number_of_visible_neurons(VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return INT2FIX((r->rbm).numberOfVN());
+	return INT2FIX(r->rbm.numberOfVN());
 }
 
 typedef VALUE (*rb_method)(...);
@@ -187,20 +187,45 @@ void Test_RBM () {
 	//create rbm with simple binary units
 	rb_BinaryRBM *rb_rbm = new rb_BinaryRBM();
 	//BinaryRBM rbm(Rng::globalRng);
-	BinaryRBM rbm = rb_rbm->rbm;
-	rbm.setStructure(numberOfVisible,numberOfHidden);
+	cout << "Called rbm once" << endl;
+
+	rb_rbm->rbm.setStructure(numberOfVisible,numberOfHidden);
 	
 	//create derivative to optimize the rbm
 	//we want a simple vanilla CD-1
 	rb_BinaryCD *rb_cd = new rb_BinaryCD(rb_rbm->rbm);
-	BinaryCD cd = rb_cd->objective();
-	//BinaryCD cd(&rbm);
-	cd.setK(1);
-	cd.setData(data);
 
+	cout << "Got past BinaryCD" << endl;
+	//BinaryCD cd = rb_cd->objective();
+	//BinaryCD cd(&rbm);
+	rb_cd->objective().setK(1);
+	rb_cd->objective().setData(data);
+    
+    
 	//generate optimizer
 	rb_SteepestDescent *rb_optimizer = new rb_SteepestDescent();
+    
+    ///*
+	//SteepestDescent optimizer = rb_optimizer->algorithm();
+	rb_optimizer->algorithm().setMomentum(0);
+	rb_optimizer->algorithm().setLearningRate(0.1);
+	
+	//now we train the rbm and evaluate the mean negative log-likelihood at the end
+	unsigned int numIterations = 1000;//iterations for training
+	unsigned int numTrials = 10;//number of trials for training
+	double meanResult = 0;
 
+	// for testing purposes
+	initializeWeights(rb_rbm->rbm);
+	rb_optimizer->algorithm().init(rb_cd->objective());
+
+	cout << "optimizer.solution().point = " << rb_optimizer->algorithm().solution().point << endl;
+	cout << "optimizer.solution().value = " << rb_optimizer->algorithm().solution().value << endl;
+	initializeWeights(rb_rbm->rbm);
+	rb_optimizer->algorithm().step(rb_cd->objective());
+    // */
+
+    /*
 	SteepestDescent optimizer = rb_optimizer->algorithm();
 	optimizer.setMomentum(0);
 	optimizer.setLearningRate(0.1);
@@ -211,21 +236,26 @@ void Test_RBM () {
 	double meanResult = 0;
 
 	// for testing purposes
-	initializeWeights(rbm);
-	optimizer.init(cd);
+	initializeWeights(rb_rbm->rbm);
+	optimizer.init(rb_cd->objective());
 
 	cout << "optimizer.solution().point = " << optimizer.solution().point << endl;
 	cout << "optimizer.solution().value = " << optimizer.solution().value << endl;
+	initializeWeights(rb_rbm->rbm);
+	optimizer.step(rb_cd->objective());
+    */
 
-	for(unsigned int trial = 0; trial != numTrials; ++trial) {
-		initializeWeights(rbm);
+
+
+	/*for(unsigned int trial = 0; trial != numTrials; ++trial) {
+		initializeWeights(rb_rbm->rbm);
 		optimizer.init(cd);
 
 		for(unsigned int iteration = 0; iteration != numIterations; ++iteration) {
 			optimizer.step(cd);
 		}
 		//evaluate exact likelihood after training. this is only possible for small problems!
-		double likelihood = negativeLogLikelihood(rbm,data);
+		double likelihood = negativeLogLikelihood(rb_rbm->rbm,data);
 		std::cout<<trial<<" "<<likelihood<<std::endl;
 		meanResult +=likelihood;
 	}
@@ -234,7 +264,7 @@ void Test_RBM () {
 	//print the mean performance
 	cout << "RESULTS: " << std::endl;
 	cout << "======== " << std::endl;
-	cout << "mean negative log likelihood: " << meanResult << std::endl;
+	cout << "mean negative log likelihood: " << meanResult << std::endl;*/
 
 }
 

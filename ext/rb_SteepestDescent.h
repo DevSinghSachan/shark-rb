@@ -10,10 +10,9 @@
 using namespace shark;
 
 class rb_SteepestDescent {
-
-	public:
 		SteepestDescent _algorithm;
-		SteepestDescent algorithm();
+	public:
+		SteepestDescent& algorithm();
 		rb_SteepestDescent();
 
 };

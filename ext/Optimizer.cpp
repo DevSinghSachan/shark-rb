@@ -11,13 +11,13 @@ Optimizer::Optimizer(
 	double _rho,
 	double _beta,
 	double _lambda):
-		steps(0),
-		lambda(_lambda),
-		rho(_rho),
-		beta(_beta),
 		visibleSize(_visibleSize),
 		hiddenSize(_hiddenSize),
-		error(&model, &loss, rho, beta)
+		rho(_rho),
+		beta(_beta),
+		lambda(_lambda),
+		error(&model, &loss, rho, beta),
+		steps(0)
 		{
 	model.setStructure(visibleSize, hiddenSize, visibleSize, true, false, false, true);
 	error = SparseFFNetError(&model, &loss, rho, beta);

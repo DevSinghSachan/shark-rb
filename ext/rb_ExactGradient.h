@@ -12,10 +12,9 @@ using namespace shark;
 using namespace std;
 
 class rb_ExactGradient {
-
-	public:
 		ExactGradient<BinaryRBM> _objective;
-		ExactGradient<BinaryRBM> objective();
+	public:
+		ExactGradient<BinaryRBM>& objective();
 		rb_ExactGradient(BinaryRBM &);
 
 };
