@@ -57,8 +57,6 @@ Gem::Specification.new do |s|
     "ext/rb_SteepestDescent.h",
     "ext/rb_UnlabeledData.cpp",
     "ext/rb_UnlabeledData.h",
-    "ext/rb_class_errors.cpp",
-    "ext/rb_class_errors.h",
     "ext/rb_classes.h",
     "ext/rb_conversions.cpp",
     "ext/rb_conversions.h",
