@@ -16,7 +16,6 @@ template<class Obtype> VALUE alloc_ob(VALUE self) {
 	return wrap_pointer<Obtype>(self,new Obtype());
 }
 
-
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
 			rb_optimizer_binaryrbm_klass,
@@ -74,10 +73,10 @@ VALUE method_binaryrbm_set_structure (int number_of_arguments, VALUE* ruby_argum
 		&rb_hidden
 		);
 
-	if (TYPE(rb_visible) == T_HASH) {
+	if (TYPE(rb_opts_or_visible) == T_HASH) {
 
 		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible")), T_FIXNUM);
-		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")), T_FIXNUM);
+		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")),  T_FIXNUM);
 
 		r->rbm.setStructure(
 			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible"))),
@@ -86,9 +85,9 @@ VALUE method_binaryrbm_set_structure (int number_of_arguments, VALUE* ruby_argum
 	} else {
 
 		Check_Type(rb_opts_or_visible, T_FIXNUM);
-		Check_Type(rb_hidden, T_FIXNUM);
+		Check_Type(rb_hidden,          T_FIXNUM);
 
-		r->rbm.setStructure(NUM2INT(rb_visible), NUM2INT(rb_hidden));
+		r->rbm.setStructure(NUM2INT(rb_opts_or_visible), NUM2INT(rb_hidden));
 	}
 	return self;
 }

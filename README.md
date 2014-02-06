@@ -284,9 +284,9 @@ Dimension Reduction comparisions
 --------------------------------
 
 
-Suppose we want to reduce the number of dimensions for a set of data. In this case we will consider bag of words vectors so we can illustrate the problem better.
+Suppose we want to reduce the number of dimensions in a dataset. To illustrate this dimensionality reduction problem we will consider a bag of words dataset we convert to vectors.
 
-In particular we are interested in European countries, their colonies, and the Chinese trade:
+As an example we will take some word associations between certain European countries, their past colonies, and some tidbits about China:
 
 	samples = []
 
