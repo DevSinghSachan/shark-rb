@@ -191,12 +191,15 @@ First, we need to include the following files:
 
 	
 	require 'shark-rb'
+	include Shark::Problems
+	include Shark::RBM
+	include Shark::RBM::Analytics # for negative log likelihood
 
 
 As an example problem, we consider one of the predefined benchmark problems in `RBM/Problems/`, namely, the Bars-and-Stripes data set:
 
 
-	problem = Shark::Problems::BarsAndStripes.new
+	problem = BarsAndStripes.new
 	data = problem.data
 
 
@@ -207,8 +210,9 @@ Now we can create the RBM. We have to define how many input variables (visible u
 	numberOfVisible = problem.input_dimension #visible units of the inputs
 
 	#create rbm with simple binary units:
-	rbm = Shark::BinaryRBM.new
-	rbm.set_structure numberOfVisible, numberOfHidden
+	rbm = BinaryRBM.new
+	rbm.set_structure :hidden => numberOfHidden, :visible => numberOfVisible
+	# or to keep with Shark syntax: `rbm.set_structure numberOfVisible, numberOfHidden`
 
 
 Using the RBM, we can now construct the k-step Contrastive Divergence error function. Since we want to model Hinton’s famous algorithm we will set k to 1. Throughout the library we use the convention that all kinds of initialization of the structure must be set before calling `data=(val)`. This allows the gradients to adjust their internal structures. For CD-k this is not crucial, but you should get used to it before trying more elaborate gradient approximators:
@@ -246,7 +250,7 @@ Since our problem is small, we can actually evaluate the negative log-likelihood
 		meanResult += likelihood
 	end
 
-	meanresult /= numTrials
+	meanResult /= numTrials
 
 
 Now we can print the results as usual with:

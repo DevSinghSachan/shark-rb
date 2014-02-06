@@ -1,14 +1,12 @@
 // Ruby helpers and classes:
 #include "rb_conversions.h"
 #include "rb_classes.h"
-
 // datatypes:
 #include "rb_RealVector.h"
 #include "rb_RealMatrix.h"
 #include "rb_UnlabeledData.h"
 #include "rb_RegressionDataset.h"
 #include "rb_SolutionSet.h"
-
 // algorithms:
 #include "rb_LinearModel.h"
 #include "rb_PCA.h"
@@ -391,6 +389,11 @@ extern "C"  {
 
 		// TODO:
 		//   - define .each method,
+		//   - separate SparseFFNet from autoencoder
+		//   - Add RealVector/Int labeleddata for classification
+		//   - Add more cases
+		//   - Add GaussianBinaryRBM
+		//   - Add tempering RBM
 
 		// to respect original naming conventions:
 		rb_define_global_const("Shark", rb_optimizer_klass);
@@ -441,34 +444,29 @@ extern "C"  {
 			rb_define_singleton_method(rb_optimizer_klass, "import_pgm", (rb_method) method_import_pgm_dir, 1);
 
 		// Datatypes:
-
 		Init_RealVector();
 		Init_RealMatrix();
 		Init_RegressionDataset();
 		Init_UnlabeledData();
 		Init_SolutionSet();
 
-		// Algorithms:
-
-		// Objective Function optimizers:
-		Init_Steepest_Descent();
-		// Add lbfgs and friends.
+		// Objective Functions:
+		Init_BinaryCD();
+		Init_ExactGradient();
+		// Add friends.
 		
-		// Rando other stuff:
+		// Random other stuff & Algorithms:
 		Init_LinearModel();
 		Init_PCA();
 		Init_BinaryRBM();
+		Init_RBM_Analytics();
 
-		// Objective functions:
-		Init_BinaryCD();
-		Init_ExactGradient();
+		// Objective Function optimizers:
+		Init_Steepest_Descent();
 		Init_LBFGS();
 
 		// Sample Problems:
-
 		Init_BarsAndStripes();
-
-		Init_RBM_Analytics();
 
 	}
 }

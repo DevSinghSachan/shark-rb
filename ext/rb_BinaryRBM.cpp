@@ -60,42 +60,113 @@ VALUE method_binaryrbm_set_parameter_vector (VALUE self, VALUE rb_parameter) {
 	return self;
 }
 
-VALUE method_binaryrbm_set_structure (VALUE self, VALUE rb_visible, VALUE rb_hidden) {
-
-	Check_Type(rb_visible, T_FIXNUM);
-	Check_Type(rb_hidden, T_FIXNUM);
+VALUE method_binaryrbm_set_structure (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_opts_or_visible, rb_hidden;
 
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 
-	r->rbm.setStructure(NUM2INT(rb_visible), NUM2INT(rb_hidden));
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"11",
+		&rb_opts_or_visible,
+		&rb_hidden
+		);
+
+	if (TYPE(rb_visible) == T_HASH) {
+
+		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible")), T_FIXNUM);
+		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")), T_FIXNUM);
+
+		r->rbm.setStructure(
+			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible"))),
+			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")))
+			);
+	} else {
+
+		Check_Type(rb_opts_or_visible, T_FIXNUM);
+		Check_Type(rb_hidden, T_FIXNUM);
+
+		r->rbm.setStructure(NUM2INT(rb_visible), NUM2INT(rb_hidden));
+	}
 	return self;
 }
 
-/*VALUE method_binaryrbm_hidden_neurons (VALUE self) {
-	// ??
-	return self;
+void rb_error_binaryrbm_wrong_format () {
+	rb_raise(rb_eArgError, "A BinaryRBM can sample using Arrays, UnlabeledData, RealVectors, or by passing a Hash.");
 }
 
-VALUE method_binaryrbm_visible_neurons (VALUE self) {
-	// ??
-	return self;
+UnlabeledData<RealVector> rb_BinaryRBM::eval(UnlabeledData<RealVector> const& dataset) {
+
+	std::vector<shark::RealVector> evaluated_batches;
+
+	BOOST_FOREACH(RealMatrix const& batch,dataset.batches()) {
+		RealMatrix evaluated_batch;
+		rbm.eval(batch, evaluated_batch);
+
+		for (size_t i = 0; i< evaluated_batch.size1(); i++)
+			evaluated_batches.push_back(row(evaluated_batch,i));
+	}
+
+	return shark::createDataFromRange(evaluated_batches);
 }
 
-VALUE method_binaryrbm_weight_matrix (VALUE self) {
-	// ??
-	return self;
-}*/
+VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
+	VALUE rb_direction, rb_dataset = Qnil, rb_mean = Qfalse;
 
-/*VALUE method_binaryrbm_energy (VALUE self) {
-	// ??
-	return self;
-}*/
+	if (TYPE(rb_dataset) == T_HASH) {
+		rb_dataset   = rb_hash_aref(rb_opts, rb_sym_new("samples"));
+		rb_direction = rb_hash_aref(rb_opts, rb_sym_new("direction"));
+		rb_mean = rb_hash_aref(rb_opts, rb_sym_new("mean"));
+	} else {
+		rb_dataset = rb_opts;
+	}
+	rb_mean = (rb_mean == Qnil || rb_mean != Qtrue) ? Qfalse : Qtrue;
+	rb_direction = rb_direction == Qnil ? rb_sym_new("forward") : rb_direction;
 
-/*VALUE method_binaryrbm_random_number_generator (VALUE self) {
-	// ??
+	rb_BinaryRBM *r;
+	Data_Get_Struct(self, rb_BinaryRBM, r);
+
+	if (TYPE(rb_dataset) == T_DATA) {
+		if (CLASS_OF(rb_dataset) == rb_optimizer_unlabeleddata_klass) {
+			rb_UnlabeledData *d;
+			Data_Get_Struct(rb_dataset, rb_UnlabeledData, d);
+			
+			r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+			return wrap_pointer<rb_UnlabeledData>(
+				rb_optimizer_unlabeleddata_klass,
+				new rb_UnlabeledData(r->eval(d->data))
+			);
+
+		} else if (CLASS_OF(rb_dataset) == rb_optimizer_realvector_klass) {
+			rb_RealVector *d;
+			Data_Get_Struct(rb_dataset, rb_RealVector, d);
+			std::vector<RealVector> vectors = realvector_to_stdvector(d->data);
+
+			r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+			return wrap_pointer<rb_UnlabeledData>(
+				rb_optimizer_unlabeleddata_klass,
+				new rb_UnlabeledData(r->eval(shark::createDataFromRange(vectors)))
+			);
+
+		} else {
+			rb_error_binaryrbm_wrong_format();
+		}
+	} else if (TYPE(rb_dataset) == T_ARRAY) {
+
+		r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+		return wrap_pointer<rb_UnlabeledData>(
+				rb_optimizer_unlabeleddata_klass,
+				new rb_UnlabeledData(r->eval(rb_ary_to_unlabeleddata(rb_dataset)))
+		);
+
+	} else {
+		rb_error_binaryrbm_wrong_format();
+	}
+
 	return self;
-}*/
+}
 
 VALUE method_binaryrbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_eval_mean) {
 	if ((rb_forward != Qtrue || rb_forward != Qfalse) && (rb_eval_mean != Qtrue || rb_eval_mean != Qfalse))
@@ -106,53 +177,6 @@ VALUE method_binaryrbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_e
 	r->rbm.evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
 	return self;
 }
-/*VALUE method_binaryrbm_eval(VALUE self, VALUE rb_data) {
-	rb_BinaryRBM *r;
-	Data_Get_Struct(self, rb_BinaryRBM, r);
-
-	if (TYPE(rb_data) == T_ARRAY) {
-
-		if (RARRAY_LEN(rb_data) > 0) {
-
-			// Will work with 1 and 2D arrays:
-
-			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->rbm.eval(rb_ary_to_unlabeleddata(rb_data)))
-			);
-		} else {
-			rb_raise(rb_eArgError, "Can only evaluate non-empty data.");
-		}
-	} else {
-		Check_Type(rb_data, T_DATA);
-
-		if (CLASS_OF(rb_data) == rb_optimizer_unlabeleddata_klass) {
-			rb_UnlabeledData *d;
-			Data_Get_Struct(rb_data, rb_UnlabeledData, d);
-
-			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->rbm.eval(d->data))
-			);
-		} else if (CLASS_OF(rb_data) == rb_optimizer_realvector_klass) {
-			rb_RealVector *d;
-			Data_Get_Struct(rb_data, rb_RealVector, d);
-
-			std::vector<RealVector> vectors = realvector_to_stdvector(d->data);
-			shark::UnlabeledData<shark::RealVector> samples = shark::createDataFromRange(vectors);
-
-			// could also return a realvector with just the results... but why break the expected format?
-			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->rbm.eval(samples))
-			);
-		} else {
-			rb_raise(rb_eArgError, "BinaryRBM can evalute UnlabeledData, RealVectors, or Arrays.");
-		}
-		return self;
-	}
-	return self;
-}*/
 VALUE method_binaryrbm_number_of_hidden_neurons(VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
@@ -177,7 +201,8 @@ void initializeWeights(BinaryRBM& rbm){
 void Init_BinaryRBM () {
 
 	rb_define_alloc_func(rb_optimizer_binaryrbm_klass, (rb_alloc_func_t) method_binaryrbm_allocate);
-	rb_define_method(rb_optimizer_binaryrbm_klass, "set_structure", (rb_method) method_binaryrbm_set_structure, 2);
+	rb_define_method(rb_optimizer_binaryrbm_klass, "eval", (rb_method) method_binaryrbm_eval, 1);
+	rb_define_method(rb_optimizer_binaryrbm_klass, "set_structure", (rb_method) method_binaryrbm_set_structure, -1);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "evaluation_type", (rb_method) method_binaryrbm_evaluation_type, 2);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "initialize", (rb_method) method_binaryrbm_initialize, 0);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "parameter_vector=", (rb_method) method_binaryrbm_set_parameter_vector, 1);
