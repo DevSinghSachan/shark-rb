@@ -17,10 +17,11 @@ LBFGS& rb_LBFGS::algorithm() {
 	return _algorithm;
 }
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
+#include "rb_objective_function.extras"
 
 
-VALUE method_lbfgs_solution (VALUE self) {
+/*VALUE method_lbfgs_solution (VALUE self) {
 
 	rb_LBFGS *s;
 	Data_Get_Struct(self, rb_LBFGS, s);
@@ -29,7 +30,7 @@ VALUE method_lbfgs_solution (VALUE self) {
 		rb_optimizer_solutionset_klass,
 		new rb_SolutionSet(s->algorithm().solution().point, s->algorithm().solution().value)
 		);
-}
+}*/
 
 VALUE method_lbfgs_allocate (VALUE klass) {
 	return wrap_pointer<rb_LBFGS>(
@@ -54,7 +55,7 @@ VALUE method_lbfgs_set_history_count (VALUE self, VALUE rb_history_count) {
 
 	return self;
 }
-
+/*
 VALUE method_lbfgs_init (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_objective_func, rb_startpoint;
 
@@ -144,15 +145,15 @@ VALUE method_lbfgs_step (VALUE self, VALUE rb_objective_func) {
 
 	return self;
 }
-
+*/
 typedef VALUE (*rb_method)(...);
 
 void Init_LBFGS () {
 
 	rb_define_alloc_func(rb_optimizer_lbfgs_klass,  (rb_alloc_func_t) method_lbfgs_allocate);
-	rb_define_method(rb_optimizer_lbfgs_klass, "solution", (rb_method) method_lbfgs_solution, 0);
-	rb_define_method(rb_optimizer_lbfgs_klass, "step", (rb_method) method_lbfgs_step, 1);
-	rb_define_method(rb_optimizer_lbfgs_klass, "init", (rb_method) method_lbfgs_init, -1);
+	rb_define_method(rb_optimizer_lbfgs_klass, "solution", (rb_method) method_objective_function_solution<rb_LBFGS>, 0);
+	rb_define_method(rb_optimizer_lbfgs_klass, "step", (rb_method) method_objective_function_step<rb_LBFGS>, 1);
+	rb_define_method(rb_optimizer_lbfgs_klass, "init", (rb_method) method_objective_function_init<rb_LBFGS, rb_class2name(rb_optimizer_lbfgs_klass>), -1);
 	rb_define_method(rb_optimizer_lbfgs_klass, "initialize", (rb_method) method_lbfgs_initialize, -1);
 	rb_define_method(rb_optimizer_lbfgs_klass, "history_count=", (rb_method) method_lbfgs_set_history_count, 1);
 

@@ -16,7 +16,8 @@ SteepestDescent& rb_SteepestDescent::algorithm() {
 	return _algorithm;
 }
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
+#include "rb_objective_function.extras"
 
 VALUE method_steepestdescent_allocate (VALUE klass) {
 	return wrap_pointer<rb_SteepestDescent>(
@@ -59,6 +60,7 @@ VALUE method_steepestdescent_set_learning_rate (VALUE self, VALUE rb_learning_ra
 
 	return self;
 }
+/*
 
 VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_objective_func, rb_startpoint;
@@ -122,7 +124,7 @@ VALUE method_steepestdescent_init (int number_of_arguments, VALUE* ruby_argument
 		rb_raise(rb_eRuntimeError, e.what());
 	}
 	return self;
-}
+}*/
 
 VALUE method_steepestdescent_get_learning_rate (VALUE self) {
 	rb_SteepestDescent *s;
@@ -131,17 +133,18 @@ VALUE method_steepestdescent_get_learning_rate (VALUE self) {
 	return rb_float_new(s->algorithm().learningRate());
 }
 
-VALUE method_steepestdescent_solution (VALUE self) {
-	rb_SteepestDescent *s;
-	Data_Get_Struct(self, rb_SteepestDescent, s);
+/*template<class Obtype>
+VALUE method_objective_function_solution (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
 
 	return wrap_pointer<rb_SolutionSet>(
 		rb_optimizer_solutionset_klass,
 		new rb_SolutionSet(s->algorithm().solution().point, s->algorithm().solution().value)
 		);
-}
+}*/
 
-template<class Obtype>
+/*template<class Obtype>
 VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
 
 	Check_Type(rb_objective_func, T_DATA);
@@ -176,7 +179,7 @@ VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
 
 	return self;
 
-}
+}*/
 
 typedef VALUE (*rb_method)(...);
 
@@ -184,8 +187,8 @@ void Init_Steepest_Descent () {
 
 	rb_define_alloc_func(rb_optimizer_steepestdescent_klass,  (rb_alloc_func_t) method_steepestdescent_allocate);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "step", (rb_method) method_objective_function_step<rb_SteepestDescent>, 1);
-	rb_define_method(rb_optimizer_steepestdescent_klass, "init", (rb_method) method_steepestdescent_init, -1);
-	rb_define_method(rb_optimizer_steepestdescent_klass, "solution", (rb_method) method_steepestdescent_solution, 0);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "init", (rb_method) method_objective_function_init<rb_SteepestDescent, rb_class2name(rb_optimizer_steepestdescent_klass)>, -1);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "solution", (rb_method) method_objective_function_solution<rb_SteepestDescent>, 0);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "initialize", (rb_method) method_steepestdescent_initialize, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum=", (rb_method) method_steepestdescent_set_momentum, 1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum", (rb_method) method_steepestdescent_get_momentum, 0);

@@ -1,0 +1,111 @@
+template<class Obtype>
+VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
+
+	Check_Type(rb_objective_func, T_DATA);
+	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
+		
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
+
+		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
+		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+			rb_BinaryCD *obj;
+			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
+			try {
+				s->algorithm().step(obj->objective());
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nDid you remember to initialize the Optimizer?").c_str());
+			}
+		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+			rb_ExactGradient *obj;
+			Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
+			try {
+				s->algorithm().step(obj->objective());
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nDid you remember to initialize the Optimizer?").c_str());
+			}
+		} else {
+			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
+		}
+	} else {
+		rb_raise(rb_eArgError, "You can only step using an ObjectiveFunction object.");
+	}
+
+	return self;
+
+}
+template<class Obtype>
+VALUE method_objective_function_solution (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+
+	return wrap_pointer<rb_SolutionSet>(
+		rb_optimizer_solutionset_klass,
+		new rb_SolutionSet(s->algorithm().solution().point, s->algorithm().solution().value)
+		);
+}
+
+template<class Obtype, char* rb_classname>
+VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_objective_func, rb_startpoint;
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"11",
+		&rb_objective_func,
+		&rb_startpoint);
+
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+
+	Check_Type(rb_objective_func, T_DATA);
+	try {
+		if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
+			
+			Obtype *s;
+			Data_Get_Struct(self, Obtype, s);
+
+			VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
+
+			if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+				rb_BinaryCD *obj;
+				Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
+				if (rb_startpoint != Qnil) {
+
+					Check_Type(rb_startpoint, T_DATA);
+					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_classname);
+					rb_RealVector *v;
+					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+					
+					s->algorithm().init(obj->objective(), v->data);
+				} else {
+					s->algorithm().init(obj->objective());
+				}
+			} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+				rb_ExactGradient *obj;
+				Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
+				if (rb_startpoint != Qnil) {
+
+					Check_Type(rb_startpoint, T_DATA);
+					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_classname);
+					rb_RealVector *v;
+					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
+					
+					s->algorithm().init(obj->objective(), v->data);
+				} else {
+					s->algorithm().init(obj->objective());
+				}
+			} else {
+				rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
+			}
+		} else {
+			rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
+		}
+	} catch (shark::Exception e) {
+		rb_raise(rb_eRuntimeError, e.what());
+	}
+	return self;
+}
