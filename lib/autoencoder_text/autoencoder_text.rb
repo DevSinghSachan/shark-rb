@@ -23,8 +23,8 @@ class Optimizer
 				@num_std_deviations = opts[:std_deviations].nil? ? 3 : opts[:std_deviations]
 				@min_value = opts[:min_value].nil? ? 0.1 : opts[:min_value]
 				@max_value = opts[:max_value].nil? ? 0.9 : opts[:max_value]
-				@standard_vector     = Optimizer::Conversion::Text.create_text_sample_set_from_samples opts[:samples]
-				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.create_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
+				@standard_vector     = Optimizer::Conversion::Text.text_sample_set_from_samples opts[:samples]
+				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
 				# normalize the data
 				normalize_data if opts[:normalize] != false
 				@regression_dataset = Optimizer.regression_dataset @unlabeled_data, @unlabeled_data
@@ -37,7 +37,7 @@ class Optimizer
 			end
 
 			def present(cutoff=0, ordered=true, cutoff_number=false)
-				Optimizer::Conversion::Text.present_filters parameters, cutoff, ordered, cutoff_number
+				Optimizer::Conversion::Text.present parameters, cutoff, ordered, cutoff_number
 			end
 
 			def train
@@ -52,7 +52,7 @@ class Optimizer
 				if index == 0 and rendered
 					filters = @autoencoder.parameters_to_a index
 					filters.map do |filter|
-						Optimizer::Conversion::Text.create_text_samples_from_filters :filter => filter, :vector => @standard_vector.features
+						Optimizer::Conversion::Text.text_samples_from_filters :filter => filter, :vector => @standard_vector.features
 					end
 				else 
 					@autoencoder.parameters_to_a index
@@ -61,7 +61,7 @@ class Optimizer
 
 			def eval sample, rendered = false
 				if !rendered
-					@autoencoder.eval(Optimizer::Conversion::Text.create_text_sample_from_sample sample, @standard_vector.feature_vector)
+					@autoencoder.eval(Optimizer::Conversion::Text.text_sample_from_sample sample, @standard_vector.feature_vector)
 				else
 					@autoencoder.eval sample
 				end

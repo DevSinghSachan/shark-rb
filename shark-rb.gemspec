@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-02-05"
+  s.date = "2014-02-07"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -63,6 +63,7 @@ Gem::Specification.new do |s|
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
     "lib/autoencoder_text/autoencoder_text.rb",
+    "lib/binaryrbm_text/binaryrbm_text.rb",
     "lib/conversion_text/conversion_text.rb",
     "lib/datatypes/datatypes.rb",
     "lib/pca_text/pca_text.rb",

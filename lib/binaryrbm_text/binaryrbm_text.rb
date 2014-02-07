@@ -10,8 +10,8 @@ class Optimizer
 			DefaultHiddenStates = 25 #RBM number of hidden states
 
 			def initialize(opts={})
-				@standard_vector     = Optimizer::Conversion::Text.create_text_sample_set_from_samples opts[:samples]
-				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.create_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
+				@standard_vector     = Optimizer::Conversion::Text.text_sample_set_from_samples opts[:samples]
+				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
 				@rbm = Optimizer::RBM::BinaryRBM.new
 				@rbm.set_structure :hidden => [(opts[:hidden_states] || DefaultHiddenStates), 1].max,
 								   :visible => @standard_vector.features.length
@@ -37,7 +37,7 @@ class Optimizer
 			end
 
 			def present(cutoff=0, ordered=true, cutoff_number=false)
-				Optimizer::Conversion::Text.present_filters parameters(true), cutoff, ordered, cutoff_number
+				Optimizer::Conversion::Text.present parameters(true), cutoff, ordered, cutoff_number
 			end
 
 			def parameters rendered = true
@@ -49,7 +49,8 @@ class Optimizer
 				filters = eval basis_vectors
 				if rendered
 					filters.map do |filter|
-						Optimizer::Conversion::Text.create_text_samples_from_filters :filter => filter, :vector => @standard_vector.features
+						Optimizer::Conversion::Text.text_samples_from_filters :filter => filter,
+						                                                             :vector => @standard_vector.features
 					end
 				else
 					filters

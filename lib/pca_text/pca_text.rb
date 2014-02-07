@@ -16,7 +16,7 @@ class Optimizer
 
 			def encode sample, rendered = false
 				if !rendered
-					@autoencoder.encoder.eval(Optimizer::Conversion::Text.create_text_sample_from_sample sample, @standard_vector.feature_vector)
+					@autoencoder.encoder.eval(Optimizer::Conversion::Text.text_sample_from_sample sample, @standard_vector.feature_vector)
 				else
 					@autoencoder.encoder.eval sample
 				end
@@ -25,7 +25,7 @@ class Optimizer
 			def decode sample, render=true
 				decoded = @autoencoder.decoder.eval sample
 				if render
-					Optimizer::Conversion::Text.create_text_samples_from_filters :filter => decoded.to_a, :vector => @standard_vector.features
+					Optimizer::Conversion::Text.text_samples_from_filters :filter => decoded.to_a, :vector => @standard_vector.features
 				else
 					decoded
 				end
@@ -47,8 +47,8 @@ class Optimizer
 			end
 
 			def initialize(opts={})
-				@standard_vector     = Optimizer::Conversion::Text.create_text_sample_set_from_samples opts[:samples]
-				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.create_samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
+				@standard_vector     = Optimizer::Conversion::Text.text_sample_set_from_samples opts[:samples]
+				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
 				@dimensions          = [(opts[:dimensions] || DefaultDimensions), 1].max
 				@pca = Optimizer::PCA.new @unlabeled_data
 				@encoder = create_encoder @dimensions
@@ -56,7 +56,7 @@ class Optimizer
 			end
 
 			def present(cutoff=0, show_offset=false, ordered=true, cutoff_number=false)
-				Optimizer::Conversion::Text.present_filters parameters(0, show_offset, true), cutoff, ordered, cutoff_number
+				Optimizer::Conversion::Text.present parameters(0, show_offset, true), cutoff, ordered, cutoff_number
 			end
 
 			def parameters index = 0, show_offset=false, rendered = true
@@ -65,12 +65,12 @@ class Optimizer
 						offset = decoder.offset
 						filters = (~decoder.matrix).to_realvectors
 						filters.map do |filter|
-							Optimizer::Conversion::Text.create_text_samples_from_filters :filter => (filter + offset).to_a, :vector => @standard_vector.features
+							Optimizer::Conversion::Text.text_samples_from_filters :filter => (filter + offset).to_a, :vector => @standard_vector.features
 						end
 					else
 						filters = (~decoder.matrix).to_realvectors
 						filters.map do |filter|
-							Optimizer::Conversion::Text.create_text_samples_from_filters :filter => filter.to_a, :vector => @standard_vector.features
+							Optimizer::Conversion::Text.text_samples_from_filters :filter => filter.to_a, :vector => @standard_vector.features
 						end
 					end
 				else

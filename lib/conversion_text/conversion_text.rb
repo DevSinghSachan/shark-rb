@@ -4,7 +4,7 @@ class Optimizer
 	module Conversion
 		class Text
 
-			def self.create_text_sample_from_sample sample, fv
+			def self.text_sample_from_sample sample, fv
 				vector = Array.new(fv.keys.length, 0.0)
 				case sample
 				when Array
@@ -27,7 +27,7 @@ class Optimizer
 			end
 
 			# creates a set of text to convert text features to vectors
-			def self.create_text_sample_set_from_samples samples
+			def self.text_sample_set_from_samples samples
 				feature_vector = Set.new
 				case samples.first
 				when Array
@@ -51,7 +51,7 @@ class Optimizer
 				OpenStruct.new :feature_vector => fv, :features => feature_vector.to_a
 			end
 
-			def self.present_filters filters, cutoff=0, ordered=true, cutoff_number=false
+			def self.present filters, cutoff=0, ordered=true, cutoff_number=false
 				filters.each do |filter|
 					puts "\n{"
 					if ordered
@@ -73,15 +73,15 @@ class Optimizer
 				end
 			end
 
-			def self.create_samples opts={}
+			def self.samples opts={}
 				vectors = Array.new(opts[:data].length).map {Array.new(opts[:vector].keys.length, 0.0)}
 				opts[:data].each_with_index do |sample, k|
-					vectors[k] = Optimizer::Conversion::Text.create_text_sample_from_sample sample, opts[:vector]
+					vectors[k] = Optimizer::Conversion::Text.text_sample_from_sample sample, opts[:vector]
 				end
 				vectors
 			end
 
-			def self.create_text_samples_from_filters opts={}
+			def self.text_samples_from_filters opts={}
 				converted_filter = Hash.new(0.0)
 				opts[:filter].each_with_index do |score, k |
 					converted_filter[opts[:vector][k]] = score
