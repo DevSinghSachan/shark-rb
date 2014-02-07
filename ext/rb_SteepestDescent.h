@@ -6,6 +6,7 @@
 #include "rb_BinaryCD.h"
 #include "rb_ExactGradient.h"
 #include "rb_SolutionSet.h"
+#include "rb_conversions.h"
 
 using namespace shark;
 

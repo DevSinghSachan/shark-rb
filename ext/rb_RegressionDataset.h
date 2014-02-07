@@ -8,6 +8,7 @@
 #include <shark/Data/Csv.h>//for reading in the images as csv
 #include <shark/Data/Statistics.h> //for normalization
 #include "rb_UnlabeledData.h"
+#include "rb_conversions.h"
 
 class rb_RegressionDataset {
 	public:

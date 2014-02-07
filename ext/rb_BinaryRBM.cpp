@@ -4,17 +4,7 @@ extern VALUE rb_optimizer_binaryrbm_klass;
 extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
-template<class Obtype> void delete_objects(Obtype *ptr){
-	delete ptr;
-}
-
-template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
-	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
-}
-
-template<class Obtype> VALUE alloc_ob(VALUE self) {
-	return wrap_pointer<Obtype>(self,new Obtype());
-}
+#include "wrappers.extras"
 
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
@@ -133,21 +123,27 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 			Data_Get_Struct(rb_dataset, rb_UnlabeledData, d);
 			
 			r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
-			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->eval(d->data))
-			);
-
+			try {
+				return wrap_pointer<rb_UnlabeledData>(
+					rb_optimizer_unlabeleddata_klass,
+					new rb_UnlabeledData(r->eval(d->data))
+				);
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
+			}
 		} else if (CLASS_OF(rb_dataset) == rb_optimizer_realvector_klass) {
 			rb_RealVector *d;
 			Data_Get_Struct(rb_dataset, rb_RealVector, d);
 			std::vector<RealVector> vectors = realvector_to_stdvector(d->data);
-
 			r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
-			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->eval(shark::createDataFromRange(vectors)))
-			);
+			try {
+				return wrap_pointer<rb_UnlabeledData>(
+					rb_optimizer_unlabeleddata_klass,
+					new rb_UnlabeledData(r->eval(shark::createDataFromRange(vectors)))
+				);
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
+			}
 
 		} else {
 			rb_error_binaryrbm_wrong_format();
@@ -155,10 +151,14 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 	} else if (TYPE(rb_dataset) == T_ARRAY) {
 
 		r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
-		return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(r->eval(rb_ary_to_unlabeleddata(rb_dataset)))
-		);
+		try {
+			return wrap_pointer<rb_UnlabeledData>(
+					rb_optimizer_unlabeleddata_klass,
+					new rb_UnlabeledData(r->eval(rb_ary_to_unlabeleddata(rb_dataset)))
+			);
+		} catch (shark::Exception e) {
+			rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
+		}
 
 	} else {
 		rb_error_binaryrbm_wrong_format();

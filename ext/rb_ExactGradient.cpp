@@ -8,17 +8,7 @@ extern VALUE rb_optimizer_solutionset_klass;
 using namespace shark;
 using namespace std;
 
-template<class Obtype> void delete_objects(Obtype *ptr){
-	delete ptr;
-}
-
-template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
-	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
-}
-
-template<class Obtype> VALUE alloc_ob(VALUE self) {
-	return wrap_pointer<Obtype>(self,new Obtype());
-}
+#include "wrappers.extras"
 
 rb_ExactGradient::rb_ExactGradient(BinaryRBM &rbm): _objective(&rbm) {};
 

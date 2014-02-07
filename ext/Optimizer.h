@@ -6,6 +6,7 @@
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //loss for classification
 #include <fstream>
 #include <boost/any.hpp>
+#include "rb_conversions.h"
 #include <boost/format.hpp>
 #include <shark/Data/Csv.h>//for reading in the images as csv
 #include <shark/Data/Statistics.h> //for normalization

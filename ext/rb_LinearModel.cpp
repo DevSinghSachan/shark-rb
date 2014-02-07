@@ -7,17 +7,7 @@ extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
-template<class Obtype> void delete_objects(Obtype *ptr){
-	delete ptr;
-}
-
-template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
-	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
-}
-
-template<class Obtype> VALUE alloc_ob(VALUE self) {
-	return wrap_pointer<Obtype>(self,new Obtype());
-}
+#include "wrappers.extras"
 
 RealVector& rb_LinearModel::offset() {
 	return model.offset();
@@ -197,6 +187,10 @@ VALUE method_linearmodel_hasOffset(VALUE self) {
 	return (m->hasOffset() ? Qtrue : Qfalse);
 };
 
+void linearmodel_rb_error_unmatched_dimensions(shark::Exception e) {
+	rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the linear models's input size.").c_str());
+}
+
 VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
@@ -206,18 +200,25 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 		if (RARRAY_LEN(dataset) > 0) {
 
 			if (TYPE(rb_ary_entry(dataset, 0)) == T_ARRAY) {
-				// 2d array case.
-
-				return wrap_pointer<rb_UnlabeledData>(
-					rb_optimizer_unlabeleddata_klass,
-					new rb_UnlabeledData(m->eval(rb_ary_to_unlabeleddata(dataset)))
-				);
-
+				// 2D array.
+				try {
+					return wrap_pointer<rb_UnlabeledData>(
+						rb_optimizer_unlabeleddata_klass,
+						new rb_UnlabeledData(m->eval(rb_ary_to_unlabeleddata(dataset)))
+					);
+				} catch (shark::Exception e) {
+					linearmodel_rb_error_unmatched_dimensions(e);
+				}
 			} else {
-				return wrap_pointer<rb_RealVector>(
-					rb_optimizer_realvector_klass,
-					new rb_RealVector(m->eval(rb_ary_to_1d_realvector(dataset)))
-				);
+				// 1D array
+				try {
+					return wrap_pointer<rb_RealVector>(
+						rb_optimizer_realvector_klass,
+						new rb_RealVector(m->eval(rb_ary_to_1d_realvector(dataset)))
+					);
+				} catch (shark::Exception e) {
+					linearmodel_rb_error_unmatched_dimensions(e);
+				}
 			}
 		} else {
 			rb_raise(rb_eArgError, "Can only evaluate non-empty data. Look at LinearModel#offset for the constant part of the transformation.");
@@ -229,18 +230,26 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 			rb_UnlabeledData *d;
 			Data_Get_Struct(dataset, rb_UnlabeledData, d);
 
-			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
-				new rb_UnlabeledData(m->eval(d->data))
-			);
+			try {
+				return wrap_pointer<rb_UnlabeledData>(
+					rb_optimizer_unlabeleddata_klass,
+					new rb_UnlabeledData(m->eval(d->data))
+				);
+			} catch (shark::Exception e) {
+				linearmodel_rb_error_unmatched_dimensions(e);
+			}
 		} else if (CLASS_OF(dataset) == rb_optimizer_realvector_klass) {
 			rb_RealVector *d;
 			Data_Get_Struct(dataset, rb_RealVector, d);
 
-			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
-				new rb_RealVector(m->eval(d->data))
-			);
+			try {
+				return wrap_pointer<rb_RealVector>(
+					rb_optimizer_realvector_klass,
+					new rb_RealVector(m->eval(d->data))
+				);
+			} catch (shark::Exception e) {
+				linearmodel_rb_error_unmatched_dimensions(e);
+			}
 		} else {
 			rb_raise(rb_eArgError, "LinearModel can evalute UnlabeledData, RealVectors, or Arrays.");
 		}

@@ -6,17 +6,7 @@ extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_realvector_klass;
 
 
-template<class Obtype> void delete_objects(Obtype *ptr){
-	delete ptr;
-}
-
-template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
-	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
-}
-
-template<class Obtype> VALUE alloc_ob(VALUE self) {
-	return wrap_pointer<Obtype>(self,new Obtype());
-}
+#include "wrappers.extras"
 
 rb_RealMatrix::rb_RealMatrix(RealMatrix const& _data) {
 	data = _data;

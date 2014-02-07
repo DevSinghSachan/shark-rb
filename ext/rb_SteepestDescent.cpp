@@ -16,17 +16,7 @@ SteepestDescent& rb_SteepestDescent::algorithm() {
 	return _algorithm;
 }
 
-template<class Obtype> void delete_objects(Obtype *ptr){
-	delete ptr;
-}
-
-template<class Obtype> VALUE wrap_pointer(VALUE klass, Obtype *ptr){
-	return Data_Wrap_Struct(klass,0,delete_objects<Obtype>,ptr);
-}
-
-template<class Obtype> VALUE alloc_ob(VALUE self) {
-	return wrap_pointer<Obtype>(self,new Obtype());
-}
+#include "wrappers.extras"
 
 VALUE method_steepestdescent_allocate (VALUE klass) {
 	return wrap_pointer<rb_SteepestDescent>(
@@ -151,28 +141,37 @@ VALUE method_steepestdescent_solution (VALUE self) {
 		);
 }
 
-VALUE method_steepestdescent_step (VALUE self, VALUE rb_objective_func) {
+template<class Obtype>
+VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
 
 	Check_Type(rb_objective_func, T_DATA);
 	if (rb_obj_is_kind_of(rb_objective_func, rb_optimizer_objective_function_klass) == Qtrue) {
 		
-		rb_SteepestDescent *s;
-		Data_Get_Struct(self, rb_SteepestDescent, s);
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
 
 		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
 		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
 			rb_BinaryCD *obj;
 			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
-			s->algorithm().step(obj->objective());
+			try {
+				s->algorithm().step(obj->objective());
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nDid you remember to initialize the Optimizer?").c_str());
+			}
 		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
 			rb_ExactGradient *obj;
 			Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
-			s->algorithm().step(obj->objective());
+			try {
+				s->algorithm().step(obj->objective());
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nDid you remember to initialize the Optimizer?").c_str());
+			}
 		} else {
 			rb_raise(rb_eArgError, "Unsupported ObjectiveFunction.");
 		}
 	} else {
-		rb_raise(rb_eArgError, "Can only step using an ObjectiveFunction object.");
+		rb_raise(rb_eArgError, "You can only step using an ObjectiveFunction object.");
 	}
 
 	return self;
@@ -184,7 +183,7 @@ typedef VALUE (*rb_method)(...);
 void Init_Steepest_Descent () {
 
 	rb_define_alloc_func(rb_optimizer_steepestdescent_klass,  (rb_alloc_func_t) method_steepestdescent_allocate);
-	rb_define_method(rb_optimizer_steepestdescent_klass, "step", (rb_method) method_steepestdescent_step, 1);
+	rb_define_method(rb_optimizer_steepestdescent_klass, "step", (rb_method) method_objective_function_step<rb_SteepestDescent>, 1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "init", (rb_method) method_steepestdescent_init, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "solution", (rb_method) method_steepestdescent_solution, 0);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "initialize", (rb_method) method_steepestdescent_initialize, -1);

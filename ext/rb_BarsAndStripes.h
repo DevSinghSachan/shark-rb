@@ -2,6 +2,7 @@
 #define RB_BARSANDSTRIPES_H
 
 #include "ruby.h"
+#include "rb_conversions.h"
 #include "rb_UnlabeledData.h"
 #include <shark/Unsupervised/RBM/Problems/BarsAndStripes.h>
 
