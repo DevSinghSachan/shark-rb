@@ -62,6 +62,7 @@ Gem::Specification.new do |s|
     "ext/rb_conversions.h",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
+    "ext/wrappers.extras",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/binaryrbm_text/binaryrbm_text.rb",
     "lib/conversion_text/conversion_text.rb",
