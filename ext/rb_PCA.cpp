@@ -9,7 +9,7 @@ extern VALUE rb_optimizer_linearmodel_klass;
 extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 void rb_PCA::train(LinearModel<RealVector> &model, UnlabeledData<RealVector> const& inputs) {
 	trainer.train(model, inputs);

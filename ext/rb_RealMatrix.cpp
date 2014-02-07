@@ -6,7 +6,7 @@ extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_realvector_klass;
 
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 rb_RealMatrix::rb_RealMatrix(RealMatrix const& _data) {
 	data = _data;

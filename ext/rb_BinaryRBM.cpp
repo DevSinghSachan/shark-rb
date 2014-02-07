@@ -4,7 +4,7 @@ extern VALUE rb_optimizer_binaryrbm_klass;
 extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
@@ -104,7 +104,7 @@ UnlabeledData<RealVector> rb_BinaryRBM::eval(UnlabeledData<RealVector> const& da
 VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 	VALUE rb_direction, rb_dataset = Qnil, rb_mean = Qfalse;
 
-	if (TYPE(rb_dataset) == T_HASH) {
+	if (TYPE(rb_opts) == T_HASH) {
 		rb_dataset   = rb_hash_aref(rb_opts, rb_sym_new("samples"));
 		rb_direction = rb_hash_aref(rb_opts, rb_sym_new("direction"));
 		rb_mean = rb_hash_aref(rb_opts, rb_sym_new("mean"));

@@ -7,7 +7,7 @@ extern VALUE rb_optimizer_regressionset_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_klass;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 // Or create fake samples:
 shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSamples, int height, int width) {

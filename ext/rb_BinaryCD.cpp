@@ -8,7 +8,7 @@ extern VALUE rb_optimizer_realvector_klass;
 using namespace shark;
 using namespace std;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 
 

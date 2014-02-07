@@ -11,7 +11,7 @@ using namespace std;
 
 extern void exportPGM( const char *, const RealVector &, int, int, bool);
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 rb_RealVector::rb_RealVector(RealVector const& _data) {
 	data = _data;

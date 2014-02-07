@@ -8,7 +8,7 @@ extern VALUE rb_optimizer_solutionset_klass;
 using namespace shark;
 using namespace std;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 rb_ExactGradient::rb_ExactGradient(BinaryRBM &rbm): _objective(&rbm) {};
 
@@ -36,8 +36,7 @@ VALUE method_exactgradient_initialize (VALUE self, VALUE rb_rbm) {
 
 	rb_BinaryRBM *r;
 	Data_Get_Struct(rb_rbm, rb_BinaryRBM, r);
-	rb_ExactGradient *bupdated = new(b) rb_ExactGradient(r->rbm);
-
+	new(b) rb_ExactGradient(r->rbm);
 	return self;
 }
 

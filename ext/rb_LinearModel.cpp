@@ -7,7 +7,7 @@ extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 RealVector& rb_LinearModel::offset() {
 	return model.offset();

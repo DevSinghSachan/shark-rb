@@ -1,3 +1,8 @@
+// Objective Functions:
+extern VALUE rb_optimizer_objective_function_klass;
+extern VALUE rb_optimizer_binarycd_klass;
+extern VALUE rb_optimizer_exactgradient_klass;
+
 template<class Obtype>
 VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
 
@@ -45,7 +50,7 @@ VALUE method_objective_function_solution (VALUE self) {
 		);
 }
 
-template<class Obtype, char* rb_classname>
+template<class Obtype>
 VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_objective_func, rb_startpoint;
 
@@ -75,7 +80,7 @@ VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_argum
 
 					Check_Type(rb_startpoint, T_DATA);
 					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
-						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_classname);
+						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_obj_classname(self));
 					rb_RealVector *v;
 					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
 					
@@ -90,7 +95,7 @@ VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_argum
 
 					Check_Type(rb_startpoint, T_DATA);
 					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
-						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_classname);
+						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_obj_classname(self));
 					rb_RealVector *v;
 					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
 					
@@ -108,4 +113,11 @@ VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_argum
 		rb_raise(rb_eRuntimeError, e.what());
 	}
 	return self;
+}
+
+template<class Obtype>
+void InitObjectiveFunction(VALUE klass) {
+	rb_define_method(klass, "step", (rb_method) method_objective_function_step<Obtype>, 1);
+	rb_define_method(klass, "init", (rb_method) method_objective_function_init<Obtype>, -1);
+	rb_define_method(klass, "solution", (rb_method) method_objective_function_solution<Obtype>, 0);
 }

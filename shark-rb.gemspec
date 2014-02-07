@@ -60,6 +60,7 @@ Gem::Specification.new do |s|
     "ext/rb_classes.h",
     "ext/rb_conversions.cpp",
     "ext/rb_conversions.h",
+    "ext/rb_objective_function.extras",
     "ext/rb_pointer_wrapping.extras",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",

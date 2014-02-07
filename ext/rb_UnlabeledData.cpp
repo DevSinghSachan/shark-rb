@@ -7,7 +7,7 @@ extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
 
-#include "wrappers.extras"
+#include "rb_pointer_wrapping.extras"
 
 rb_UnlabeledData::rb_UnlabeledData(UnlabeledData<RealVector> _data) {
 	data = _data;
