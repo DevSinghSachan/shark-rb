@@ -48,7 +48,7 @@ class Optimizer
 					vector[k] = 1.0
 					vector
 				end
-				filters = @rbm.eval basis_vectors
+				filters = @rbm.eval(samples: basis_vectors, direction: :backward).to_a
 				if rendered
 					filters.map do |filter|
 						Optimizer::Conversion::Text.text_samples_from_filters :filter => filter,

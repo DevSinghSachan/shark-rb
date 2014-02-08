@@ -91,3 +91,10 @@ class Optimizer
 		end
 	end
 end
+class Optimizer
+	class RealVector
+		def to_text_sample vector=[]
+			Optimizer::Conversion::Text.text_samples_from_filters :filter => self.to_a, :vector => vector
+		end
+	end
+end
