@@ -16,7 +16,6 @@ class rb_BinaryCD {
 	public:
 		BinaryCD& objective();
 		rb_BinaryCD(BinaryRBM &);
-
 };
 
 void Init_BinaryCD();

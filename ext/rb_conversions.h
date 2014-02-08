@@ -7,6 +7,8 @@
 using namespace std;
 using namespace shark;
 
+typedef VALUE (*rb_method)(...);
+
 VALUE rb_sym_new(const char *);
 VALUE method_is_a_directory(VALUE);
 

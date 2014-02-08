@@ -1,4 +1,5 @@
 #include "rb_BinaryCD.h"
+#include "rb_pointer_wrapping.extras"
 
 extern VALUE rb_optimizer_binarycd_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
@@ -7,10 +8,6 @@ extern VALUE rb_optimizer_realvector_klass;
 
 using namespace shark;
 using namespace std;
-
-#include "rb_pointer_wrapping.extras"
-
-
 
 rb_BinaryCD::rb_BinaryCD(BinaryRBM &rbm): _objective(&rbm) {};
 
@@ -51,7 +48,7 @@ VALUE method_binarycd_initialize (VALUE self, VALUE rb_rbm) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(rb_rbm, rb_BinaryRBM, r);
 	// Placement new puts an object in a pre-allocated memory area.
-	rb_BinaryCD *bplaced = new(b) rb_BinaryCD(r->rbm);
+	rb_BinaryCD *bplaced = new(b) rb_BinaryCD(r->model);
 
 	return self;
 }
@@ -97,8 +94,6 @@ VALUE method_binarycd_set_data (VALUE self, VALUE rb_data) {
 	}
 	return self;
 };
-
-typedef VALUE (*rb_method)(...);
 
 void Init_BinaryCD () {
 	rb_define_alloc_func(rb_optimizer_binarycd_klass, (rb_alloc_func_t) method_binarycd_allocate);

@@ -1,5 +1,4 @@
 #include "rb_conversions.h"
-
 #define StringValueCStr(v) rb_string_value_cstr(&(v))
 
 VALUE rb_sym_new(const char *s) {
@@ -145,4 +144,3 @@ VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
 	}
 	return ary;
 }
-

@@ -11,12 +11,10 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Unsupervised/RBM/BinaryRBM.h>
 class rb_BinaryRBM {
-
 	public:
-		BinaryRBM rbm;
+		BinaryRBM model;
 		rb_BinaryRBM();
 		UnlabeledData<RealVector> eval(UnlabeledData<RealVector>const&);
-
 };
 
 void Init_BinaryRBM ();

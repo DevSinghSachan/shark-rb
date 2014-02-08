@@ -1,7 +1,4 @@
 #include "Optimizer.h"
-
-
-
 using namespace std;
 using namespace shark;
 

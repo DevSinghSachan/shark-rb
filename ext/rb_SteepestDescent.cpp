@@ -11,8 +11,6 @@ SteepestDescent& rb_SteepestDescent::algorithm() {
 	return _algorithm;
 }
 
-typedef VALUE (*rb_method)(...);
-
 #include "rb_pointer_wrapping.extras"
 #include "rb_objective_function.extras"
 

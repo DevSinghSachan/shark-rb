@@ -27,9 +27,9 @@ VALUE method_rbm_analytics_log_partition_function (int number_of_arguments, VALU
 	if (rb_beta != Qnil) {
 		if (TYPE(rb_beta) != T_FLOAT && TYPE(rb_beta) != T_FIXNUM)
 			rb_raise(rb_eArgError, "Log partition Function's beta value must be a Float or a Fixnum.");
-		return rb_float_new(logPartitionFunction(r->rbm, NUM2DBL(rb_beta)));
+		return rb_float_new(logPartitionFunction(r->model, NUM2DBL(rb_beta)));
 	} else {
-		return rb_float_new(logPartitionFunction(r->rbm));
+		return rb_float_new(logPartitionFunction(r->model));
 	}
 };
 VALUE method_rbm_analytics_negative_log_likelihood_from_log_partition (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
@@ -63,9 +63,9 @@ VALUE method_rbm_analytics_negative_log_likelihood_from_log_partition (int numbe
 	if (rb_beta != Qnil) {
 		if (TYPE(rb_beta) != T_FLOAT && TYPE(rb_beta) != T_FIXNUM)
 			rb_raise(rb_eArgError, "Negative Log Likelihood from Log Partition's beta (4th optional argument) value must be a Float or a Fixnum.");
-		return rb_float_new(negativeLogLikelihoodFromLogPartition(r->rbm, d->data, NUM2DBL(rb_logPartition), NUM2DBL(rb_beta)));
+		return rb_float_new(negativeLogLikelihoodFromLogPartition(r->model, d->data, NUM2DBL(rb_logPartition), NUM2DBL(rb_beta)));
 	} else {
-		return rb_float_new(negativeLogLikelihoodFromLogPartition(r->rbm, d->data, NUM2DBL(rb_logPartition)));
+		return rb_float_new(negativeLogLikelihoodFromLogPartition(r->model, d->data, NUM2DBL(rb_logPartition)));
 	}
 };
 VALUE method_rbm_analytics_negative_log_likelihood (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
@@ -95,13 +95,13 @@ VALUE method_rbm_analytics_negative_log_likelihood (int number_of_arguments, VAL
 	if (rb_beta != Qnil) {
 		if (TYPE(rb_beta) != T_FLOAT && TYPE(rb_beta) != T_FIXNUM)
 			rb_raise(rb_eArgError, "Negative Log Likelihood's beta (3rd optional argument) value must be a Float or a Fixnum.");
-		return rb_float_new(negativeLogLikelihood(r->rbm, d->data, NUM2DBL(rb_beta)));
+		return rb_float_new(negativeLogLikelihood(r->model, d->data, NUM2DBL(rb_beta)));
 	} else {
-		return rb_float_new(negativeLogLikelihood(r->rbm, d->data));
+		return rb_float_new(negativeLogLikelihood(r->model, d->data));
 	}
 };
 
-typedef VALUE (*rb_method)(...);
+
 
 void Init_RBM_Analytics () {
 	rb_define_singleton_method(rb_optimizer_rbm_analytics_module, "negative_log_likelihood", (rb_method) method_rbm_analytics_negative_log_likelihood, -1);

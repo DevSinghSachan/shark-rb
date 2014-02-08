@@ -1,10 +1,11 @@
 #include "rb_BinaryRBM.h"
+#include "rb_pointer_wrapping.extras"
 
 extern VALUE rb_optimizer_binaryrbm_klass;
 extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
-#include "rb_pointer_wrapping.extras"
+#include "rb_abstract_model.extras"
 
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
@@ -17,41 +18,10 @@ VALUE method_binaryrbm_initialize (VALUE self) {
 	return self;
 }
 
-rb_BinaryRBM::rb_BinaryRBM (): rbm(Rng::globalRng) {};
-
-VALUE method_binaryrbm_get_number_of_parameters (VALUE self) {
-	rb_BinaryRBM *r;
-	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return INT2FIX(r->rbm.numberOfParameters());
-}
-
-VALUE method_binaryrbm_get_parameter_vector (VALUE self) {
-	rb_BinaryRBM *r;
-	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
-		new rb_RealVector(r->rbm.parameterVector())
-	);
-}
-
-VALUE method_binaryrbm_set_parameter_vector (VALUE self, VALUE rb_parameter) {
-	rb_BinaryRBM *r;
-	Data_Get_Struct(self, rb_BinaryRBM, r);
-
-	Check_Type(rb_parameter, T_DATA);
-	if (CLASS_OF(rb_parameter) != rb_optimizer_realvector_klass)
-		rb_raise(rb_eArgError, "BinaryRBM's parameter vector can only be set using a RealVector.");
-
-	rb_RealVector *vec;
-	Data_Get_Struct(rb_parameter, rb_RealVector, vec);
-
-	r->rbm.setParameterVector(vec->data);
-	return self;
-}
+rb_BinaryRBM::rb_BinaryRBM (): model(Rng::globalRng) {};
 
 VALUE method_binaryrbm_set_structure (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_opts_or_visible, rb_hidden;
-
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 
@@ -68,7 +38,7 @@ VALUE method_binaryrbm_set_structure (int number_of_arguments, VALUE* ruby_argum
 		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible")), T_FIXNUM);
 		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")),  T_FIXNUM);
 
-		r->rbm.setStructure(
+		r->model.setStructure(
 			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible"))),
 			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")))
 			);
@@ -77,7 +47,7 @@ VALUE method_binaryrbm_set_structure (int number_of_arguments, VALUE* ruby_argum
 		Check_Type(rb_opts_or_visible, T_FIXNUM);
 		Check_Type(rb_hidden,          T_FIXNUM);
 
-		r->rbm.setStructure(NUM2INT(rb_opts_or_visible), NUM2INT(rb_hidden));
+		r->model.setStructure(NUM2INT(rb_opts_or_visible), NUM2INT(rb_hidden));
 	}
 	return self;
 }
@@ -92,7 +62,7 @@ UnlabeledData<RealVector> rb_BinaryRBM::eval(UnlabeledData<RealVector> const& da
 
 	BOOST_FOREACH(RealMatrix const& batch,dataset.batches()) {
 		RealMatrix evaluated_batch;
-		rbm.eval(batch, evaluated_batch);
+		model.eval(batch, evaluated_batch);
 
 		for (size_t i = 0; i< evaluated_batch.size1(); i++)
 			evaluated_batches.push_back(row(evaluated_batch,i));
@@ -122,7 +92,7 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 			rb_UnlabeledData *d;
 			Data_Get_Struct(rb_dataset, rb_UnlabeledData, d);
 			
-			r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+			r->model.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
 					rb_optimizer_unlabeleddata_klass,
@@ -135,7 +105,7 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 			rb_RealVector *d;
 			Data_Get_Struct(rb_dataset, rb_RealVector, d);
 			std::vector<RealVector> vectors = realvector_to_stdvector(d->data);
-			r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+			r->model.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
 					rb_optimizer_unlabeleddata_klass,
@@ -150,7 +120,7 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 		}
 	} else if (TYPE(rb_dataset) == T_ARRAY) {
 
-		r->rbm.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+		r->model.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
 		try {
 			return wrap_pointer<rb_UnlabeledData>(
 					rb_optimizer_unlabeleddata_klass,
@@ -173,42 +143,27 @@ VALUE method_binaryrbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_e
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 
-	r->rbm.evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
+	r->model.evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
 	return self;
 }
 VALUE method_binaryrbm_number_of_hidden_neurons(VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return INT2FIX(r->rbm.numberOfHN());
+	return INT2FIX(r->model.numberOfHN());
 }
 VALUE method_binaryrbm_number_of_visible_neurons(VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return INT2FIX(r->rbm.numberOfVN());
-}
-
-typedef VALUE (*rb_method)(...);
-
-void initializeWeights(BinaryRBM& rbm){
-	RealVector weights(rbm.numberOfParameters());
-	for(size_t i = 0; i != weights.size(); ++i){
-		weights(i) = Rng::uni(-0.1,0.1);
-	}
-	rbm.setParameterVector(weights);
+	return INT2FIX(r->model.numberOfVN());
 }
 
 void Init_BinaryRBM () {
-
+	InitAbstractModel<rb_BinaryRBM>(rb_optimizer_binaryrbm_klass);
 	rb_define_alloc_func(rb_optimizer_binaryrbm_klass, (rb_alloc_func_t) method_binaryrbm_allocate);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "eval", (rb_method) method_binaryrbm_eval, 1);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "set_structure", (rb_method) method_binaryrbm_set_structure, -1);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "evaluation_type", (rb_method) method_binaryrbm_evaluation_type, 2);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "initialize", (rb_method) method_binaryrbm_initialize, 0);
-	rb_define_method(rb_optimizer_binaryrbm_klass, "parameter_vector=", (rb_method) method_binaryrbm_set_parameter_vector, 1);
-	rb_define_method(rb_optimizer_binaryrbm_klass, "parameter_vector", (rb_method) method_binaryrbm_get_parameter_vector, 0);
-	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_parameters", (rb_method) method_binaryrbm_get_number_of_parameters, 0);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_hidden_neurons", (rb_method) method_binaryrbm_number_of_hidden_neurons, 0);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "number_of_visible_neurons", (rb_method) method_binaryrbm_number_of_visible_neurons, 0);
-
 }
-

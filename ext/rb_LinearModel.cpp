@@ -8,6 +8,7 @@ extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
 #include "rb_pointer_wrapping.extras"
+#include "rb_abstract_model.extras"
 
 RealVector& rb_LinearModel::offset() {
 	return model.offset();
@@ -117,7 +118,6 @@ VALUE method_linearmodel_initialize (int number_of_arguments, VALUE* ruby_argume
 	} else {
 		// No settings for structure.
 	}
-
 	return self;
 }
 
@@ -137,36 +137,6 @@ VALUE method_linearmodel_matrix(VALUE self) {
 		rb_optimizer_realmatrix_klass,
 		new rb_RealMatrix(m->matrix())
 	);
-};
-
-VALUE method_linearmodel_setParameterVector(VALUE self, VALUE paramVector) {
-	rb_LinearModel *m;
-	Data_Get_Struct(self, rb_LinearModel, m);
-
-	Check_Type(paramVector, T_DATA);
-	if (CLASS_OF(paramVector) != rb_optimizer_realvector_klass)
-		rb_raise(rb_eArgError, "LinearModel's parameter vector can only be set using a RealVector.");
-
-	rb_RealVector *vec;
-	Data_Get_Struct(paramVector, rb_RealVector, vec);
-
-	m->setParameterVector(vec->data);
-	return self;
-};
-
-VALUE method_linearmodel_parameterVector(VALUE self) {
-	rb_LinearModel *m;
-	Data_Get_Struct(self, rb_LinearModel, m);
-	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
-		new rb_RealVector(m->parameterVector())
-	);
-};
-
-VALUE method_linearmodel_numberOfParameters(VALUE self) {
-	rb_LinearModel *m;
-	Data_Get_Struct(self, rb_LinearModel, m);
-	return INT2FIX(m->numberOfParameters());
 };
 
 VALUE method_linearmodel_outputSize(VALUE self) {
@@ -257,22 +227,16 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 	}
 };
 
-typedef VALUE (*rb_method)(...);
-
 void Init_LinearModel() {
-
 	// Shark LinearModel class:
+	InitAbstractModel<rb_LinearModel>(rb_optimizer_linearmodel_klass);
 	rb_define_alloc_func(rb_optimizer_linearmodel_klass,  (rb_alloc_func_t) method_linearmodel_allocate);
 	rb_define_method(rb_optimizer_linearmodel_klass, "initialize", (rb_method)method_linearmodel_initialize, -1);
 	rb_define_method(rb_optimizer_linearmodel_klass, "set_structure", (rb_method)method_linearmodel_initialize, -1);
 	rb_define_method(rb_optimizer_linearmodel_klass, "offset" ,(rb_method) method_linearmodel_offset, 0);
 	rb_define_method(rb_optimizer_linearmodel_klass, "matrix",(rb_method) method_linearmodel_matrix, 0);
-	rb_define_method(rb_optimizer_linearmodel_klass, "parameter_vector=",(rb_method) method_linearmodel_setParameterVector, 1);
-	rb_define_method(rb_optimizer_linearmodel_klass, "parameter_vector",(rb_method) method_linearmodel_parameterVector, 0);
-	rb_define_method(rb_optimizer_linearmodel_klass, "number_of_parameters",(rb_method) method_linearmodel_numberOfParameters, 0);
 	rb_define_method(rb_optimizer_linearmodel_klass, "output_size",(rb_method) method_linearmodel_outputSize, 0);
 	rb_define_method(rb_optimizer_linearmodel_klass, "input_size",(rb_method) method_linearmodel_inputSize, 0);
 	rb_define_method(rb_optimizer_linearmodel_klass, "has_offset?",(rb_method) method_linearmodel_hasOffset, 0);
 	rb_define_method(rb_optimizer_linearmodel_klass, "eval",(rb_method) method_linearmodel_eval, 1);
-
 }

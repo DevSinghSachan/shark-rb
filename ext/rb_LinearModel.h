@@ -11,7 +11,6 @@
 #include "rb_RealMatrix.h"
 #include "rb_conversions.h"
 
-
 using namespace std;
 using namespace shark;
 class rb_LinearModel {

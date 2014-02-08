@@ -257,8 +257,6 @@ VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE m
 	return self;
 }
 
-typedef VALUE (*rb_method)(...);
-
 void Init_UnlabeledData () {
 	// Shark Unlabeled data sets:
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);

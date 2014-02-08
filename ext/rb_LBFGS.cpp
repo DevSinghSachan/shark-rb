@@ -4,9 +4,6 @@ extern VALUE rb_optimizer_lbfgs_klass;
 extern VALUE rb_optimizer_solutionset_klass;
 extern VALUE rb_optimizer_realvector_klass;
 rb_LBFGS::rb_LBFGS() {};
-
-typedef VALUE (*rb_method)(...);
-
 LBFGS& rb_LBFGS::algorithm() {
 	return _algorithm;
 }

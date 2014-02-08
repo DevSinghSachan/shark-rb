@@ -46,8 +46,6 @@
 using namespace std;
 using namespace shark;
 
-typedef VALUE (*rb_method)(...);
-
 // Big Wrapper for everything (not good);
 extern VALUE rb_optimizer_klass;
 // Datatypes:;
