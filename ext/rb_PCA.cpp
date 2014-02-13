@@ -283,7 +283,7 @@ VALUE method_pca_test (VALUE self) {
 }
 */
 
-typedef VALUE (*rb_method)(...);
+
 
 void Init_PCA () {
 

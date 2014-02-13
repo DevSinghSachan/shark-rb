@@ -547,7 +547,7 @@ VALUE method_realmatrix_to_realvectors (VALUE self) {
 	return stdvector_realvector_to_rb_ary_of_realvectors(vectors);
 }
 
-typedef VALUE (*rb_method)(...);
+
 
 void Init_RealMatrix () {
 

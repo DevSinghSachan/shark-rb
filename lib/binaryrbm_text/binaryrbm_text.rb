@@ -15,7 +15,7 @@ class Optimizer
 			def initialize(opts={})
 				@standard_vector     = Optimizer::Conversion::Text.text_sample_set_from_samples opts[:samples]
 				@unlabeled_data      = Optimizer::UnlabeledData.new Optimizer::Conversion::Text.samples(:data => opts[:samples], :vector => @standard_vector.feature_vector)
-				@rbm = Optimizer::RBM::BinaryRBM.new
+				@rbm = Shark::RBM::BinaryRBM.new
 				@rbm.set_structure :hidden => [(opts[:hidden_states] || DefaultHiddenStates), 1].max,
 								   :visible => @standard_vector.features.length
 				@cd                      = Optimizer::BinaryCD.new @rbm

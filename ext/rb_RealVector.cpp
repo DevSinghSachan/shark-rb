@@ -435,7 +435,7 @@ VALUE method_rb_ary_to_realvector (VALUE self) {
 	return self;
 }
 
-typedef VALUE (*rb_method)(...);
+
 
 void Init_RealVector () {
 

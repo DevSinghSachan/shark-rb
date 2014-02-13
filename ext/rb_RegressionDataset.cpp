@@ -170,7 +170,7 @@ VALUE method_regressionset_get_size(VALUE self) {
 	return INT2FIX((s->data).numberOfElements());
 }
 
-typedef VALUE (*rb_method)(...);
+
 
 void Init_RegressionDataset () {
 
