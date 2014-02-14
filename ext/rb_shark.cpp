@@ -4,6 +4,7 @@
 // datatypes:
 #include "rb_RealVector.h"
 #include "rb_RealMatrix.h"
+#include "rb_RealMatrixReference.h"
 #include "rb_UnlabeledData.h"
 #include "rb_RegressionDataset.h"
 #include "rb_SolutionSet.h"
@@ -434,6 +435,7 @@ extern "C"  {
 		// Datatypes:
 		Init_RealVector();
 		Init_RealMatrix();
+		Init_RealMatrixReference();
 		Init_RegressionDataset();
 		Init_UnlabeledData();
 		Init_SolutionSet();

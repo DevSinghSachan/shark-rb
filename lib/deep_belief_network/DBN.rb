@@ -16,7 +16,7 @@ class Optimizer
 					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
 					@rbm_layers[k].set_structure hidden: layer_size,
 												 visible: input_size
-					@rbm_layers[k].link_parameters_to @sigmoid_layers[k].parameters
+					@rbm_layers[k].link_parameters @sigmoid_layers[k].parameters
 					# ties both bias and non-bias parameters together.
 				end
 
