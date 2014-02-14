@@ -29,7 +29,7 @@ VALUE method_abstract_model_set_parameter_vector (VALUE self, VALUE rb_parameter
 	return self;
 }
 template<class Obtype>
-VALUE method_abstract_model_link_parameter_vector (VALUE self, VALUE rb_parameter_vector_position) {
+VALUE method_abstract_model_link_parameter_vector (VALUE self, VALUE rb_parameter_vector) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);
 

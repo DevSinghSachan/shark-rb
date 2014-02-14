@@ -7,9 +7,9 @@ class Optimizer
 			attr_reader   :number_of_outputs
 
 			def initialize n_inputs, n_outputs
-				@number_of_inputs = inputs
-				@number_of_outputs = outputs
-				@parameters = Shark::RealVector.new(0)
+				@number_of_inputs = n_inputs
+				@number_of_outputs = n_outputs
+				@parameters = Shark::RealMatrix.new([])
 			end
 
 			def sigmoid x

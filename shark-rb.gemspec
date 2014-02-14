@@ -70,6 +70,7 @@ Gem::Specification.new do |s|
     "lib/conversion_text/conversion_text.rb",
     "lib/datatypes/datatypes.rb",
     "lib/deep_belief_network/DBN.rb",
+    "lib/deep_belief_network/HiddenLayer.rb",
     "lib/deep_belief_network/deep_belief_network.rb",
     "lib/pca_text/pca_text.rb",
     "lib/shark-rb.rb",

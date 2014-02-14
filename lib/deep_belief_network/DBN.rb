@@ -5,12 +5,17 @@ class Optimizer
 
 			def create_rbms_from_layers hidden_layer_array
 
+				# construct multi-layer
+				@rbm_layers = Array.new(hidden_layer_array.length)
+				@sigmoid_layers = Array.new(hidden_layer_array.length)
 				hidden_layer_array.each_with_index do |layer_size, k|
 					input_size         = k == 0 ? @input_size : hidden_layer_array[k-1]
-					@sigmoid_layers[k] = HiddenLayer.new input_size, layer_size
+					# construct sigmoid_layer
+					@sigmoid_layers[k] = HiddenLayer.new @input_size, @layer_size
+					# construct rbm_layer
 					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
-					@rbm_layers[k].set_structure :hidden => layer_size,
-												 :visible => input_size
+					@rbm_layers[k].set_structure hidden: layer_size,
+												 visible: input_size
 					@rbm_layers[k].link_parameters_to @sigmoid_layers[k].parameters
 					# ties both bias and non-bias parameters together.
 				end
@@ -21,16 +26,19 @@ class Optimizer
 			def initialize(opts={})
 				@input_size     = opts[:input_size]
 				@output_size    = opts[:output_size]
-				@hidden_layers  = []
-				@sigmoid_layers = []
 				create_rbms_from_layers opts[:hidden_layers]
 			end
 
+			def data_present!
+				raise StandardError.new "Cannot pretrain without data." if @unlabeled_data.nil?
+			end
+
 			def pretrain opts={}
+				data_present!
 				layer_input = []
-				@rbm_layers.length.times do |i|
-					opts[:epochs].times do |epoch|
-						@rbm_layers[0..i].each_with_index do |layer, l|
+				@rbm_layers.length.times do |i| # layer-wise
+					opts[:epochs].times do |epoch| # training epochs
+						@rbm_layers[0..i].each_with_index do |layer, l| # layer input
 							# initialize the layer
 							cd = Optimizer::BinaryCD.new layer
 							cd.k = opts[:k]

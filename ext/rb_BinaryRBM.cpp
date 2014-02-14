@@ -162,7 +162,7 @@ VALUE method_binaryrbm_get_weight_matrix (VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 	return wrap_pointer<rb_RealMatrix>(
-		rb_Optimizer_realmatrix_klass,
+		rb_optimizer_realmatrix_klass,
 		new rb_RealMatrix(r->model.weightMatrix()));
 }
 
