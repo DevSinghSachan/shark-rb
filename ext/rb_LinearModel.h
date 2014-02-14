@@ -20,9 +20,6 @@ class rb_LinearModel {
 		RealMatrix& matrix();
 		void setStructure(RealMatrix const&, RealVector const&);
 		void setStructure(int, int, bool);
-		int numberOfParameters();
-		void setParameterVector(RealVector const&);
-		RealVector parameterVector();
 		int outputSize();
 		int inputSize();
 		bool hasOffset();

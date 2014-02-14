@@ -22,15 +22,6 @@ void rb_LinearModel::setStructure(RealMatrix const& matrix, RealVector const& of
 void rb_LinearModel::setStructure(int inputs, int outputs = 1, bool offset = false) {
 	model.setStructure(inputs, outputs, offset);
 };
-int rb_LinearModel::numberOfParameters() {
-	return (int)model.numberOfParameters();
-};
-void rb_LinearModel::setParameterVector(RealVector const& vec) {
-	model.setParameterVector(vec);
-};
-RealVector rb_LinearModel::parameterVector() {
-	return model.parameterVector();
-};
 int rb_LinearModel::outputSize() {
 	return (int)model.outputSize();
 };

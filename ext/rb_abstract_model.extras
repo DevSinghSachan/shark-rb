@@ -29,8 +29,26 @@ VALUE method_abstract_model_set_parameter_vector (VALUE self, VALUE rb_parameter
 	return self;
 }
 template<class Obtype>
+VALUE method_abstract_model_link_parameter_vector (VALUE self, VALUE rb_parameter_vector_position) {
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+
+	Check_Type(rb_parameter_vector, T_DATA);
+	if (CLASS_OF(rb_parameter_vector) != rb_optimizer_realmatrix_klass)
+		rb_raise(rb_eArgError, "%s's parameter vector can only be linked to a RealMatrix.", rb_obj_classname(self));
+
+	rb_RealMatrix *mat;
+	Data_Get_Struct(rb_parameter_vector, rb_RealMatrix, mat);
+
+
+
+	//r->model.setParameterVector(vec->data);
+	return self;
+}
+template<class Obtype>
 void InitAbstractModel(VALUE klass) {
 	rb_define_method(klass, "parameter_vector=", (rb_method) method_abstract_model_set_parameter_vector<Obtype>, 1);
+	rb_define_method(klass, "link_parameters_to", (rb_method) method_abstract_model_link_parameter_vector<Obtype>, 1);
 	rb_define_method(klass, "parameter_vector", (rb_method) method_abstract_model_get_parameter_vector<Obtype>, 0);
 	rb_define_method(klass, "number_of_parameters", (rb_method) method_abstract_model_get_number_of_parameters<Obtype>, 0);
 }

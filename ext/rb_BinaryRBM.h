@@ -3,6 +3,7 @@
 
 #include "ruby.h"
 #include "rb_RealVector.h"
+#include "rb_RealMatrix.h"
 #include "rb_UnlabeledData.h"
 #include "rb_conversions.h"
 #include "rb_BarsAndStripes.h"
