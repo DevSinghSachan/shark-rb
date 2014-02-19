@@ -434,6 +434,7 @@ extern "C"  {
 
 		// Datatypes:
 		Init_RealVector();
+		// Init_RealVectorReference(); Hurray!
 		Init_RealMatrix();
 		Init_RealMatrixReference();
 		Init_RegressionDataset();

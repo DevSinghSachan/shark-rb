@@ -4,6 +4,7 @@
 extern VALUE rb_optimizer_binaryrbm_klass;
 extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
+extern VALUE rb_optimizer_realmatrix_reference_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;
 
 #include "rb_abstract_model.extras"
@@ -161,9 +162,10 @@ VALUE method_binaryrbm_number_of_visible_neurons(VALUE self) {
 VALUE method_binaryrbm_get_weight_matrix (VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
-	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
-		new rb_RealMatrix(r->model.weightMatrix()));
+	return wrap_pointer<rb_RealMatrixReference>(
+		rb_optimizer_realmatrix_reference_klass,
+		new rb_RealMatrixReference(&(r->model.weightMatrix()))
+	);
 }
 
 void Init_BinaryRBM () {

@@ -24,7 +24,7 @@ VALUE method_rbm_analytics_log_partition_function (int number_of_arguments, VALU
 	rb_BinaryRBM *r;
 	Data_Get_Struct(rb_rbm, rb_BinaryRBM, r);
 
-	if (rb_beta != Qnil) {
+	if (rb_beta != Qnil) {
 		if (TYPE(rb_beta) != T_FLOAT && TYPE(rb_beta) != T_FIXNUM)
 			rb_raise(rb_eArgError, "Log partition Function's beta value must be a Float or a Fixnum.");
 		return rb_float_new(logPartitionFunction(r->model, NUM2DBL(rb_beta)));
@@ -60,7 +60,7 @@ VALUE method_rbm_analytics_negative_log_likelihood_from_log_partition (int numbe
 	rb_UnlabeledData *d;
 	Data_Get_Struct(rb_data, rb_UnlabeledData, d);
 
-	if (rb_beta != Qnil) {
+	if (rb_beta != Qnil) {
 		if (TYPE(rb_beta) != T_FLOAT && TYPE(rb_beta) != T_FIXNUM)
 			rb_raise(rb_eArgError, "Negative Log Likelihood from Log Partition's beta (4th optional argument) value must be a Float or a Fixnum.");
 		return rb_float_new(negativeLogLikelihoodFromLogPartition(r->model, d->data, NUM2DBL(rb_logPartition), NUM2DBL(rb_beta)));
@@ -92,7 +92,7 @@ VALUE method_rbm_analytics_negative_log_likelihood (int number_of_arguments, VAL
 	rb_UnlabeledData *d;
 	Data_Get_Struct(rb_data, rb_UnlabeledData, d);
 
-	if (rb_beta != Qnil) {
+	if (rb_beta != Qnil) {
 		if (TYPE(rb_beta) != T_FLOAT && TYPE(rb_beta) != T_FIXNUM)
 			rb_raise(rb_eArgError, "Negative Log Likelihood's beta (3rd optional argument) value must be a Float or a Fixnum.");
 		return rb_float_new(negativeLogLikelihood(r->model, d->data, NUM2DBL(rb_beta)));

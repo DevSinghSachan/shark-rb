@@ -16,6 +16,11 @@ extern void exportPGM( const char *, const RealVector &, int, int, bool);
 rb_RealVector::rb_RealVector(RealVector const& _data) {
 	data = _data;
 }
+
+RealVector* rb_RealVector::getData() {
+	return &data;
+}
+
 rb_RealVector::rb_RealVector() {};
 void rb_RealVector::fill(double filling) {
 	std::fill(data.begin(), data.end(), filling);
@@ -433,6 +438,18 @@ VALUE method_rb_ary_to_realvector (VALUE self) {
 			);
 	}
 	return self;
+}
+
+
+VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector>& W) {
+	VALUE ary = rb_ary_new2((int)W.size());
+	for (size_t i = 0; i < W.size(); ++i) {
+		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(W[i])
+		));
+	}
+	return ary;
 }
 
 

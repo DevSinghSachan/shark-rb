@@ -13,12 +13,9 @@ using namespace std;
 using namespace shark;
 class rb_RealMatrixReference {
 	public:
-		rb_RealMatrixReference(RealMatrix const &);
-		rb_RealMatrixReference();
-		void fill(double);
-		RealMatrix& data;
-		RealVector get_row(int);
-		RealVector get_column(int);
+		rb_RealMatrixReference(RealMatrix *);
+		RealMatrix* data;
+		RealMatrix* getData();
 
 };
 

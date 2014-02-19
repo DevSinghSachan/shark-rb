@@ -46,6 +46,8 @@ Gem::Specification.new do |s|
     "ext/rb_RBM_Analytics.h",
     "ext/rb_RealMatrix.cpp",
     "ext/rb_RealMatrix.h",
+    "ext/rb_RealMatrixReference.cpp",
+    "ext/rb_RealMatrixReference.h",
     "ext/rb_RealVector.cpp",
     "ext/rb_RealVector.h",
     "ext/rb_RegressionDataset.cpp",
