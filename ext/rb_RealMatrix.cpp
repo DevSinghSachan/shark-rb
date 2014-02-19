@@ -33,7 +33,7 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 						rb_ary_to_realmatrix(dataset) : 
 						rb_1d_ary_to_realmatrix(dataset);
 	} else if (TYPE(rb_columns) == T_FIXNUM && TYPE(dataset) == T_FIXNUM) {
-		method_realmatrix_resize(self, dataset, rb_columns);
+		method_matrix_resize<rb_RealMatrix>(self, dataset, rb_columns);
 	}
 	return self;
 }

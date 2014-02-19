@@ -3,6 +3,7 @@
 #include "rb_classes.h"
 // datatypes:
 #include "rb_RealVector.h"
+#include "rb_RealVectorReference.h"
 #include "rb_RealMatrix.h"
 #include "rb_RealMatrixReference.h"
 #include "rb_UnlabeledData.h"
@@ -434,7 +435,7 @@ extern "C"  {
 
 		// Datatypes:
 		Init_RealVector();
-		// Init_RealVectorReference(); Hurray!
+		Init_RealVectorReference();
 		Init_RealMatrix();
 		Init_RealMatrixReference();
 		Init_RegressionDataset();

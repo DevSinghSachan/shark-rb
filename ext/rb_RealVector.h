@@ -7,6 +7,7 @@
 #include <shark/Data/Dataset.h>
 #include "rb_conversions.h"
 #include "rb_RealMatrix.h"
+#include "rb_RealVectorReference.h"
 
 using namespace std;
 using namespace shark;
@@ -14,8 +15,6 @@ class rb_RealVector {
 	public:
 		rb_RealVector(RealVector const &);
 		rb_RealVector();
-		void fill(double);
-		void remove_NaN(double);
 		RealVector data;
 		RealVector* getData();
 };

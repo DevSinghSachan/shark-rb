@@ -213,7 +213,7 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 				rb_optimizer_realmatrix_klass,
 				new rb_RealMatrix(prod(*(m->getData()), *(multi_matrix->getData())))
 				);
-		} else if (multiplier_klass == rb_optimizer_realmatrix_reference_klass) {
+		} else if (multiplier_klass == rb_optimizer_realmatrix_reference_klass) {
 			rb_RealMatrixReference *multi_matrix;
 			Data_Get_Struct(multiplier, rb_RealMatrixReference, multi_matrix);
 			if (m->getData()->size2() != multi_matrix->getData()->size1()) {
@@ -557,13 +557,13 @@ VALUE method_realmatrix_reference_deep_copy(VALUE self) {
 template<class Obtype>
 void Init_MatrixMethods (VALUE klass) {
 
-	rb_define_method(klass, "initialize_copy", (rb_method)method_matrix_initialize_copy<Obtype>, 0);
+	rb_define_method(klass, "initialize_copy", (rb_method)method_matrix_initialize_copy<Obtype>, 1);
 	rb_define_method(klass, "deep_copy", (rb_method)method_realmatrix_reference_deep_copy<Obtype>, 0);
 	rb_define_method(klass, "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
 	rb_define_method(klass, "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
 	rb_define_method(klass, "to_realvectors", (rb_method)method_matrix_to_realvectors<Obtype>, 0);
 	rb_define_method(klass, "*", (rb_method)method_matrix_multiply<Obtype>, 1);
-	rb_define_method(klass, "*=", (rb_method)method_matrix_multiply_equals, 1);
+	rb_define_method(klass, "*=", (rb_method)method_matrix_multiply_equals<Obtype>, 1);
 	rb_define_method(klass, "/", (rb_method)method_matrix_divide<Obtype>, 1);
 	rb_define_method(klass, "+", (rb_method)method_matrix_add<Obtype>, 1);
 	rb_define_method(klass, "+=", (rb_method)method_matrix_add_equals<Obtype>, 1);

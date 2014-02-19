@@ -10,6 +10,7 @@ VALUE rb_optimizer_klass               = rb_define_class("Optimizer", rb_cObject
 
 // Datatypes:
 VALUE rb_optimizer_realvector_klass    = rb_define_class_under(rb_optimizer_klass, "RealVector", rb_cObject);
+VALUE rb_optimizer_realvector_reference_klass = rb_define_class_under(rb_optimizer_klass, "RealVectorReference", rb_cObject);
 VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
 VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
 VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
