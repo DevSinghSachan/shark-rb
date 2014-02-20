@@ -469,14 +469,14 @@ VALUE method_matrix_get_column (VALUE self, VALUE rb_index) {
 	if (index >= int(m->getData()->size1()))
 		rb_raise(rb_eArgError, "Out of range of RealMatrix");
 
-	// return wrap_pointer<rb_RealVector>(
-	// 	rb_optimizer_realvector_klass,
-	// 	new rb_RealVectorReference(new matrix_column<RealMatrix>(*(m->getData()),
-	// 		index < 0 ?
-	// 			index + m->getData()->size2() :
-	// 			index
-	// 		))
-	// 	);
+	return wrap_pointer<rb_RealMatrixColumn>(
+		rb_optimizer_realmatrix_column_klass,
+		new rb_RealMatrixColumn(m->getData(),
+			index < 0 ?
+				index + m->getData()->size1() :
+				index
+			)
+		);
 	return Qnil;
 }
 

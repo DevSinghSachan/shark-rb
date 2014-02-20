@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-02-14"
+  s.date = "2014-02-20"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -48,8 +48,12 @@ Gem::Specification.new do |s|
     "ext/rb_RealMatrix.h",
     "ext/rb_RealMatrixReference.cpp",
     "ext/rb_RealMatrixReference.h",
+    "ext/rb_RealMatrixRow.cpp",
+    "ext/rb_RealMatrixRow.h",
     "ext/rb_RealVector.cpp",
     "ext/rb_RealVector.h",
+    "ext/rb_RealVectorReference.cpp",
+    "ext/rb_RealVectorReference.h",
     "ext/rb_RegressionDataset.cpp",
     "ext/rb_RegressionDataset.h",
     "ext/rb_Rprop.h",
@@ -63,10 +67,13 @@ Gem::Specification.new do |s|
     "ext/rb_classes.h",
     "ext/rb_conversions.cpp",
     "ext/rb_conversions.h",
+    "ext/rb_matrix_methods.extras",
     "ext/rb_objective_function.extras",
     "ext/rb_pointer_wrapping.extras",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
+    "ext/rb_vector_methods.extras",
+    "ext/rb_vector_min_methods.extras",
     "lib/autoencoder_text/autoencoder_text.rb",
     "lib/binaryrbm_text/binaryrbm_text.rb",
     "lib/conversion_text/conversion_text.rb",

@@ -34,5 +34,5 @@ void Init_VectorMethods (VALUE klass) {
 	rb_define_method(klass, "empty?", (rb_method)method_vector_empty<Obtype>,0);
 	rb_define_method(klass, "clear", (rb_method)method_vector_clear<Obtype>,0);
 
-	InitVectorMinMethods<Obtype>(klass)
+	Init_VectorMinMethods<Obtype>(klass);
 }

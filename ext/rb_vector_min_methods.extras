@@ -94,8 +94,8 @@ VALUE method_vector_multiply (VALUE self, VALUE multiplier) {
 
 template<class Obtype>
 VALUE method_vector_multiply_equals (VALUE self, VALUE multiplier) {
-	rb_RealVector *s;
-	Data_Get_Struct(self, rb_RealVector, s);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
 	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
 		*(s->getData()) *= NUM2DBL(multiplier);
 	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_optimizer_realvector_klass) {
@@ -206,8 +206,8 @@ VALUE method_vector_add (VALUE self, VALUE rb_vector) {
 
 template<class Obtype>
 VALUE method_vector_add_equals (VALUE self, VALUE rb_vector) {
-	rb_RealVector *s;
-	Data_Get_Struct(self, rb_RealVector, s);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
 		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
@@ -240,8 +240,8 @@ VALUE method_vector_add_equals (VALUE self, VALUE rb_vector) {
 
 template<class Obtype>
 VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
-	rb_RealVector *s;
-	Data_Get_Struct(self, rb_RealVector, s);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
 		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
@@ -273,8 +273,8 @@ VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
 
 template<class Obtype>
 VALUE method_vector_remove_equals (VALUE self, VALUE rb_vector) {
-	rb_RealVector *s;
-	Data_Get_Struct(self, rb_RealVector, s);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
 		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
@@ -299,8 +299,8 @@ VALUE method_vector_remove_equals (VALUE self, VALUE rb_vector) {
 
 template<class Obtype>
 VALUE method_vector_negate (VALUE self) {
-	rb_RealVector *v;
-	Data_Get_Struct(self, rb_RealVector, v);
+	Obtype *v;
+	Data_Get_Struct(self, Obtype, v);
 
 	return wrap_pointer<rb_RealVector>(
 		rb_optimizer_realvector_klass,
@@ -310,8 +310,8 @@ VALUE method_vector_negate (VALUE self) {
 
 template<class Obtype>
 VALUE method_vector_to_ary (VALUE self) {
-	rb_RealVector *s;
-	Data_Get_Struct(self, rb_RealVector, s);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
 	return realvector_to_rb_ary(*(s->getData()));
 }
 
@@ -375,14 +375,6 @@ VALUE method_vector_stride (VALUE self) {
 	Obtype *s;
 	Data_Get_Struct(self, Obtype, s);
 	return INT2FIX(s->getData()->stride());
-}
-
-template<class Obtype>
-VALUE method_vector_clear (VALUE self) {
-	Obtype *s;
-	Data_Get_Struct(self, Obtype, s);
-	s->getData()->clear();
-	return self;
 }
 
 template<class Obtype>
