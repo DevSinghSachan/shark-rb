@@ -1,0 +1,487 @@
+extern VALUE rb_optimizer_realvector_reference_klass;
+extern VALUE rb_optimizer_realmatrix_row_klass;
+extern VALUE rb_optimizer_realmatrix_klass;
+extern VALUE rb_optimizer_realvector_klass;
+
+extern void exportPGM( const char *, const RealVector &, int, int, bool);
+
+template<class Obtype>
+VALUE method_vector_remove_NaN (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_replacement;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&rb_replacement);
+	double replacement = 0.0;
+	if (rb_replacement != Qnil) {
+		if (TYPE(rb_replacement) != T_FLOAT && TYPE(rb_replacement) != T_FIXNUM)
+			rb_raise(rb_eArgError, "Can only replace NaN by floats.");
+		replacement = NUM2DBL(rb_replacement);
+	}
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	for (size_t i = 0;i< s->getData()->size();i++)
+		if ((*(s->getData()))(i) != (*(s->getData()))(i))
+			(*(s->getData()))(i) = replacement;
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_export_pgm (VALUE self, VALUE data_hash) {
+	Check_Type(data_hash, T_HASH);
+	VALUE rb_path   = rb_hash_aref(data_hash, rb_sym_new("path"));
+	VALUE rb_height = rb_hash_aref(data_hash, rb_sym_new("height"));
+	VALUE rb_width  = rb_hash_aref(data_hash, rb_sym_new("width"));
+	VALUE normalize = rb_hash_aref(data_hash, rb_sym_new("normalize"));
+
+	Obtype *v;
+	Data_Get_Struct(self, Obtype, v);
+
+	Check_Type(rb_height, T_FIXNUM);
+	Check_Type(rb_width, T_FIXNUM);
+	Check_Type(rb_path, T_STRING);
+	try {
+		exportPGM(StringValueCStr(rb_path), *(v->getData()), NUM2INT(rb_width), NUM2INT(rb_height), normalize == Qtrue);
+		return self;
+	} catch (...) {
+		rb_raise(rb_eRuntimeError, "Could not write PGM file.");
+		return self;
+	}
+}
+
+template<class Obtype>
+VALUE method_vector_multiply (VALUE self, VALUE multiplier) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+
+	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) * NUM2DBL(multiplier))
+			);
+	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_optimizer_realvector_klass) {
+		rb_RealVector *o;
+		Data_Get_Struct(multiplier, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+
+		return rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
+
+	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_optimizer_realvector_reference_klass) {
+		rb_RealVectorReference *o;
+		Data_Get_Struct(multiplier, rb_RealVectorReference, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+
+		return rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
+
+	} else if (TYPE(multiplier) == T_ARRAY) {
+
+		if (RARRAY_LEN(multiplier) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+
+		RealVector vec_multiplier = rb_ary_to_1d_realvector(multiplier);
+		return rb_float_new(inner_prod(*(s->getData()), vec_multiplier));
+	} else {
+		rb_raise(rb_eArgError, "Can only multiply RealVector by a scalar, RealVector, or Array.");
+	}
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_vector_multiply_equals (VALUE self, VALUE multiplier) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+		*(s->getData()) *= NUM2DBL(multiplier);
+	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_optimizer_realvector_klass) {
+		rb_RealVector *o;
+		Data_Get_Struct(multiplier, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+
+		self = rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
+
+	} else if (TYPE(multiplier) == T_ARRAY) {
+		if (RARRAY_LEN(multiplier) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+
+		RealVector vec_multiplier = rb_ary_to_1d_realvector(multiplier);
+		self = rb_float_new(inner_prod(*(s->getData()), vec_multiplier));
+	} else {
+		rb_raise(rb_eArgError, "Can only multiply RealVector by a scalar, RealVector, or Array.");
+	}
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_vector_get_sqrt (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(sqrt(*(s->getData())))
+		);
+}
+
+
+template<class Obtype>
+VALUE method_vector_divide_equals (VALUE self, VALUE divider) {
+	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
+		*(s->getData()) /= NUM2DBL(divider);
+	} else {
+		rb_raise(rb_eArgError, "Can only divide RealVector by a number");
+	}
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_vector_divide (VALUE self, VALUE divider) {
+	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) / NUM2DBL(divider))
+			);
+	} else {
+		rb_raise(rb_eArgError, "Can only divide RealVector by a number");
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_add (VALUE self, VALUE rb_vector) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+
+	if (TYPE(rb_vector) == T_ARRAY) {
+		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		RealVector summer;
+		summer = rb_ary_to_1d_realvector(rb_vector);
+
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) + summer)
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_klass) {
+		rb_RealVector *o;
+		Data_Get_Struct(rb_vector, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) + *(o->getData()))
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_reference_klass) {
+		rb_RealVectorReference *o;
+		Data_Get_Struct(rb_vector, rb_RealVectorReference, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) + *(o->getData()))
+			);
+	} else {
+		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
+	}
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_vector_add_equals (VALUE self, VALUE rb_vector) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+
+	if (TYPE(rb_vector) == T_ARRAY) {
+		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		RealVector summer;
+		summer = rb_ary_to_1d_realvector(rb_vector);
+		*(s->getData()) += summer;
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_klass) {
+		rb_RealVector *o;
+		Data_Get_Struct(rb_vector, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		*(s->getData()) += *(o->getData());
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_reference_klass) {
+		rb_RealVectorReference *o;
+		Data_Get_Struct(rb_vector, rb_RealVectorReference, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		*(s->getData()) += *(o->getData());
+	} else {
+		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+
+	if (TYPE(rb_vector) == T_ARRAY) {
+		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		RealVector summer;
+		summer = rb_ary_to_1d_realvector(rb_vector);
+
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) - summer)
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_klass) {
+		rb_RealVector *o;
+		Data_Get_Struct(self, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector(*(s->getData()) - *(o->getData()))
+			);
+	} else {
+		rb_raise(rb_eArgError, "RealVectors can be substract only with Arrays and other RealVectors");
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_remove_equals (VALUE self, VALUE rb_vector) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+
+	if (TYPE(rb_vector) == T_ARRAY) {
+		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		RealVector summer;
+		summer = rb_ary_to_1d_realvector(rb_vector);
+		*(s->getData()) -= summer;
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_optimizer_realvector_klass) {
+		rb_RealVector *o;
+		Data_Get_Struct(self, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		*(s->getData()) -= *(o->getData());
+	} else {
+		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_negate (VALUE self) {
+	rb_RealVector *v;
+	Data_Get_Struct(self, rb_RealVector, v);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(-(*(v->getData())))
+	);
+}
+
+template<class Obtype>
+VALUE method_vector_to_ary (VALUE self) {
+	rb_RealVector *s;
+	Data_Get_Struct(self, rb_RealVector, s);
+	return realvector_to_rb_ary(*(s->getData()));
+}
+
+template<class Obtype>
+VALUE method_vector_to_matrix (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE height, width;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"02",
+		&height,
+		&width);
+	rb_RealVector *v;
+	int mat_height, mat_width;
+	Data_Get_Struct(self, rb_RealVector, v);
+	if (height == Qnil && width == Qnil) {
+		mat_height = v->getData()->size();
+		mat_width  = 1;
+	} else if (TYPE(height) == T_FIXNUM && width == Qnil) {
+		if (NUM2INT(height) <= 0)
+			rb_raise(rb_eArgError, "RealMatrix cannot (or will not, or cannot stand) have(ing) a negative height.");
+		if (v->getData()->size() % NUM2INT(height) != 0)
+			rb_raise(rb_eArgError, "The specified dimension is incompatible with the vector's length (must be a divisor of the vector' length to be allowable).");
+		mat_width = v->getData()->size()/NUM2INT(height);
+		mat_height = NUM2INT(height);
+	} else {
+		Check_Type(height, T_FIXNUM);
+		Check_Type(width, T_FIXNUM);
+		if (NUM2INT(height) <= 0)
+			rb_raise(rb_eArgError, "RealMatrix cannot (or will not, or cannot stand) have(ing) a negative height.");
+		if (NUM2INT(width) <= 0)
+			rb_raise(rb_eArgError, "RealMatrix cannot (or will not, or cannot stand) have(ing) a negative width.");
+		if (v->getData()->size() - (NUM2INT(height) * NUM2INT(width)) != 0)
+			rb_raise(rb_eArgError, "The product of the height and width is not equal to the length of the vector, therefore the resulting Matrix would be off to a bad start.");
+		mat_width  = NUM2INT(width);
+		mat_height = NUM2INT(height);
+	}
+	RealMatrix mat(mat_height, mat_width);
+
+	int pos = 0;
+	for (int i=0; i < mat_height; i++) {
+		row(mat, i) = subrange(*(v->getData()), pos, pos + mat_width);
+		pos += mat_width;
+	}
+	return wrap_pointer<rb_RealMatrix>(
+			rb_optimizer_realmatrix_klass,
+			new rb_RealMatrix(mat)
+		);
+}
+
+template<class Obtype>
+VALUE method_vector_length (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	return INT2FIX(s->getData()->size());
+}
+
+
+template<class Obtype>
+VALUE method_vector_stride (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	return INT2FIX(s->getData()->stride());
+}
+
+template<class Obtype>
+VALUE method_vector_clear (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	s->getData()->clear();
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_fill (VALUE self, VALUE filling) {
+	if (TYPE(filling) != T_FLOAT && TYPE(filling) != T_FIXNUM)
+		rb_raise(rb_eArgError, "Can only fill RealVector with floats.");
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	std::fill(s->getData()->begin(), s->getData()->end(), NUM2DBL(filling));
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_query (VALUE self, VALUE position) {
+	Check_Type(position, T_FIXNUM);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	if (NUM2INT(position) < 0) {
+		if (NUM2INT(position) < int(-(s->getData()->size())))
+			rb_raise(rb_eArgError, "Out of range.");
+		// to get last element ask for -1 for instance:
+		return rb_float_new((*(s->getData()))[s->getData()->size()+NUM2INT(position)]);
+	} else {
+		if (NUM2INT(position) >= int(s->getData()->size()))
+			rb_raise(rb_eArgError, "Out of range.");
+		// ordered normally
+		return rb_float_new((*(s->getData()))[NUM2INT(position)]);
+	}
+}
+
+template<class Obtype>
+VALUE method_vector_insert (VALUE self, VALUE position, VALUE assignment) {
+	Check_Type(position, T_FIXNUM);
+	if (TYPE(assignment) != T_FIXNUM && TYPE(assignment) != T_FLOAT)
+		rb_raise(rb_eArgError, "Can only insert floats in RealVector.");
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	if (NUM2INT(position) < 0) {
+		if (NUM2INT(position) < int(-(s->getData()->size())))
+			rb_raise(rb_eArgError, "Out of range.");
+		// to get last element ask for -1 for instance:
+		(*(s->getData()))[s->getData()->size()+NUM2INT(position)] = NUM2DBL(assignment);
+	} else {
+		if (NUM2INT(position) >= int(s->getData()->size()))
+			rb_raise(rb_eArgError, "Out of range.");
+		// ordered normally
+		(*(s->getData()))[NUM2INT(position)] = NUM2DBL(assignment);
+	}
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_vector_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
+	Obtype *orig;
+	Obtype *copy;
+	if (rb_copy == rb_orig)
+		return rb_copy;
+	Check_Type(rb_orig, T_DATA);
+	Data_Get_Struct(rb_orig, Obtype, orig);
+	Data_Get_Struct(rb_copy, Obtype, copy);
+	copy->data = orig->data;
+
+	return rb_copy;
+}
+
+template<class Obtype>
+VALUE method_vector_deep_copy(VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(*(m->getData()))
+		);
+}
+
+template<class Obtype>
+void Init_VectorMinMethods (VALUE klass) {
+	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
+	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
+	rb_define_method(klass, "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
+	rb_define_method(klass, "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
+	rb_define_method(klass, "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
+	rb_define_method(klass, "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
+	rb_define_method(klass, "to_matrix", (rb_method)method_vector_to_matrix<Obtype>,-1);
+	rb_define_method(klass, "*", (rb_method)method_vector_multiply<Obtype>,1);
+	rb_define_method(klass, "*=", (rb_method)method_vector_multiply_equals<Obtype>,1);
+	rb_define_method(klass, "/", (rb_method)method_vector_divide<Obtype>,1);
+	rb_define_method(klass, "/=", (rb_method)method_vector_divide_equals<Obtype>,1);
+	rb_define_method(klass, "+", (rb_method)method_vector_add<Obtype>,1);
+	rb_define_method(klass, "+=", (rb_method)method_vector_add_equals<Obtype>,1);
+	rb_define_method(klass, "-=", (rb_method)method_vector_remove_equals<Obtype>,1);
+	rb_define_method(klass, "-", (rb_method)method_vector_remove<Obtype>,1);
+	rb_define_method(klass, "length", (rb_method)method_vector_length<Obtype>,0);
+	rb_define_method(klass, "size", (rb_method)method_vector_length<Obtype>,0);
+	rb_define_method(klass, "-@", (rb_method)method_vector_negate<Obtype>,0);
+	rb_define_method(klass, "stride", (rb_method)method_vector_stride<Obtype>,0);
+	rb_define_method(klass, "fill", (rb_method)method_vector_fill<Obtype>,1);
+	rb_define_method(klass, "[]", (rb_method)method_vector_query<Obtype>,1);
+	rb_define_method(klass, "[]=", (rb_method)method_vector_insert<Obtype>,2);
+}

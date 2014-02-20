@@ -435,18 +435,6 @@ VALUE method_rb_ary_to_realvector (VALUE self) {
 	return self;
 }
 
-
-VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector*>& W) {
-	VALUE ary = rb_ary_new2((int)W.size());
-	for (size_t i = 0; i < W.size(); ++i) {
-		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealVectorReference>(
-			rb_optimizer_realvector_reference_klass,
-			new rb_RealVectorReference(&W[i])
-		));
-	}
-	return ary;
-}
-
 void Init_RealVector () {
 
 	Init_VectorMethods<rb_RealVector>(rb_optimizer_realvector_klass);

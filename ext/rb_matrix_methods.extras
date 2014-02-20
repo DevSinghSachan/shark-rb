@@ -131,10 +131,10 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 	return self;
 }
 
-template<class Obtype, class matType>
-static void add_equals_matrix_with_matrix(Obtype* m, VALUE multiplier) {
+template<class matType, class Obtype>
+static VALUE add_equals_matrix_with_matrix(Obtype* m, VALUE adder) {
 	matType *other;
-	Data_Get_Struct(rb_other, matType, other);
+	Data_Get_Struct(adder, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		*(m->getData()) += *(other->getData());
 	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
@@ -142,12 +142,13 @@ static void add_equals_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 	} else {
 		rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
 	}
+	return Qnil;
 }
 
-template<class Obtype, class vectorType>
-static void add_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
+template<class vectorType, class Obtype>
+static VALUE add_equals_matrix_with_vector(Obtype* m, VALUE adder) {
 	vectorType *other;
-	Data_Get_Struct(rb_other, vectorType, other);
+	Data_Get_Struct(adder, vectorType, other);
 	if (other->getData()->size() == m->getData()->size1()) {
 		if (m->getData()->size2() == 1) {
 			return wrap_pointer<rb_RealVector>(
@@ -167,6 +168,7 @@ static void add_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	} else {
 		rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
 	}
+	return Qnil;
 }
 
 
@@ -176,13 +178,13 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
 		if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_klass) {
-			add_equals_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
+			return add_equals_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_reference_klass) {
-			add_equals_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
+			return add_equals_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_klass) {
-			add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_reference_klass) {
-			add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
@@ -222,7 +224,7 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 	return self;
 }
 
-template<class Obtype, class vectorType>
+template<class vectorType, class Obtype>
 static VALUE multiply_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	vectorType *vec;
 	Data_Get_Struct(multiplier, vectorType, vec);
@@ -234,7 +236,7 @@ static VALUE multiply_matrix_with_vector(Obtype* m, VALUE multiplier) {
 		new rb_RealVector(prod(*(m->getData()), *(vec->getData())))
 		);
 }
-template<class Obtype, class matType>
+template<class matType, class Obtype>
 static VALUE multiply_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 	matType *multi_matrix;
 	Data_Get_Struct(multiplier, matType, multi_matrix);
@@ -299,7 +301,7 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 	return self;
 }
 
-template<class Obtype, class vectorType>
+template<class vectorType, class Obtype>
 static VALUE multiply_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	vectorType *vec;
 	Data_Get_Struct(multiplier, vectorType, vec);
@@ -312,7 +314,7 @@ static VALUE multiply_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	*(m->getData()) = temp_matrix;
 }
 
-template<class Obtype, class matType>
+template<class matType, class Obtype>
 static void multiply_equals_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 	matType *multi_matrix;
 	Data_Get_Struct(multiplier, matType, multi_matrix);
@@ -446,7 +448,7 @@ VALUE method_matrix_get_row (VALUE self, VALUE rb_index) {
 
 	return wrap_pointer<rb_RealMatrixRow>(
 		rb_optimizer_realmatrix_row_klass,
-		new rb_RealMatrixRow(*(m->getData()),
+		new rb_RealMatrixRow(m->getData(),
 			index < 0 ?
 				index + m->getData()->size2() :
 				index
@@ -550,14 +552,38 @@ VALUE method_matrix_negate (VALUE self) {
 	);
 }
 
+// std::vector<rb_RealMatrixRow> realmatrix_to_stdvector_realvector (RealMatrix* W) {
+// 	std::vector<rb_RealMatrixRow> vectors;
+// 	for (size_t i=0; i< W->size1(); i++) {
+// 		vectors.push_back(new rb_RealMatrixRow(W, i));
+// 	}
+// 	return vectors;
+// }
+
+// VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<rb_RealMatrixRow>& W) {
+	
+// 	for (size_t i = 0; i < W.size(); ++i) {
+// 		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealMatrixRow>(
+// 			rb_optimizer_realmatrix_row_klass,
+// 			&W[i]
+// 		));
+// 	}
+// 	return ary;
+// }
+
 template<class Obtype>
 VALUE method_matrix_to_realvectors (VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-
-	std::vector<RealVector*> vectors = realmatrix_to_stdvector_realvector(m->getData());
-
-	return stdvector_realvector_to_rb_ary_of_realvectors(vectors);
+	//std::vector<rb_RealMatrixRow> vectors = realmatrix_to_stdvector_realvector(m->getData());
+	VALUE ary = rb_ary_new2(int(m->getData()->size1()));
+	for (size_t i=0; i< m->getData()->size1(); i++) {
+		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealMatrixRow>(
+			rb_optimizer_realmatrix_row_klass,
+			new rb_RealMatrixRow(m->getData(), i)
+		));
+	}
+	return ary;
 }
 
 template<class Obtype>

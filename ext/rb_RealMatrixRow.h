@@ -13,8 +13,8 @@ using namespace shark;
 class rb_RealMatrixRow {
 	public:
 		rb_RealMatrixRow(RealMatrix *, int);
-		shark::blas::matrix_row data;
-		shark::blas::matrix_row* getData();
+		shark::blas::matrix_row<RealMatrix> data;
+		shark::blas::matrix_row<RealMatrix>* getData();
 
 };
 

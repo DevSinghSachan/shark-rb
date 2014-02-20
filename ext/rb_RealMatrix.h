@@ -7,6 +7,7 @@
 #include <shark/Data/Dataset.h>
 #include "rb_conversions.h"
 #include "rb_RealVector.h"
+#include "rb_RealMatrixRow.h"
 #include "rb_RealMatrixReference.h"
 
 using namespace std;
