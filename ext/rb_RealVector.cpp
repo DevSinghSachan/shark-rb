@@ -393,30 +393,30 @@ rb_RealVector::rb_RealVector() {};
 // 	return self;
 // }
 
-// VALUE method_realvector_allocate (VALUE klass) {
-// 	return wrap_pointer<rb_RealVector>(
-// 			rb_optimizer_realvector_klass,
-// 			new rb_RealVector()
-// 			);
-// }
+VALUE method_realvector_allocate (VALUE klass) {
+	return wrap_pointer<rb_RealVector>(
+			rb_optimizer_realvector_klass,
+			new rb_RealVector()
+			);
+}
 
-// VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
-// 	VALUE dataset;
-// 	rb_scan_args(
-// 		number_of_arguments,
-// 		ruby_arguments,
-// 		"01",
-// 		&dataset);
-// 	rb_RealVector *v;
-// 	Data_Get_Struct(self, rb_RealVector, v);
+VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE dataset;
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"01",
+		&dataset);
+	rb_RealVector *v;
+	Data_Get_Struct(self, rb_RealVector, v);
 
-// 	if (TYPE(dataset) == T_ARRAY) {
-// 		v->data = rb_ary_to_1d_realvector(dataset);
-// 	} else if (TYPE(dataset) == T_FIXNUM) {
-// 		method_realvector_resize(self, dataset);
-// 	}
-// 	return self;
-// }
+	if (TYPE(dataset) == T_ARRAY) {
+		v->data = rb_ary_to_1d_realvector(dataset);
+	} else if (TYPE(dataset) == T_FIXNUM) {
+		method_vector_resize<rb_RealVector>(self, dataset);
+	}
+	return self;
+}
 
 VALUE method_rb_ary_to_realvector (VALUE self) {
 	if (RARRAY_LEN(self) > 0) {
@@ -436,12 +436,12 @@ VALUE method_rb_ary_to_realvector (VALUE self) {
 }
 
 
-VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector>& W) {
+VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector*>& W) {
 	VALUE ary = rb_ary_new2((int)W.size());
 	for (size_t i = 0; i < W.size(); ++i) {
-		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
-			new rb_RealVector(W[i])
+		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealVectorReference>(
+			rb_optimizer_realvector_reference_klass,
+			new rb_RealVectorReference(&W[i])
 		));
 	}
 	return ary;

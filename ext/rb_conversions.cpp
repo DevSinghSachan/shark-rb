@@ -18,10 +18,10 @@ shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 	return vector;
 }
 
-std::vector<RealVector> realmatrix_to_stdvector_realvector (RealMatrix const& W) {
-	std::vector<RealVector> vectors;
-	for (size_t i=0; i< W.size1(); i++) {
-		vectors.push_back(row(W, i));
+std::vector<rb_RealMatrixRow> realmatrix_to_stdvector_realvector (RealMatrix* W) {
+	std::vector<rb_RealMatrixRow> vectors;
+	for (size_t i=0; i< W->size1(); i++) {
+		vectors.push_back(new rb_RealMatrixRow(*W, i));
 	}
 	return vectors;
 }

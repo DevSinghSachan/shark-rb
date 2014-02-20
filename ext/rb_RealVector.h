@@ -20,6 +20,6 @@ class rb_RealVector {
 };
 
 void Init_RealVector ();
-VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector>&);
+VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector*>&);
 
 #endif

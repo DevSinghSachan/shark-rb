@@ -1,5 +1,5 @@
-#ifndef RB_REALMATRIX_REFERENCE_H
-#define RB_REALMATRIX_REFERENCE_H
+#ifndef RB_REALVECTOR_REFERENCE_H
+#define RB_REALVECTOR_REFERENCE_H
 
 #include "ruby.h"
 #include <boost/any.hpp>

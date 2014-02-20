@@ -1,4 +1,5 @@
 extern VALUE rb_optimizer_realvector_reference_klass;
+extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_realvector_klass;
 
 extern void exportPGM( const char *, const RealVector &, int, int, bool);
@@ -20,8 +21,8 @@ VALUE method_vector_remove_NaN (int number_of_arguments, VALUE* ruby_arguments, 
 	Obtype *s;
 	Data_Get_Struct(self, Obtype, s);
 	for (size_t i = 0;i< s->getData()->size();i++)
-		if (*(s->getData())(i) != *(s->getData())(i))
-			*(s->getData())(i) = replacement;
+		if ((*(s->getData()))(i) != (*(s->getData()))(i))
+			(*(s->getData()))(i) = replacement;
 	return self;
 }
 
@@ -458,20 +459,36 @@ VALUE method_vector_insert (VALUE self, VALUE position, VALUE assignment) {
 	return self;
 }
 
-// template<class Obtype>
-// VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector>& W) {
-// 	VALUE ary = rb_ary_new2((int)W.size());
-// 	for (size_t i = 0; i < W.size(); ++i) {
-// 		rb_ary_store(ary, (int)i, wrap_pointer<Obtype>(
-// 			rb_optimizer_realvector_klass,
-// 			new Obtype(W[i])
-// 		));
-// 	}
-// 	return ary;
-// }
+
+template<class Obtype>
+VALUE method_vector_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
+	Obtype *orig;
+	Obtype *copy;
+	if (rb_copy == rb_orig)
+		return rb_copy;
+	Check_Type(rb_orig, T_DATA);
+	Data_Get_Struct(rb_orig, Obtype, orig);
+	Data_Get_Struct(rb_copy, Obtype, copy);
+	copy->data = orig->data;
+
+	return rb_copy;
+}
+
+template<class Obtype>
+VALUE method_vector_deep_copy(VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+
+	return wrap_pointer<rb_RealVector>(
+		rb_optimizer_realvector_klass,
+		new rb_RealVector(*(m->getData()))
+		);
+}
 
 template<class Obtype>
 void Init_VectorMethods (VALUE klass) {
+	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
+	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
 	rb_define_method(klass, "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
 	rb_define_method(klass, "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
 	rb_define_method(klass, "to_a", (rb_method)method_vector_to_ary<Obtype>,0);

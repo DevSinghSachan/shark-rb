@@ -14,6 +14,8 @@ VALUE rb_optimizer_realvector_reference_klass = rb_define_class_under(rb_optimiz
 VALUE rb_optimizer_unlabeleddata_klass = rb_define_class_under(rb_optimizer_klass, "UnlabeledData", rb_cObject);
 VALUE rb_optimizer_regressionset_klass = rb_define_class_under(rb_optimizer_klass, "RegressionDataset", rb_cObject);
 VALUE rb_optimizer_realmatrix_klass    = rb_define_class_under(rb_optimizer_klass, "RealMatrix", rb_cObject);
+VALUE rb_optimizer_realmatrix_row_klass = rb_define_class_under(rb_optimizer_klass, "RealMatrixRow", rb_cObject);
+VALUE rb_optimizer_realmatrix_column_klass = rb_define_class_under(rb_optimizer_klass, "RealMatrixColumn", rb_cObject);
 VALUE rb_optimizer_realmatrix_reference_klass = rb_define_class_under(rb_optimizer_klass, "RealMatrixReference", rb_cObject);
 VALUE rb_optimizer_solutionset_klass   = rb_define_class_under(rb_optimizer_klass, "SolutionSet", rb_cObject);
 
