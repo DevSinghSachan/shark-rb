@@ -4,6 +4,10 @@
 rb_SolutionSet::rb_SolutionSet (RealVector const& _point, double _value) : point(_point), value(_value) {};
 rb_SolutionSet::rb_SolutionSet () {};
 
+VALUE rb_SolutionSet::rb_class () {
+	return rb_optimizer_solutionset_klass;
+}
+
 VALUE method_solutionset_point (VALUE self) {
 	rb_SolutionSet *s;
 	Data_Get_Struct(self, rb_SolutionSet, s);

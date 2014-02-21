@@ -6,12 +6,10 @@
 class rb_BFGS {
 
 	public:
-		static VALUE rb_class;
+		static VALUE rb_class();
 		BFGS algorithm;
 		rb_BFGS();
 
 };
-
-VALUE rb_BFGS::rb_class = rb_optimizer_bfgs_klass;
 
 #endif

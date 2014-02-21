@@ -15,13 +15,13 @@
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squard loss usd for regression
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 rgulariziation
 #include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h> //binds together the regularizer with the Error
-#include "rb_classes.h"
+
 
 using namespace std;
 using namespace shark;
 class Optimizer {
 	public:
-		static VALUE rb_class;
+		static VALUE rb_class();
 		shark::FFNet<shark::LogisticNeuron, shark::LogisticNeuron> model;
 		shark::LBFGS optimizer;
 		shark::SparseFFNetError error;
@@ -48,5 +48,3 @@ class Optimizer {
 		void updateFunction();
 		void setStartingPoint();
 };
-
-VALUE Optimizer::rb_class = rb_optimizer_klass;

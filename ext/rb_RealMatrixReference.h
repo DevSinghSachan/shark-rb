@@ -10,13 +10,13 @@
 #include "rb_RealMatrixRow.h"
 #include "rb_RealMatrixColumn.h"
 #include "rb_RealMatrix.h"
-#include "rb_classes.h"
+
 
 using namespace std;
 using namespace shark;
 class rb_RealMatrixReference {
 	public:
-		static VALUE rb_class;
+		static VALUE rb_class();
 		rb_RealMatrixReference(RealMatrix *);
 		RealMatrix* data;
 		RealMatrix* getData();
@@ -24,7 +24,5 @@ class rb_RealMatrixReference {
 };
 
 void Init_RealMatrixReference ();
-
-VALUE rb_RealMatrixReference::rb_class = rb_optimizer_realmatrix_reference_klass;
 
 #endif
