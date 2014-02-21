@@ -18,8 +18,8 @@ VALUE method_rbm_get_hidden_neurons(VALUE self) {
 		);
 }
 
-template<class Obtype, class NeuronType>
+template<class RbmType, class VisibleNeuronType, class HiddenNeuronType>
 void Init_RBMNeurons() {
-	rb_define_method(Obtype::rb_class(), "hidden_neurons", (rb_method) method_rbm_get_hidden_neurons<Obtype,NeuronType>, 0);
-	rb_define_method(Obtype::rb_class(), "visible_neurons", (rb_method) method_rbm_get_visible_neurons<Obtype,NeuronType>, 0);
+	rb_define_method(RbmType::rb_class(), "hidden_neurons", (rb_method) method_rbm_get_hidden_neurons<RbmType,HiddenNeuronType>, 0);
+	rb_define_method(RbmType::rb_class(), "visible_neurons", (rb_method) method_rbm_get_visible_neurons<RbmType,VisibleNeuronType>, 0);
 }

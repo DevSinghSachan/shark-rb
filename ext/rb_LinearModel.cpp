@@ -11,27 +11,9 @@ VALUE rb_LinearModel::rb_class () {
 	return rb_optimizer_linearmodel_klass;
 }
 
-RealVector& rb_LinearModel::offset() {
-	return model.offset();
-};
-RealMatrix& rb_LinearModel::matrix() {
-	return model.matrix();
-};
-void rb_LinearModel::setStructure(RealMatrix const& matrix, RealVector const& offset = RealVector()) {
-	model.setStructure(matrix, offset);
-};
-void rb_LinearModel::setStructure(int inputs, int outputs = 1, bool offset = false) {
-	model.setStructure(inputs, outputs, offset);
-};
-int rb_LinearModel::outputSize() {
-	return (int)model.outputSize();
-};
-int rb_LinearModel::inputSize() {
-	return (int)model.inputSize();
-};
-bool rb_LinearModel::hasOffset() {
-	return model.hasOffset();
-};
+LinearModel<>* rb_LinearModel::getModel() {
+	return &model;
+}
 Data<RealVector> rb_LinearModel::operator()(Data<RealVector> const& patterns) {
 	return model(patterns);
 };
@@ -96,17 +78,17 @@ VALUE method_linearmodel_initialize (int number_of_arguments, VALUE* ruby_argume
 				rb_raise(rb_eArgError, "LinearModel takes either:\n - a number of inputs, a number of outputs, and a boolean choice whether to use offsets, OR\n - a RealMatrix and a RealVector, OR\n - no parameters.");
 			rb_RealVector *vec;
 			Data_Get_Struct(rb_offsets, rb_RealVector, vec);
-			m->setStructure(mat->data, vec->data);
+			m->getModel()->setStructure(mat->data, vec->data);
 
 		} else {
 			// Without offsets vector.
-			m->setStructure(mat->data, *new RealVector());
+			m->getModel()->setStructure(mat->data, *new RealVector());
 
 		}
 
 	} else if (TYPE(rb_matrix) == T_FIXNUM && TYPE(rb_offsets) == T_FIXNUM) {
 		// Using numbers to choose structure.
-		m->setStructure(NUM2INT(rb_matrix), NUM2INT(rb_offsets), rb_bias == Qtrue ? true : false);
+		m->getModel()->setStructure(NUM2INT(rb_matrix), NUM2INT(rb_offsets), rb_bias == Qtrue ? true : false);
 	} else {
 		// No settings for structure.
 	}
@@ -118,35 +100,35 @@ VALUE method_linearmodel_offset(VALUE self) {
 	Data_Get_Struct(self, rb_LinearModel, m);
 	return wrap_pointer<rb_RealVector>(
 		rb_RealVector::rb_class(),
-		new rb_RealVector(m->offset())
+		new rb_RealVector(m->getModel()->offset())
 	);
 };
-
+g
 VALUE method_linearmodel_matrix(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
 	return wrap_pointer<rb_RealMatrix>(
 		rb_RealMatrix::rb_class(),
-		new rb_RealMatrix(m->matrix())
+		new rb_RealMatrix(m->getModel()->matrix())
 	);
 };
 
 VALUE method_linearmodel_outputSize(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
-	return INT2FIX(m->outputSize());
+	return INT2FIX(m->getModel()->outputSize());
 };
 
 VALUE method_linearmodel_inputSize(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
-	return INT2FIX(m->inputSize());
+	return INT2FIX(m->getModel()->inputSize());
 };
 
 VALUE method_linearmodel_hasOffset(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
-	return (m->hasOffset() ? Qtrue : Qfalse);
+	return (m->getModel()->hasOffset() ? Qtrue : Qfalse);
 };
 
 void linearmodel_rb_error_unmatched_dimensions(shark::Exception e) {

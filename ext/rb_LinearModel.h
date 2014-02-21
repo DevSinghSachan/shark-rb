@@ -11,20 +11,12 @@
 #include "rb_RealMatrix.h"
 #include "rb_conversions.h"
 
-
 using namespace std;
 using namespace shark;
 class rb_LinearModel {
 
 	public:
 		static VALUE rb_class();
-		RealVector& offset();
-		RealMatrix& matrix();
-		void setStructure(RealMatrix const&, RealVector const&);
-		void setStructure(int, int, bool);
-		int outputSize();
-		int inputSize();
-		bool hasOffset();
 		Data<RealVector> operator()(Data<RealVector> const&);
 		RealVector operator()(RealVector const&);
 		Data<RealVector> eval(Data<RealVector> const&);

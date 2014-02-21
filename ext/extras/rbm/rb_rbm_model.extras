@@ -1,0 +1,180 @@
+#include "../utils/rb_pointer_wrapping.extras"
+#include "../models/rb_abstract_model.extras"
+#include "rb_rbm_neuronlayer.extras"
+
+template<class Obtype>
+VALUE method_rbm_allocate (VALUE klass) {
+	return wrap_pointer<Obtype>(
+			Obtype::rb_class(),
+			new Obtype()
+		);
+}
+
+template<class Obtype>
+VALUE method_rbm_initialize (VALUE self) {
+	return self;
+}
+
+template<class Obtype>
+VALUE method_rbm_set_structure (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
+	VALUE rb_opts_or_visible, rb_hidden;
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+
+	rb_scan_args(
+		number_of_arguments,
+		ruby_arguments,
+		"11",
+		&rb_opts_or_visible,
+		&rb_hidden
+		);
+
+	if (TYPE(rb_opts_or_visible) == T_HASH) {
+
+		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible")), T_FIXNUM);
+		Check_Type(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")),  T_FIXNUM);
+
+		r->getModel()->setStructure(
+			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("visible"))),
+			NUM2INT(rb_hash_aref(rb_opts_or_visible, rb_sym_new("hidden")))
+			);
+	} else {
+
+		Check_Type(rb_opts_or_visible, T_FIXNUM);
+		Check_Type(rb_hidden,          T_FIXNUM);
+
+		r->getModel()->setStructure(NUM2INT(rb_opts_or_visible), NUM2INT(rb_hidden));
+	}
+	return self;
+}
+
+template<class Obtype>
+void rb_error_rbm_wrong_format () {
+	rb_raise(rb_eArgError, "A %s can sample using Arrays, UnlabeledData, RealVectors, or by passing a Hash.", rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
+UnlabeledData<RealVector> method_rbm_eval_unlabeleddata(Obtype* r, UnlabeledData<RealVector> const& dataset) {
+
+	std::vector<shark::RealVector> evaluated_batches;
+
+	BOOST_FOREACH(RealMatrix const& batch,dataset.batches()) {
+		RealMatrix evaluated_batch;
+		r->getModel()->eval(batch, evaluated_batch);
+
+		for (size_t i = 0; i< evaluated_batch.size1(); i++)
+			evaluated_batches.push_back(row(evaluated_batch,i));
+	}
+
+	return shark::createDataFromRange(evaluated_batches);
+}
+
+template<class Obtype>
+VALUE method_rbm_eval (VALUE self, VALUE rb_opts) {
+	VALUE rb_direction = Qnil, rb_dataset = Qnil, rb_mean = Qfalse;
+
+	if (TYPE(rb_opts) == T_HASH) {
+		rb_dataset   = rb_hash_aref(rb_opts, rb_sym_new("samples"));
+		rb_direction = rb_hash_aref(rb_opts, rb_sym_new("direction"));
+		rb_mean = rb_hash_aref(rb_opts, rb_sym_new("mean"));
+	} else {
+		rb_dataset = rb_opts;
+	}
+	rb_mean = (rb_mean == Qnil || rb_mean != Qtrue) ? Qfalse : Qtrue;
+	rb_direction = rb_direction == Qnil ? rb_sym_new("forward") : rb_direction;
+
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+
+	if (TYPE(rb_dataset) == T_DATA) {
+		if (CLASS_OF(rb_dataset) == rb_UnlabeledData::rb_class()) {
+			rb_UnlabeledData *d;
+			Data_Get_Struct(rb_dataset, rb_UnlabeledData, d);
+			
+			r->getModel()->evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+			try {
+				return wrap_pointer<rb_UnlabeledData>(
+					rb_UnlabeledData::rb_class(),
+					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(&r, d->data))
+				);
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
+			}
+		} else if (CLASS_OF(rb_dataset) == rb_RealVector::rb_class()) {
+			rb_RealVector *d;
+			Data_Get_Struct(rb_dataset, rb_RealVector, d);
+			std::vector<RealVector> vectors = realvector_to_stdvector(d->data);
+			r->getModel()->evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+			try {
+				return wrap_pointer<rb_UnlabeledData>(
+					rb_UnlabeledData::rb_class(),
+					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(&r, shark::createDataFromRange(vectors)))
+				);
+			} catch (shark::Exception e) {
+				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
+			}
+
+		} else {
+			rb_error_rbm_wrong_format<Obtype>();
+		}
+	} else if (TYPE(rb_dataset) == T_ARRAY) {
+
+		r->getModel()->evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
+		try {
+			return wrap_pointer<rb_UnlabeledData>(
+					rb_UnlabeledData::rb_class(),
+					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(&r, rb_ary_to_unlabeleddata(rb_dataset)))
+			);
+		} catch (shark::Exception e) {
+			rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
+		}
+
+	} else {
+		rb_error_rbm_wrong_format<Obtype>();
+	}
+
+	return self;
+}
+
+VALUE method_rbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_eval_mean) {
+	if ((rb_forward != Qtrue || rb_forward != Qfalse) && (rb_eval_mean != Qtrue || rb_eval_mean != Qfalse))
+		rb_raise(rb_eArgError, "Evaluation type takes 2 boolean options:\n    1. @param forward whether the forward view should be used false=backwards\n    2. @param evalMean whether the mean state should be returned. false=a sample is\n      returned.");
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+
+	r->getModel()->evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
+	return self;
+}
+VALUE method_rbm_number_of_hidden_neurons(VALUE self) {
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+	return INT2FIX(r->getModel()->numberOfHN());
+}
+VALUE method_rbm_number_of_visible_neurons(VALUE self) {
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+	return INT2FIX(r->getModel()->numberOfVN());
+}
+
+VALUE method_rbm_get_weight_matrix (VALUE self) {
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+	return wrap_pointer<rb_RealMatrixReference>(
+		rb_RealMatrixReference::rb_class(),
+		new rb_RealMatrixReference(&(r->getModel()->weightMatrix()))
+	);
+}
+
+template<class RbmType, class VisibleNeuronType, class HiddenNeuronType>
+void Init_RBM () {
+	InitAbstractModel<RbmType>();
+	Init_RBMNeurons<RbmType, VisibleNeuronType, HiddenNeuronType>();
+	rb_define_alloc_func(RbmType::rb_class(), (rb_alloc_func_t) method_rbm_allocate<RbmType>);
+	rb_define_method(RbmType::rb_class(), "eval", (rb_method) method_rbm_eval<RbmType>, 1);
+	rb_define_method(RbmType::rb_class(), "set_structure", (rb_method) method_rbm_set_structure<RbmType>, -1);
+	rb_define_method(RbmType::rb_class(), "evaluation_type", (rb_method) method_rbm_evaluation_type<RbmType>, 2);
+	rb_define_method(RbmType::rb_class(), "initialize", (rb_method) method_rbm_initialize<RbmType>, 0);
+	rb_define_method(RbmType::rb_class(), "weight_matrix", (rb_method) method_rbm_get_weight_matrix<RbmType>, 0);
+	rb_define_method(RbmType::rb_class(), "number_of_hidden_neurons", (rb_method) method_rbm_number_of_hidden_neurons<RbmType>, 0);
+	rb_define_method(RbmType::rb_class(), "number_of_visible_neurons", (rb_method) method_rbm_number_of_visible_neurons<RbmType>, 0);
+}

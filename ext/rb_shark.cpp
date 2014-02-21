@@ -453,6 +453,7 @@ extern "C"  {
 		Init_LinearModel();
 		Init_PCA();
 		Init_BinaryRBM();
+		Init_GaussianBinaryRBM();
 		Init_RBM_Analytics();
 		Init_RBMBinaryLayer();
 		Init_RBMGaussianLayer();

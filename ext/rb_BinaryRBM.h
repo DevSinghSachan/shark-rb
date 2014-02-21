@@ -14,14 +14,12 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Unsupervised/RBM/BinaryRBM.h>
 
-
 class rb_BinaryRBM {
 	public:
 		static VALUE rb_class();
 		BinaryRBM model;
 		BinaryRBM* getModel();
 		rb_BinaryRBM();
-		UnlabeledData<RealVector> eval(UnlabeledData<RealVector>const&);
 };
 
 void Init_BinaryRBM ();
