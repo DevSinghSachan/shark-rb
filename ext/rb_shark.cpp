@@ -19,6 +19,7 @@
 #include "rb_BinaryRBM.h"
 #include "rb_GaussianBinaryRBM.h"
 #include "rb_RBMBinaryLayer.h"
+#include "rb_RBMGaussianLayer.h"
 // additional RBM goodies:
 #include "rb_RBM_Analytics.h"
 
@@ -54,10 +55,6 @@ using namespace shark;
 // Big Wrapper for everything (not good);
 extern VALUE rb_optimizer_klass;
 // Datatypes:;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
-extern VALUE rb_optimizer_regressionset_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
 
 VALUE method_import_pgm_dir (VALUE self, VALUE rb_directory) {
 	Check_Type(rb_directory, T_STRING);
@@ -73,7 +70,7 @@ VALUE method_import_pgm_dir (VALUE self, VALUE rb_directory) {
 			importPGMSet(path, images, imagesInfo);
 
 			return wrap_pointer<rb_UnlabeledData>(
-				rb_optimizer_unlabeleddata_klass,
+				rb_UnlabeledData::rb_class(),
 				new rb_UnlabeledData(images)
 				);
 
@@ -88,7 +85,7 @@ VALUE method_import_pgm_dir (VALUE self, VALUE rb_directory) {
 			importPGM(path, vec, imgInfo.x, imgInfo.y);
 
 			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
+				rb_RealVector::rb_class(),
 				new rb_RealVector(vec)
 				);
 		} catch(...) {
@@ -108,7 +105,7 @@ VALUE method_export_pgm (VALUE self, VALUE data_hash) {
 	VALUE normalize = rb_hash_aref(data_hash, rb_sym_new("normalize"));
 
 	Check_Type(rb_data, T_DATA);
-	if (CLASS_OF(rb_data) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(rb_data) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "PGM are exported from a RealVector");
 
 	rb_RealVector *v;
@@ -137,7 +134,7 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 	shark::RegressionDataset data;
 
 	if (number_of_arguments == 1 && TYPE(ruby_arguments[0]) == T_DATA ) {
-		if (CLASS_OF(ruby_arguments[0]) != rb_optimizer_regressionset_klass)
+		if (CLASS_OF(ruby_arguments[0]) != rb_RegressionDataset::rb_class())
 			rb_raise(rb_eArgError, "Samples must be of class RegressionDataset.");
 
 		rb_RegressionDataset *s;
@@ -171,7 +168,7 @@ static VALUE method_autoencode(int number_of_arguments, VALUE* ruby_arguments, V
 		}
 		if (rb_data != Qnil) {
 			Check_Type(rb_data, T_DATA);
-			if (CLASS_OF(rb_data) != rb_optimizer_regressionset_klass)
+			if (CLASS_OF(rb_data) != rb_RegressionDataset::rb_class())
 				rb_raise(rb_eArgError, "Samples can only be a RegressionDataset.");
 			rb_RegressionDataset *s;
 			Data_Get_Struct(rb_data, rb_RegressionDataset, s);
@@ -219,10 +216,10 @@ static VALUE method_autoencode_layer_matrices(int number_of_arguments, VALUE* ru
 		RealMatrix& matrix = o->layer_matrices_at_index(index);
 
 		return wrap_pointer<rb_RealMatrix>(
-			rb_optimizer_realmatrix_klass,
+			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(matrix)
 		);
-	} else if (TYPE(rb_layer_index) == T_DATA && CLASS_OF(rb_layer_index) == rb_optimizer_realvector_klass) {
+	} else if (TYPE(rb_layer_index) == T_DATA && CLASS_OF(rb_layer_index) == rb_RealVector::rb_class()) {
 		return method_autoencode_set_parameter_vector(self, rb_layer_index);
 	} else {
 		rb_raise(rb_eArgError, "Can only query layer parameters by specifying a Fixnum index (e.g. 0), or by providing a RealVector to reassign the parameters.");
@@ -458,6 +455,7 @@ extern "C"  {
 		Init_BinaryRBM();
 		Init_RBM_Analytics();
 		Init_RBMBinaryLayer();
+		Init_RBMGaussianLayer();
 
 		// Objective Function optimizers:
 		Init_Steepest_Descent();

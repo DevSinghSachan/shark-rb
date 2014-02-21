@@ -1,6 +1,7 @@
 #include "rb_RealVector.h"
 
 extern VALUE rb_array_klass;
+extern VALUE rb_optimizer_realvector_klass;
 
 //extern VALUE method_realvector_export_pgm; // this is a promise!
 

@@ -1,6 +1,5 @@
 #include "rb_BarsAndStripes.h"
 
-extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_barsandstripes_klass;
 
 #include "extras/utils/rb_pointer_wrapping.extras"
@@ -16,7 +15,7 @@ VALUE method_barsandstripes_get_data(VALUE self) {
 	Data_Get_Struct(self, rb_BarsAndStripes, p);
 
 	return wrap_pointer<rb_UnlabeledData>(
-		rb_optimizer_unlabeleddata_klass,
+		rb_UnlabeledData::rb_class(),
 		new rb_UnlabeledData(p->problem.data())
 		);
 }

@@ -1,0 +1,13 @@
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/models/rb_abstract_model.extras"
+#include "extras/vector/rb_vector_resize.extras"
+#include "extras/vector/rb_vector_length.extras"
+#include "extras/rbm/rb_neuronlayer_bias.extras"
+
+template<class Obtype>
+void Init_RBMNeuronLayer() {
+	InitAbstractModel<Obtype>();
+	Init_VectorResize<Obtype>();
+	Init_VectorLength<Obtype>();
+	Init_LayerBias<Obtype>();
+};

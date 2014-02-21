@@ -9,7 +9,7 @@ VALUE method_abstract_model_get_parameter_vector (VALUE self) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(r->getModel()->parameterVector())
 	);
 }
@@ -19,7 +19,7 @@ VALUE method_abstract_model_set_parameter_vector (VALUE self, VALUE rb_parameter
 	Data_Get_Struct(self, Obtype, r);
 
 	Check_Type(rb_parameter_vector, T_DATA);
-	if (CLASS_OF(rb_parameter_vector) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(rb_parameter_vector) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "%s's parameter vector can only be set using a RealVector.", rb_obj_classname(self));
 
 	rb_RealVector *vec;

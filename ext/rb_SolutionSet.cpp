@@ -2,7 +2,6 @@
 #include "extras/utils/rb_pointer_wrapping.extras"
 
 extern VALUE rb_optimizer_solutionset_klass;
-extern VALUE rb_optimizer_realvector_klass;
 
 VALUE rb_SolutionSet::rb_class () {
 	return rb_optimizer_solutionset_klass;
@@ -16,7 +15,7 @@ VALUE method_solutionset_point (VALUE self) {
 	Data_Get_Struct(self, rb_SolutionSet, s);
 
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(s->point)
 		);
 }
@@ -38,7 +37,7 @@ VALUE method_solutionset_initialize (VALUE self, VALUE rb_point, VALUE rb_value)
 	if (TYPE(rb_value) != T_FIXNUM && TYPE(rb_value) != T_FLOAT)
 		raise_solutionset_formaterror();
 	if (TYPE(rb_point) == T_DATA) {
-		if (CLASS_OF(rb_point) != rb_optimizer_realvector_klass)
+		if (CLASS_OF(rb_point) != rb_RealVector::rb_class())
 			raise_solutionset_formaterror();
 		rb_RealVector *vec;
 		Data_Get_Struct(rb_point, rb_RealVector, vec);

@@ -1,7 +1,5 @@
 // Objective Functions:
 extern VALUE rb_optimizer_objective_function_klass;
-extern VALUE rb_optimizer_binarycd_klass;
-extern VALUE rb_optimizer_exactgradient_klass;
 
 template<class Obtype>
 VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
@@ -13,7 +11,7 @@ VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
 		Data_Get_Struct(self, Obtype, s);
 
 		VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
-		if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+		if (rb_objective_func_klass == rb_BinaryCD::rb_class()) {
 			rb_BinaryCD *obj;
 			Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
 			try {
@@ -21,7 +19,7 @@ VALUE method_objective_function_step (VALUE self, VALUE rb_objective_func) {
 			} catch (shark::Exception e) {
 				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nDid you remember to initialize the Optimizer?").c_str());
 			}
-		} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+		} else if (rb_objective_func_klass == rb_ExactGradient::rb_class()) {
 			rb_ExactGradient *obj;
 			Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
 			try {
@@ -45,7 +43,7 @@ VALUE method_objective_function_solution (VALUE self) {
 	Data_Get_Struct(self, Obtype, s);
 
 	return wrap_pointer<rb_SolutionSet>(
-		rb_optimizer_solutionset_klass,
+		rb_SolutionSet::rb_class(),
 		new rb_SolutionSet(s->algorithm().solution().point, s->algorithm().solution().value)
 		);
 }
@@ -73,13 +71,13 @@ VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_argum
 
 			VALUE rb_objective_func_klass = CLASS_OF(rb_objective_func);
 
-			if (rb_objective_func_klass == rb_optimizer_binarycd_klass) {
+			if (rb_objective_func_klass == rb_BinaryCD::rb_class()) {
 				rb_BinaryCD *obj;
 				Data_Get_Struct(rb_objective_func, rb_BinaryCD, obj);
 				if (rb_startpoint != Qnil) {
 
 					Check_Type(rb_startpoint, T_DATA);
-					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+					if (CLASS_OF(rb_startpoint) != rb_RealVector::rb_class())
 						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_obj_classname(self));
 					rb_RealVector *v;
 					Data_Get_Struct(rb_startpoint, rb_RealVector, v);
@@ -88,13 +86,13 @@ VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_argum
 				} else {
 					s->algorithm().init(obj->objective());
 				}
-			} else if (rb_objective_func_klass == rb_optimizer_exactgradient_klass) {
+			} else if (rb_objective_func_klass == rb_ExactGradient::rb_class()) {
 				rb_ExactGradient *obj;
 				Data_Get_Struct(rb_objective_func, rb_ExactGradient, obj);
 				if (rb_startpoint != Qnil) {
 
 					Check_Type(rb_startpoint, T_DATA);
-					if (CLASS_OF(rb_startpoint) != rb_optimizer_realvector_klass)
+					if (CLASS_OF(rb_startpoint) != rb_RealVector::rb_class())
 						rb_raise(rb_eArgError, "%s is initialized using a RealVector.", rb_obj_classname(self));
 					rb_RealVector *v;
 					Data_Get_Struct(rb_startpoint, rb_RealVector, v);

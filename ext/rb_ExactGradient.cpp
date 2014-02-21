@@ -1,9 +1,6 @@
 #include "rb_ExactGradient.h"
 
 extern VALUE rb_optimizer_exactgradient_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
-extern VALUE rb_optimizer_binaryrbm_klass;
-extern VALUE rb_optimizer_solutionset_klass;
 
 using namespace shark;
 using namespace std;
@@ -35,7 +32,7 @@ VALUE method_exactgradient_initialize (VALUE self, VALUE rb_rbm) {
 
 	Check_Type(rb_rbm, T_DATA);
 
-	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass) 
+	if (CLASS_OF(rb_rbm) != rb_BinaryRBM::rb_class()) 
 		rb_raise(rb_eArgError, "Exact Gradient is initiliazed using a Binary RBM.");
 
 	rb_BinaryRBM *r;
@@ -53,7 +50,7 @@ VALUE method_exactgradient_get_number_of_variables (VALUE self) {
 VALUE method_exactgradient_set_data (VALUE self, VALUE rb_data) {
 	if (TYPE(rb_data) == T_DATA) {
 
-		if (CLASS_OF(rb_data) != rb_optimizer_unlabeleddata_klass)
+		if (CLASS_OF(rb_data) != rb_UnlabeledData::rb_class())
 			raise_objective_func_data_error();
 
 		rb_ExactGradient *b;

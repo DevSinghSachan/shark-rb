@@ -1,8 +1,6 @@
 #include "rb_RBM_Analytics.h"
 
 extern VALUE rb_optimizer_rbm_analytics_module;
-extern VALUE rb_optimizer_binaryrbm_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
 
 using namespace shark;
 using namespace std;
@@ -18,7 +16,7 @@ VALUE method_rbm_analytics_log_partition_function (int number_of_arguments, VALU
 		&rb_beta);
 
 	Check_Type(rb_rbm, T_DATA);
-	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass)
+	if (CLASS_OF(rb_rbm) != rb_BinaryRBM::rb_class())
 		rb_raise(rb_eArgError, "Log Partition Function requires an RBM");
 
 	rb_BinaryRBM *r;
@@ -45,11 +43,11 @@ VALUE method_rbm_analytics_negative_log_likelihood_from_log_partition (int numbe
 		&rb_beta);
 
 	Check_Type(rb_rbm, T_DATA);
-	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass)
+	if (CLASS_OF(rb_rbm) != rb_BinaryRBM::rb_class())
 		rb_raise(rb_eArgError, "Negative Log Likelihood from Log Partition requires an RBM");
 
 	Check_Type(rb_data, T_DATA);
-	if (CLASS_OF(rb_data) != rb_optimizer_unlabeleddata_klass)
+	if (CLASS_OF(rb_data) != rb_UnlabeledData::rb_class())
 		rb_raise(rb_eArgError, "Negative Log Likelihood from Log Partition requires UnlabeledData.");
 
 	if (TYPE(rb_logPartition) != T_FLOAT && TYPE(rb_logPartition) != T_FIXNUM)
@@ -80,11 +78,11 @@ VALUE method_rbm_analytics_negative_log_likelihood (int number_of_arguments, VAL
 		&rb_beta);
 
 	Check_Type(rb_rbm, T_DATA);
-	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass)
+	if (CLASS_OF(rb_rbm) != rb_BinaryRBM::rb_class())
 		rb_raise(rb_eArgError, "Negative Log Likelihood requires an RBM");
 
 	Check_Type(rb_data, T_DATA);
-	if (CLASS_OF(rb_data) != rb_optimizer_unlabeleddata_klass)
+	if (CLASS_OF(rb_data) != rb_UnlabeledData::rb_class())
 		rb_raise(rb_eArgError, "Negative Log Likelihood requires UnlabeledData.");
 
 	rb_BinaryRBM *r;

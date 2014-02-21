@@ -1,10 +1,6 @@
 #include "rb_BinaryRBM.h"
 
 extern VALUE rb_optimizer_binaryrbm_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
-extern VALUE rb_optimizer_realmatrix_reference_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
 
 #include "extras/utils/rb_pointer_wrapping.extras"
 #include "extras/models/rb_abstract_model.extras"
@@ -16,7 +12,7 @@ VALUE rb_BinaryRBM::rb_class () {
 
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
-			rb_optimizer_binaryrbm_klass,
+			rb_BinaryRBM::rb_class(),
 			new rb_BinaryRBM()
 		);
 }
@@ -79,7 +75,7 @@ UnlabeledData<RealVector> rb_BinaryRBM::eval(UnlabeledData<RealVector> const& da
 }
 
 VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
-	VALUE rb_direction, rb_dataset = Qnil, rb_mean = Qfalse;
+	VALUE rb_direction = Qnil, rb_dataset = Qnil, rb_mean = Qfalse;
 
 	if (TYPE(rb_opts) == T_HASH) {
 		rb_dataset   = rb_hash_aref(rb_opts, rb_sym_new("samples"));
@@ -95,27 +91,27 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 
 	if (TYPE(rb_dataset) == T_DATA) {
-		if (CLASS_OF(rb_dataset) == rb_optimizer_unlabeleddata_klass) {
+		if (CLASS_OF(rb_dataset) == rb_UnlabeledData::rb_class()) {
 			rb_UnlabeledData *d;
 			Data_Get_Struct(rb_dataset, rb_UnlabeledData, d);
 			
 			r->model.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
-					rb_optimizer_unlabeleddata_klass,
+					rb_UnlabeledData::rb_class(),
 					new rb_UnlabeledData(r->eval(d->data))
 				);
 			} catch (shark::Exception e) {
 				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
 			}
-		} else if (CLASS_OF(rb_dataset) == rb_optimizer_realvector_klass) {
+		} else if (CLASS_OF(rb_dataset) == rb_RealVector::rb_class()) {
 			rb_RealVector *d;
 			Data_Get_Struct(rb_dataset, rb_RealVector, d);
 			std::vector<RealVector> vectors = realvector_to_stdvector(d->data);
 			r->model.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
-					rb_optimizer_unlabeleddata_klass,
+					rb_UnlabeledData::rb_class(),
 					new rb_UnlabeledData(r->eval(shark::createDataFromRange(vectors)))
 				);
 			} catch (shark::Exception e) {
@@ -130,7 +126,7 @@ VALUE method_binaryrbm_eval (VALUE self, VALUE rb_opts) {
 		r->model.evaluationType(rb_direction == rb_sym_new("forward"), rb_mean == Qtrue);
 		try {
 			return wrap_pointer<rb_UnlabeledData>(
-					rb_optimizer_unlabeleddata_klass,
+					rb_UnlabeledData::rb_class(),
 					new rb_UnlabeledData(r->eval(rb_ary_to_unlabeleddata(rb_dataset)))
 			);
 		} catch (shark::Exception e) {
@@ -168,7 +164,7 @@ VALUE method_binaryrbm_get_weight_matrix (VALUE self) {
 	rb_BinaryRBM *r;
 	Data_Get_Struct(self, rb_BinaryRBM, r);
 	return wrap_pointer<rb_RealMatrixReference>(
-		rb_optimizer_realmatrix_reference_klass,
+		rb_RealMatrixReference::rb_class(),
 		new rb_RealMatrixReference(&(r->model.weightMatrix()))
 	);
 }

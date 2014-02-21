@@ -4,8 +4,6 @@ using namespace shark;
 using namespace std;
 
 extern VALUE rb_optimizer_unlabeleddata_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
 
 #include "extras/utils/rb_pointer_wrapping.extras"
 
@@ -125,14 +123,14 @@ VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
 		if (NUM2INT(position) < (int)-(s->data).numberOfElements())
 			rb_raise(rb_eArgError, "Out of range.");
 		return wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
+			rb_RealVector::rb_class(),
 			new rb_RealVector((s->data).element((s->data).numberOfElements() + NUM2INT(position)))
 		);
 	} else {
 		if (NUM2INT(position) >= (int)(s->data).numberOfElements())
 			rb_raise(rb_eArgError, "Out of range.");
 		return wrap_pointer<rb_RealVector>(
-			rb_optimizer_realvector_klass,
+			rb_RealVector::rb_class(),
 			new rb_RealVector((s->data).element(NUM2INT(position)))
 		);
 	}
@@ -140,7 +138,7 @@ VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
 
 VALUE method_unlabeleddata_insert (VALUE self, VALUE position, VALUE assignment) {
 	Check_Type(assignment, T_DATA);
-	if (CLASS_OF(assignment) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(assignment) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "Can only insert a RealVector.");
 	Check_Type(position, T_FIXNUM);
 	rb_UnlabeledData *s;
@@ -165,7 +163,7 @@ VALUE method_unlabeleddata_mean (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(mean(s->data))
 	);
 }
@@ -174,7 +172,7 @@ VALUE method_unlabeleddata_variance (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(variance(s->data))
 	);
 }
@@ -183,14 +181,14 @@ VALUE method_unlabeleddata_covariance (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
+		rb_RealMatrix::rb_class(),
 		new rb_RealMatrix(covariance(s->data))
 	);
 }
 
 VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 	Check_Type(shift_vector, T_DATA);
-	if (CLASS_OF(shift_vector) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(shift_vector) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "Shift can only be performed by a RealVector.");
 
 	rb_UnlabeledData *s;
@@ -206,7 +204,7 @@ VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 
 VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 	Check_Type(shift_vector, T_DATA);
-	if (CLASS_OF(shift_vector) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(shift_vector) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "Shift can only be performed by a RealVector.");
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
@@ -220,7 +218,7 @@ VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 VALUE method_unlabeleddata_truncate (VALUE self, VALUE minX, VALUE minY) {
 	Check_Type(minX, T_DATA);
 	Check_Type(minY, T_DATA);
-	if (CLASS_OF(minX) != rb_optimizer_realvector_klass || CLASS_OF(minX) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(minX) != rb_RealVector::rb_class() || CLASS_OF(minX) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "Can only truncate using a RealVector.");
 	// could also check classes...
 
@@ -239,7 +237,7 @@ VALUE method_unlabeleddata_truncate (VALUE self, VALUE minX, VALUE minY) {
 VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE minY, VALUE newMin, VALUE newMax) {
 	Check_Type(minX, T_DATA);
 	Check_Type(minY, T_DATA);
-	if (CLASS_OF(minX) != rb_optimizer_realvector_klass || CLASS_OF(minX) != rb_optimizer_realvector_klass)
+	if (CLASS_OF(minX) != rb_RealVector::rb_class() || CLASS_OF(minX) != rb_RealVector::rb_class())
 		rb_raise(rb_eArgError, "Can only truncate using a RealVector.");
 	if (
 		(TYPE(newMin) == T_FLOAT || TYPE(newMin) == T_FIXNUM) && 

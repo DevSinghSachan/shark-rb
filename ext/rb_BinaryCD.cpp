@@ -2,9 +2,6 @@
 #include "extras/utils/rb_pointer_wrapping.extras"
 
 extern VALUE rb_optimizer_binarycd_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
-extern VALUE rb_optimizer_binaryrbm_klass;
-extern VALUE rb_optimizer_realvector_klass;
 
 using namespace shark;
 using namespace std;
@@ -35,7 +32,7 @@ VALUE method_binarycd_propose_starting_point (VALUE self) {
 	b->objective().proposeStartingPoint(vec);
 
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(vec)
 		);
 }
@@ -46,7 +43,7 @@ VALUE method_binarycd_initialize (VALUE self, VALUE rb_rbm) {
 
 	Check_Type(rb_rbm, T_DATA);
 
-	if (CLASS_OF(rb_rbm) != rb_optimizer_binaryrbm_klass) 
+	if (CLASS_OF(rb_rbm) != rb_BinaryRBM::rb_class()) 
 		rb_raise(rb_eArgError, "BinaryCD (Contrastive Divergence) is initiliazed using a Binary RBM.");
 
 	rb_BinaryRBM *r;
@@ -76,7 +73,7 @@ VALUE method_binarycd_get_number_of_variables (VALUE self) {
 VALUE method_binarycd_set_data (VALUE self, VALUE rb_data) {
 	if (TYPE(rb_data) == T_DATA) {
 
-		if (CLASS_OF(rb_data) != rb_optimizer_unlabeleddata_klass)
+		if (CLASS_OF(rb_data) != rb_UnlabeledData::rb_class())
 			raise_objective_func_data_error();
 
 		rb_BinaryCD *b;

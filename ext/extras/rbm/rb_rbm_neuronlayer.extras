@@ -4,7 +4,7 @@ VALUE method_rbm_get_visible_neurons(VALUE self) {
 	Data_Get_Struct(self, Obtype, m);
 	return wrap_pointer<NeuronType>(
 		NeuronType::rb_class(),
-		new NeuronType(&(m->visibleNeurons()))
+		new NeuronType(&(m->getModel()->visibleNeurons()))
 		);
 }
 
@@ -14,7 +14,7 @@ VALUE method_rbm_get_hidden_neurons(VALUE self) {
 	Data_Get_Struct(self, Obtype, m);
 	return wrap_pointer<NeuronType>(
 		NeuronType::rb_class(),
-		new NeuronType(&(m->hiddenNeurons()))
+		new NeuronType(&(m->getModel()->hiddenNeurons()))
 		);
 }
 

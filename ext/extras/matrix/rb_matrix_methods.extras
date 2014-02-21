@@ -1,9 +1,3 @@
-extern VALUE rb_optimizer_realmatrix_reference_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realvector_reference_klass;
-extern VALUE rb_optimizer_realmatrix_row_klass;
-extern VALUE rb_optimizer_realmatrix_column_klass;
 #include "../utils/rb_datatype_deep_copy.extras"
 
 template<class Obtype>
@@ -27,12 +21,12 @@ static VALUE add_matrix_with_matrix(Obtype* m, VALUE adder) {
 	Data_Get_Struct(adder, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		return wrap_pointer<rb_RealMatrix>(
-			rb_optimizer_realmatrix_klass,
+			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) + *(other->getData()))
 			);
 	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
 		return wrap_pointer<rb_RealMatrix>(
-			rb_optimizer_realmatrix_klass,
+			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) + trans(*(other->getData())))
 			);
 	} else {
@@ -48,7 +42,7 @@ static VALUE add_matrix_with_vector(Obtype* m, VALUE adder) {
 	if (other->getData()->size() == m->getData()->size1()) {
 		if (m->getData()->size2() == 1) {
 			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
+				rb_RealVector::rb_class(),
 				new rb_RealVector(column(*(m->getData()), 0) + *(other->getData())));
 		} else {
 			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
@@ -56,7 +50,7 @@ static VALUE add_matrix_with_vector(Obtype* m, VALUE adder) {
 	} else if (other->getData()->size() == m->getData()->size2()) {
 		if (m->getData()->size1() == 1) {
 			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
+				rb_RealVector::rb_class(),
 				new rb_RealVector(row(*(m->getData()), 0) + *(other->getData())));
 		} else {
 			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
@@ -73,13 +67,13 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
 		// can also add two references together.
-		if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_klass) {
+		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
 			return add_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_reference_klass) {
+		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
 			return add_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_klass) {
+		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return add_matrix_with_vector<rb_RealVector>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_reference_klass) {
+		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
 			return add_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
 		} else {
 			rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, and RealMatrices to a %s.", rb_obj_classname(self));
@@ -89,12 +83,12 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
 				return wrap_pointer<rb_RealMatrix>(
-					rb_optimizer_realmatrix_klass,
+					rb_RealMatrix::rb_class(),
 					new rb_RealMatrix(*(m->getData()) + other)
 					);
 			} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
 				return wrap_pointer<rb_RealMatrix>(
-					rb_optimizer_realmatrix_klass,
+					rb_RealMatrix::rb_class(),
 					new rb_RealMatrix(*(m->getData()) + trans(other))
 					);
 			} else {
@@ -105,7 +99,7 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 			if (other.size() == m->getData()->size1()) {
 				if (m->getData()->size2() == 1) {
 					return wrap_pointer<rb_RealVector>(
-						rb_optimizer_realvector_klass,
+						rb_RealVector::rb_class(),
 						new rb_RealVector(row(*(m->getData()), 0) + other));
 				} else {
 					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
@@ -113,7 +107,7 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 			} else if (other.size() == m->getData()->size2()) {
 				if (m->getData()->size1() == 1) {
 					return wrap_pointer<rb_RealVector>(
-						rb_optimizer_realvector_klass,
+						rb_RealVector::rb_class(),
 						new rb_RealVector(column(*(m->getData()), 0) + other));
 				} else {
 					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
@@ -149,7 +143,7 @@ static VALUE add_equals_matrix_with_vector(Obtype* m, VALUE adder) {
 	if (other->getData()->size() == m->getData()->size1()) {
 		if (m->getData()->size2() == 1) {
 			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
+				rb_RealVector::rb_class(),
 				new rb_RealVector(column(*(m->getData()), 0) + *(other->getData())));
 		} else {
 			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
@@ -157,7 +151,7 @@ static VALUE add_equals_matrix_with_vector(Obtype* m, VALUE adder) {
 	} else if (other->getData()->size() == m->getData()->size2()) {
 		if (m->getData()->size1() == 1) {
 			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
+				rb_RealVector::rb_class(),
 				new rb_RealVector(row(*(m->getData()), 0) + *(other->getData())));
 		} else {
 			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
@@ -174,13 +168,13 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
-		if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_klass) {
+		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
 			return add_equals_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_optimizer_realmatrix_reference_klass) {
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
 			return add_equals_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_klass) {
+		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_optimizer_realvector_reference_klass) {
+		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
 			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
@@ -198,7 +192,7 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 			if (other.size() == m->getData()->size1()) {
 				if (m->getData()->size2() == 1) {
 					return wrap_pointer<rb_RealVector>(
-						rb_optimizer_realvector_klass,
+						rb_RealVector::rb_class(),
 						new rb_RealVector(row(*(m->getData()), 0) + other));
 				} else {
 					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
@@ -206,7 +200,7 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 			} else if (other.size() == m->getData()->size2()) {
 				if (m->getData()->size1() == 1) {
 					return wrap_pointer<rb_RealVector>(
-						rb_optimizer_realvector_klass,
+						rb_RealVector::rb_class(),
 						new rb_RealVector(column(*(m->getData()), 0) + other));
 				} else {
 					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
@@ -229,7 +223,7 @@ static VALUE multiply_matrix_with_vector(Obtype* m, VALUE multiplier) {
 		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.", int(m->getData()->size2()), int(vec->getData()->size()));
 	}
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(prod(*(m->getData()), *(vec->getData())))
 		);
 }
@@ -241,7 +235,7 @@ static VALUE multiply_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.", int(m->getData()->size2()), int(multi_matrix->getData()->size1()));
 	}
 	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
+		rb_RealMatrix::rb_class(),
 		new rb_RealMatrix(prod(*(m->getData()), *(multi_matrix->getData())))
 		);
 }
@@ -252,18 +246,18 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
 		return wrap_pointer<rb_RealMatrix>(
-			rb_optimizer_realmatrix_klass,
+			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) * NUM2DBL(multiplier))
 			);
 	} else if (TYPE(multiplier) == T_DATA) {
 		VALUE multiplier_klass = CLASS_OF(multiplier);
-		if (multiplier_klass == rb_optimizer_realmatrix_klass) {
+		if (multiplier_klass == rb_RealMatrix::rb_class()) {
 			return multiply_matrix_with_matrix<rb_RealMatrix>(m, multiplier);
-		} else if (multiplier_klass == rb_optimizer_realmatrix_reference_klass) {
+		} else if (multiplier_klass == rb_RealMatrixReference::rb_class()) {
 			return multiply_matrix_with_matrix<rb_RealMatrixReference>(m, multiplier);
-		} else if (multiplier_klass == rb_optimizer_realvector_klass) {
+		} else if (multiplier_klass == rb_RealVector::rb_class()) {
 			return multiply_matrix_with_vector<rb_RealVector>(m, multiplier);
-		} else if (multiplier_klass == rb_optimizer_realvector_reference_klass) {
+		} else if (multiplier_klass == rb_RealVectorReference::rb_class()) {
 			return multiply_matrix_with_vector<rb_RealVectorReference>(m, multiplier);
 		} else {
 			rb_raise(rb_eArgError, "Can only multiply %s by a scalar, RealMatrix, Array, or RealVector.", rb_obj_classname(self));
@@ -276,7 +270,7 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 				rb_raise(rb_eArgError, (error_str % m->getData()->size2() % multi_matrix.size1()).str().c_str());
 			}
 			return wrap_pointer<rb_RealMatrix>(
-				rb_optimizer_realmatrix_klass,
+				rb_RealMatrix::rb_class(),
 				new rb_RealMatrix(prod(*(m->getData()), multi_matrix))
 			);
 		} else if (RARRAY_LEN(multiplier) > 0) {
@@ -286,7 +280,7 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 				rb_raise(rb_eArgError, (error_str % m->getData()->size2() % vec.size()).str().c_str());
 			}
 			return wrap_pointer<rb_RealVector>(
-				rb_optimizer_realvector_klass,
+				rb_RealVector::rb_class(),
 				new rb_RealVector(prod(*(m->getData()), vec))
 			);
 		} else {
@@ -330,13 +324,13 @@ VALUE method_matrix_multiply_equals (VALUE self, VALUE multiplier) {
 		*(m->getData()) *= NUM2DBL(multiplier);
 	} else if (TYPE(multiplier) == T_DATA) {
 		VALUE multiplier_klass = CLASS_OF(multiplier);
-		if (multiplier_klass == rb_optimizer_realmatrix_klass) {
+		if (multiplier_klass == rb_RealMatrix::rb_class()) {
 			multiply_equals_matrix_with_matrix<rb_RealMatrix>(m, multiplier);
-		} else if (multiplier_klass == rb_optimizer_realmatrix_reference_klass) {
+		} else if (multiplier_klass == rb_RealMatrixReference::rb_class()) {
 			multiply_equals_matrix_with_matrix<rb_RealMatrixReference>(m, multiplier);
-		} else if (multiplier_klass == rb_optimizer_realvector_klass) {
+		} else if (multiplier_klass == rb_RealVector::rb_class()) {
 			multiply_equals_matrix_with_vector<rb_RealVector>(m, multiplier);
-		} else if (multiplier_klass == rb_optimizer_realvector_reference_klass) {
+		} else if (multiplier_klass == rb_RealVectorReference::rb_class()) {
 			multiply_equals_matrix_with_vector<rb_RealVectorReference>(m, multiplier);
 		} else {
 			rb_raise(rb_eArgError, "Can only multiply %s by a scalar, RealMatrix, Array, or RealVector.", rb_obj_classname(self));
@@ -397,7 +391,7 @@ VALUE method_matrix_transpose (VALUE self) {
 	Data_Get_Struct(self, Obtype, m);
 
 	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
+		rb_RealMatrix::rb_class(),
 		new rb_RealMatrix(trans(*(m->getData())))
 		);
 }
@@ -444,7 +438,7 @@ VALUE method_matrix_get_row (VALUE self, VALUE rb_index) {
 		rb_raise(rb_eArgError, "Out of range of %s", rb_obj_classname(self));
 
 	return wrap_pointer<rb_RealMatrixRow>(
-		rb_optimizer_realmatrix_row_klass,
+		rb_RealMatrixRow::rb_class(),
 		new rb_RealMatrixRow(m->getData(),
 			index < 0 ?
 				index + m->getData()->size2() :
@@ -467,7 +461,7 @@ VALUE method_matrix_get_column (VALUE self, VALUE rb_index) {
 		rb_raise(rb_eArgError, "Out of range of %s", rb_obj_classname(self));
 
 	return wrap_pointer<rb_RealMatrixColumn>(
-		rb_optimizer_realmatrix_column_klass,
+		rb_RealMatrixColumn::rb_class(),
 		new rb_RealMatrixColumn(m->getData(),
 			index < 0 ?
 				index + m->getData()->size1() :
@@ -532,19 +526,19 @@ static void method_matrix_insert_row(Obtype *m, int _row, VALUE assignment) {
 		rb_raise(rb_eArgError, "Out of range.");
 
 	if (TYPE(assignment) == T_DATA) {
-		if (CLASS_OF(assignment) == rb_optimizer_realvector_klass) {
+		if (CLASS_OF(assignment) == rb_RealVector::rb_class()) {
 			rb_RealVector *v;
 			Data_Get_Struct(assignment, rb_RealVector, v);
 			row(*(m->getData()), _row) = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realvector_reference_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference *v;
 			Data_Get_Struct(assignment, rb_RealVectorReference, v);
 			row(*(m->getData()), _row) = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_row_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow *v;
 			Data_Get_Struct(assignment, rb_RealMatrixRow, v);
 			row(*(m->getData()), _row) = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_column_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn *v;
 			Data_Get_Struct(assignment, rb_RealMatrixColumn, v);
 			row(*(m->getData()), _row) = *(v->getData());
@@ -575,19 +569,19 @@ static void method_matrix_insert_column (Obtype *m, int col, VALUE assignment) {
 
 
 	if (TYPE(assignment) == T_DATA) {
-		if (CLASS_OF(assignment) == rb_optimizer_realvector_klass) {
+		if (CLASS_OF(assignment) == rb_RealVector::rb_class()) {
 			rb_RealVector *v;
 			Data_Get_Struct(assignment, rb_RealVector, v);
 			column(*(m->getData()), col) = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realvector_reference_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference *v;
 			Data_Get_Struct(assignment, rb_RealVectorReference, v);
 			column(*(m->getData()), col) = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_row_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow *v;
 			Data_Get_Struct(assignment, rb_RealMatrixRow, v);
 			column(*(m->getData()), col) = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_column_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn *v;
 			Data_Get_Struct(assignment, rb_RealMatrixColumn, v);
 			column(*(m->getData()), col) = *(v->getData());
@@ -655,7 +649,7 @@ VALUE method_matrix_negate (VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
+		rb_RealMatrix::rb_class(),
 		new rb_RealMatrix(-*(m->getData()))
 	);
 }
@@ -668,7 +662,7 @@ VALUE method_matrix_to_rows (VALUE self) {
 	VALUE ary = rb_ary_new2(int(m->getData()->size1()));
 	for (size_t i=0; i< m->getData()->size1(); i++) {
 		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealMatrixRow>(
-			rb_optimizer_realmatrix_row_klass,
+			rb_RealMatrixRow::rb_class(),
 			new rb_RealMatrixRow(m->getData(), i)
 		));
 	}
@@ -683,7 +677,7 @@ VALUE method_matrix_to_columns (VALUE self) {
 	VALUE ary = rb_ary_new2(int(m->getData()->size2()));
 	for (size_t i=0; i< m->getData()->size2(); i++) {
 		rb_ary_store(ary, (int)i, wrap_pointer<rb_RealMatrixColumn>(
-			rb_optimizer_realmatrix_column_klass,
+			rb_RealMatrixColumn::rb_class(),
 			new rb_RealMatrixColumn(m->getData(), i)
 		));
 	}
@@ -711,9 +705,9 @@ template<class Obtype>
 VALUE method_matrix_soft_eql(VALUE self, VALUE rb_other) {
 	if (TYPE(rb_other) == T_DATA) {
 		VALUE other_class = CLASS_OF(rb_other);
-		if (other_class == rb_optimizer_realmatrix_klass) {
+		if (other_class == rb_RealMatrix::rb_class()) {
 			return method_matrix_compare<Obtype, rb_RealMatrix>(self, rb_other);
-		} else if (other_class == rb_optimizer_realvector_reference_klass) {
+		} else if (other_class == rb_RealVectorReference::rb_class()) {
 			return method_matrix_compare<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else {
 			return Qfalse;

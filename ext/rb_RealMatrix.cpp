@@ -5,6 +5,8 @@ using namespace std;
 #include "extras/utils/rb_pointer_wrapping.extras"
 #include "extras/matrix/rb_matrix_methods.extras"
 
+extern VALUE rb_optimizer_realmatrix_klass;
+
 VALUE rb_RealMatrix::rb_class() {
 	return rb_optimizer_realmatrix_klass;
 }

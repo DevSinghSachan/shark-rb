@@ -2,6 +2,8 @@
 using namespace shark;
 using namespace std;
 
+extern VALUE rb_optimizer_realvector_reference_klass;
+
 #include "extras/utils/rb_pointer_wrapping.extras"
 #include "extras/vector/rb_vector_methods.extras"
 

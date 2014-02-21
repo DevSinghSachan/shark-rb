@@ -3,9 +3,6 @@ using namespace std;
 using namespace shark;
 
 extern VALUE rb_optimizer_linearmodel_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
 
 #include "extras/utils/rb_pointer_wrapping.extras"
 #include "extras/models/rb_abstract_model.extras"
@@ -63,7 +60,7 @@ rb_LinearModel::rb_LinearModel(RealMatrix const& matrix, RealVector const& offse
 
 VALUE method_linearmodel_allocate (VALUE klass) {
 	return wrap_pointer<rb_LinearModel>(
-			rb_optimizer_linearmodel_klass,
+			rb_LinearModel::rb_class(),
 			new rb_LinearModel()
 		);
 }
@@ -87,7 +84,7 @@ VALUE method_linearmodel_initialize (int number_of_arguments, VALUE* ruby_argume
 
 	if (TYPE(rb_matrix) == T_DATA) {
 
-		if (CLASS_OF(rb_matrix) != rb_optimizer_realmatrix_klass)
+		if (CLASS_OF(rb_matrix) != rb_RealMatrix::rb_class())
 			rb_raise(rb_eArgError, "LinearModel takes either:\n - a number of inputs, a number of outputs, and a boolean choice whether to use offsets, OR\n - a RealMatrix and a RealVector, OR\n - no parameters.");
 
 		rb_RealMatrix *mat;
@@ -95,7 +92,7 @@ VALUE method_linearmodel_initialize (int number_of_arguments, VALUE* ruby_argume
 
 		if (TYPE(rb_offsets) == T_DATA) {
 			// With offsets vector.
-			if (CLASS_OF(rb_offsets) != rb_optimizer_realvector_klass)
+			if (CLASS_OF(rb_offsets) != rb_RealVector::rb_class())
 				rb_raise(rb_eArgError, "LinearModel takes either:\n - a number of inputs, a number of outputs, and a boolean choice whether to use offsets, OR\n - a RealMatrix and a RealVector, OR\n - no parameters.");
 			rb_RealVector *vec;
 			Data_Get_Struct(rb_offsets, rb_RealVector, vec);
@@ -120,7 +117,7 @@ VALUE method_linearmodel_offset(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
 	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
+		rb_RealVector::rb_class(),
 		new rb_RealVector(m->offset())
 	);
 };
@@ -129,7 +126,7 @@ VALUE method_linearmodel_matrix(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);
 	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
+		rb_RealMatrix::rb_class(),
 		new rb_RealMatrix(m->matrix())
 	);
 };
@@ -168,7 +165,7 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 				// 2D array.
 				try {
 					return wrap_pointer<rb_UnlabeledData>(
-						rb_optimizer_unlabeleddata_klass,
+						rb_UnlabeledData::rb_class(),
 						new rb_UnlabeledData(m->eval(rb_ary_to_unlabeleddata(dataset)))
 					);
 				} catch (shark::Exception e) {
@@ -178,7 +175,7 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 				// 1D array
 				try {
 					return wrap_pointer<rb_RealVector>(
-						rb_optimizer_realvector_klass,
+						rb_RealVector::rb_class(),
 						new rb_RealVector(m->eval(rb_ary_to_1d_realvector(dataset)))
 					);
 				} catch (shark::Exception e) {
@@ -191,25 +188,25 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 	} else {
 		Check_Type(dataset, T_DATA);
 
-		if (CLASS_OF(dataset) == rb_optimizer_unlabeleddata_klass) {
+		if (CLASS_OF(dataset) == rb_UnlabeledData::rb_class()) {
 			rb_UnlabeledData *d;
 			Data_Get_Struct(dataset, rb_UnlabeledData, d);
 
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
-					rb_optimizer_unlabeleddata_klass,
+					rb_UnlabeledData::rb_class(),
 					new rb_UnlabeledData(m->eval(d->data))
 				);
 			} catch (shark::Exception e) {
 				linearmodel_rb_error_unmatched_dimensions(e);
 			}
-		} else if (CLASS_OF(dataset) == rb_optimizer_realvector_klass) {
+		} else if (CLASS_OF(dataset) == rb_RealVector::rb_class()) {
 			rb_RealVector *d;
 			Data_Get_Struct(dataset, rb_RealVector, d);
 
 			try {
 				return wrap_pointer<rb_RealVector>(
-					rb_optimizer_realvector_klass,
+					rb_RealVector::rb_class(),
 					new rb_RealVector(m->eval(d->data))
 				);
 			} catch (shark::Exception e) {

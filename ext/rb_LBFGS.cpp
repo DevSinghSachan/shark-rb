@@ -1,8 +1,6 @@
 #include "rb_LBFGS.h"
 extern VALUE rb_optimizer_lbfgs_klass;
 // datatypes:
-extern VALUE rb_optimizer_solutionset_klass;
-extern VALUE rb_optimizer_realvector_klass;
 
 rb_LBFGS::rb_LBFGS() {};
 LBFGS& rb_LBFGS::algorithm() {
@@ -18,7 +16,7 @@ VALUE rb_LBFGS::rb_class() {
 
 VALUE method_lbfgs_allocate (VALUE klass) {
 	return wrap_pointer<rb_LBFGS>(
-		rb_optimizer_lbfgs_klass,
+		rb_LBFGS::rb_class(),
 		new rb_LBFGS()
 	);
 };

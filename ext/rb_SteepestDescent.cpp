@@ -1,10 +1,6 @@
 #include "rb_SteepestDescent.h"
-
 extern VALUE rb_optimizer_steepestdescent_klass;
 // Datatypes:
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_solutionset_klass;
-
 VALUE rb_SteepestDescent::rb_class() {
 	return rb_optimizer_steepestdescent_klass;
 }

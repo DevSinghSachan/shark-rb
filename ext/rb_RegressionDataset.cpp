@@ -6,7 +6,6 @@ using namespace shark;
 #include "extras/utils/rb_pointer_wrapping.extras"
 extern VALUE rb_optimizer_regressionset_klass;
 extern VALUE rb_optimizer_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
 
 VALUE rb_RegressionDataset::rb_class () {
 	return rb_optimizer_regressionset_klass;
@@ -119,9 +118,9 @@ VALUE method_regressionset_create (int number_of_arguments, VALUE* ruby_argument
 		&labels,
 		&width);
 
-	if (TYPE(samples) == T_DATA && CLASS_OF(labels) == rb_optimizer_unlabeleddata_klass) {
+	if (TYPE(samples) == T_DATA && CLASS_OF(labels) == rb_UnlabeledData::rb_class()) {
 		// input is either labels and data or just data:
-		if (TYPE(labels) == T_DATA && CLASS_OF(labels) == rb_optimizer_unlabeleddata_klass) {
+		if (TYPE(labels) == T_DATA && CLASS_OF(labels) == rb_UnlabeledData::rb_class()) {
 			return wrap_pointer<rb_RegressionDataset>(
 				rb_optimizer_regressionset_klass,
 				new rb_RegressionDataset(samples, labels)
@@ -154,7 +153,7 @@ VALUE method_regressionset_get_labels(VALUE self) {
 	rb_RegressionDataset *s;
 	Data_Get_Struct(self, rb_RegressionDataset, s);
 	return wrap_pointer<rb_UnlabeledData>(
-		rb_optimizer_unlabeleddata_klass,
+		rb_UnlabeledData::rb_class(),
 		new rb_UnlabeledData((s->data).labels())
 		);
 }
@@ -162,7 +161,7 @@ VALUE method_regressionset_get_inputs(VALUE self) {
 	rb_RegressionDataset *s;
 	Data_Get_Struct(self, rb_RegressionDataset, s);
 	return wrap_pointer<rb_UnlabeledData>(
-		rb_optimizer_unlabeleddata_klass,
+		rb_UnlabeledData::rb_class(),
 		new rb_UnlabeledData((s->data).inputs())
 		);
 }

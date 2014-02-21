@@ -4,7 +4,7 @@ VALUE method_neuronlayer_get_bias(VALUE self) {
 	Data_Get_Struct(self, Obtype, n);
 
 	return wrap_pointer<rb_RealVectorReference>(
-		rb_optimizer_realvector_reference_klass,
+		rb_RealVectorReference::rb_class(),
 		new rb_RealVectorReference(&(n->getData()->bias()))
 	);
 }
@@ -15,19 +15,19 @@ VALUE method_neuronlayer_set_bias(VALUE self, VALUE assignment) {
 	Data_Get_Struct(self, Obtype, m);
 
 	if (TYPE(assignment) == T_DATA) {
-		if (CLASS_OF(assignment) == rb_optimizer_realvector_klass) {
+		if (CLASS_OF(assignment) == rb_RealVector::rb_class()) {
 			rb_RealVector *v;
 			Data_Get_Struct(assignment, rb_RealVector, v);
 			m->getData()->bias() = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realvector_reference_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference *v;
 			Data_Get_Struct(assignment, rb_RealVectorReference, v);
 			m->getData()->bias() = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_row_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow *v;
 			Data_Get_Struct(assignment, rb_RealMatrixRow, v);
 			m->getData()->bias() = *(v->getData());
-		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_column_klass) {
+		} else if (CLASS_OF(assignment) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn *v;
 			Data_Get_Struct(assignment, rb_RealMatrixColumn, v);
 			m->getData()->bias() = *(v->getData());

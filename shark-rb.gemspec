@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     "ext/extras/models/rb_abstract_model.extras",
     "ext/extras/models/rb_objective_function.extras",
     "ext/extras/rbm/rb_neuronlayer_bias.extras",
+    "ext/extras/rbm/rb_rbm_neuronlayer.extras",
     "ext/extras/utils/rb_datatype_deep_copy.extras",
     "ext/extras/utils/rb_pointer_wrapping.extras",
     "ext/extras/vector/rb_vector_length.extras",
