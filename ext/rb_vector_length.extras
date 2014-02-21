@@ -1,0 +1,12 @@
+template<class Obtype>
+VALUE method_vector_length (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	return INT2FIX(s->getData()->size());
+}
+
+template<class Obtype>
+void Init_VectorLength(klass) {
+	rb_define_method(klass, "length", (rb_method)method_vector_length<Obtype>,0);
+	rb_define_alias(klass, "size", "length");
+}

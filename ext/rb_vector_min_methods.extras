@@ -1,7 +1,10 @@
 extern VALUE rb_optimizer_realvector_reference_klass;
 extern VALUE rb_optimizer_realmatrix_row_klass;
+extern VALUE rb_optimizer_realmatrix_column_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_realvector_klass;
+
+#include "rb_vector_length.extras"
 
 extern void exportPGM( const char *, const RealVector &, int, int, bool);
 
@@ -24,6 +27,15 @@ VALUE method_vector_remove_NaN (int number_of_arguments, VALUE* ruby_arguments, 
 	for (size_t i = 0;i< s->getData()->size();i++)
 		if ((*(s->getData()))(i) != (*(s->getData()))(i))
 			(*(s->getData()))(i) = replacement;
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_vector_clear (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	s->getData()->clear();
 	return self;
 }
 
@@ -362,13 +374,6 @@ VALUE method_vector_to_matrix (int number_of_arguments, VALUE* ruby_arguments, V
 		);
 }
 
-template<class Obtype>
-VALUE method_vector_length (VALUE self) {
-	Obtype *s;
-	Data_Get_Struct(self, Obtype, s);
-	return INT2FIX(s->getData()->size());
-}
-
 
 template<class Obtype>
 VALUE method_vector_stride (VALUE self) {
@@ -445,21 +450,73 @@ template<class Obtype>
 VALUE method_vector_deep_copy(VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-
 	return wrap_pointer<rb_RealVector>(
 		rb_optimizer_realvector_klass,
 		new rb_RealVector(*(m->getData()))
 		);
 }
 
+template<class Obtype, class OtherObtype>
+VALUE method_vector_compare(VALUE left, VALUE right) {
+	Obtype *v;
+	OtherObtype *other_v;
+	Data_Get_Struct(left, Obtype, v);
+	Data_Get_Struct(right, OtherObtype, other_v);
+	// check size
+	if (other_v->getData()->size() != v->getData()->size())
+		return Qfalse;
+	// check each element... can parallelize this.
+	for (size_t i = 0; i<v->getData()->size(); i++)
+		if ((*(other_v->getData()))(i) != (*(v->getData()))(i))
+			return Qfalse;
+	return Qtrue;
+}
+
+template<class Obtype>
+VALUE method_vector_soft_eql(VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_DATA) {
+		VALUE other_class = CLASS_OF(rb_other);
+		if (other_class == rb_optimizer_realvector_klass) {
+			return method_vector_compare<Obtype, Obtype>(self, rb_other);
+		} else if (other_class == rb_optimizer_realvector_reference_klass) {
+			return method_vector_compare<Obtype, rb_RealVectorReference>(self, rb_other);
+		} else if (other_class == rb_optimizer_realmatrix_column_klass) {
+			return method_vector_compare<Obtype, rb_RealMatrixColumn>(self, rb_other);
+		} else if (other_class == rb_optimizer_realmatrix_row_klass) {
+			return method_vector_compare<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else {
+			return Qfalse;
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		VALUE self_ary = method_vector_to_ary<Obtype>(self);
+		return rb_funcall(self_ary, rb_intern("=="), 1, rb_other);
+	} else {
+		return Qfalse;
+	}
+}
+
+template<class Obtype>
+VALUE method_vector_eql(VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_DATA) {
+		if (CLASS_OF(rb_other) != CLASS_OF(self))
+			return Qfalse;
+		return method_vector_compare<Obtype, Obtype>(self, rb_other);
+	} else {
+		return Qfalse;
+	}
+}
+
 template<class Obtype>
 void Init_VectorMinMethods (VALUE klass) {
+	Init_VectorSize<Obtype>(klass);
 	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
 	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
 	rb_define_method(klass, "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
 	rb_define_method(klass, "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
 	rb_define_method(klass, "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
 	rb_define_method(klass, "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
+	rb_define_method(klass, "==", (rb_method) method_vector_soft_eql<Obtype>,1);
+	rb_define_method(klass, "eql?", (rb_method) method_vector_eql<Obtype>,1);
 	rb_define_method(klass, "to_matrix", (rb_method)method_vector_to_matrix<Obtype>,-1);
 	rb_define_method(klass, "*", (rb_method)method_vector_multiply<Obtype>,1);
 	rb_define_method(klass, "*=", (rb_method)method_vector_multiply_equals<Obtype>,1);
@@ -468,9 +525,8 @@ void Init_VectorMinMethods (VALUE klass) {
 	rb_define_method(klass, "+", (rb_method)method_vector_add<Obtype>,1);
 	rb_define_method(klass, "+=", (rb_method)method_vector_add_equals<Obtype>,1);
 	rb_define_method(klass, "-=", (rb_method)method_vector_remove_equals<Obtype>,1);
+	rb_define_method(klass, "clear", (rb_method)method_vector_clear<Obtype>,0);
 	rb_define_method(klass, "-", (rb_method)method_vector_remove<Obtype>,1);
-	rb_define_method(klass, "length", (rb_method)method_vector_length<Obtype>,0);
-	rb_define_method(klass, "size", (rb_method)method_vector_length<Obtype>,0);
 	rb_define_method(klass, "-@", (rb_method)method_vector_negate<Obtype>,0);
 	rb_define_method(klass, "stride", (rb_method)method_vector_stride<Obtype>,0);
 	rb_define_method(klass, "fill", (rb_method)method_vector_fill<Obtype>,1);

@@ -63,18 +63,18 @@ class Optimizer
 				if index == 0 and rendered
 					if show_offset
 						offset = decoder.offset
-						filters = (~decoder.matrix).to_realvectors
+						filters = (~decoder.matrix).rows
 						filters.map do |filter|
 							Optimizer::Conversion::Text.text_samples_from_filters :filter => (filter + offset).to_a, :vector => @standard_vector.features
 						end
 					else
-						filters = (~decoder.matrix).to_realvectors
+						filters = (~decoder.matrix).rows
 						filters.map do |filter|
 							Optimizer::Conversion::Text.text_samples_from_filters :filter => filter.to_a, :vector => @standard_vector.features
 						end
 					end
 				else
-					(~decoder.matrix).to_realvectors
+					(~decoder.matrix).rows
 				end
 			end
 

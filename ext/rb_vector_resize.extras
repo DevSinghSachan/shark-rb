@@ -1,0 +1,15 @@
+template<class Obtype>
+VALUE method_vector_resize (VALUE self, VALUE newlength) {
+	Check_Type(newlength, T_FIXNUM);
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	if (NUM2INT(newlength) < 0)
+		rb_raise(rb_eArgError, "Can only create positive length vectors due to lack of antimatter.");
+	s->getData()->resize(NUM2INT(newlength));
+	return self;
+}
+
+template<class Obtype>
+void Init_VectorResize(klass) {
+	rb_define_method(klass, "resize", (rb_method)method_vector_resize<Obtype>,1);
+}

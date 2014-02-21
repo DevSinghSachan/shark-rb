@@ -1,15 +1,5 @@
 #include "rb_vector_min_methods.extras"
-
-template<class Obtype>
-VALUE method_vector_resize (VALUE self, VALUE newlength) {
-	Check_Type(newlength, T_FIXNUM);
-	Obtype *s;
-	Data_Get_Struct(self, Obtype, s);
-	if (NUM2INT(newlength) < 0)
-		rb_raise(rb_eArgError, "Can only create positive length vectors due to lack of antimatter.");
-	s->getData()->resize(NUM2INT(newlength));
-	return self;
-}
+#include "rb_vector_resize.extras"
 
 template<class Obtype>
 VALUE method_vector_empty (VALUE self) {
@@ -21,18 +11,9 @@ VALUE method_vector_empty (VALUE self) {
 }
 
 template<class Obtype>
-VALUE method_vector_clear (VALUE self) {
-	Obtype *s;
-	Data_Get_Struct(self, Obtype, s);
-	s->getData()->clear();
-	return self;
-}
-
-template<class Obtype>
 void Init_VectorMethods (VALUE klass) {
-	rb_define_method(klass, "resize", (rb_method)method_vector_resize<Obtype>,1);
 	rb_define_method(klass, "empty?", (rb_method)method_vector_empty<Obtype>,0);
-	rb_define_method(klass, "clear", (rb_method)method_vector_clear<Obtype>,0);
 
+	Init_VectorResize<Obtype>(klass);
 	Init_VectorMinMethods<Obtype>(klass);
 }

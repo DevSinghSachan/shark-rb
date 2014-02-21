@@ -1,4 +1,4 @@
-class Optimizer::RealMatrix
+module MatrixInspector
 	def inspect
 		original_inspect = super()
 		original_inspect = original_inspect[0..original_inspect.size-2]
@@ -10,8 +10,15 @@ protected
 	def inspect_helper
 		["@data =","[" + self.to_a.map {|i| "["+i.join(", ") + "]"}.join(" ; ")+ "]"]
 	end
-
 end
+
+class Optimizer::RealMatrix
+	include(MatrixInspector)
+end
+class Optimizer::RealMatrixReference
+	include(MatrixInspector)
+end
+
 class Array
 	alias_method :old_sum, :+
 
@@ -20,10 +27,9 @@ class Array
 	end
 
 	alias_method :old_product, :+ # could do the same for scalars.
-
 end
 
-class Optimizer::RealVector
+module ArrayInspector
 	def inspect
 		original_inspect = super()
 		original_inspect = original_inspect[0..original_inspect.size-2]
@@ -40,4 +46,17 @@ protected
 			["@data =","[" + self.to_a.join(", ") + "]"]
 		end
 	end
+end
+
+class Optimizer::RealVector
+	include(ArrayInspector)
+end
+class Optimizer::RealVectorReference
+	include(ArrayInspector)
+end
+class Optimizer::RealMatrixRow
+	include(ArrayInspector)
+end
+class Optimizer::RealMatrixColumn
+	include(ArrayInspector)
 end

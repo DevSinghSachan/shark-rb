@@ -126,8 +126,8 @@ For those that were curious about the missing step that encoded the images:
 	decodedImages = dec.eval encodedImages  # this can go on forever!
 
 
-uBLAS Vectors: RealMatrix and RealVector wrappers
--------------------------------------------------
+uBLAS Datatypes: RealMatrix, RealVector, Rows, Columns, and reference wrappers
+------------------------------------------------------------------------------
 
 How would you like to play around with `uBlas` vectors and matrices in Ruby? I know I do.
 
@@ -170,6 +170,40 @@ What can we cast?
 
 
 Reponse: any array can be cast during a sum to a RealVector for convenience!
+
+#### Advanced Matrix Selections ####
+
+We can obtain rows and columns from a matrix in reference form:
+
+	mat = Shark::RealMatrix.new [[2, 3, 1], [4, 5, 6]]
+
+	mat.row 0
+	# => #<Optimizer::RealMatrixRow:0x007fbdc9839f80 @data = [2.0, 3.0, 1.0]> 
+
+	mat.rows
+	# => [#<Optimizer::RealMatrixRow:0x007f9a2111a0b8 @data = [2.0, 3.0, 1.0]>, #<Optimizer::RealMatrixRow:0x007f9a2111a068 @data = [4.0, 5.0, 6.0]>] 
+
+	mat.col 0
+	# => <Optimizer::RealMatrixColumn:0x007fbdc9833e00 @data = [2.0, 4.0]> 
+
+	mat.row(0) == mat[0]
+	# => true
+
+Compare a row or vector with a Ruby Array:
+
+	mat.row(0) == [2, 3, 1]
+	# => true
+
+Check for stricter equality:
+
+	mat.row(0).eql? mat[0]
+	# => true
+
+	mat.row(0).to_a.to_realvector == mat[0]
+	# => true
+
+	mat.row(0).to_a.to_realvector.eql? mat[0]
+	# => false
 
 
 Binary Restricted Boltzmann Machines
@@ -221,7 +255,6 @@ Using the RBM, we can now construct the k-step Contrastive Divergence error func
 	cd = Shark::BinaryCD.new rbm # you can also replace Shark::BinaryCD by Shark::ExactGradient, however it is much slower.
 	cd.k = 1
 	cd.data = data # which we obtained earlier using: "problem.data"
-
 
 
 The RBM optimization problem is special in the sense that the error function can not be evaluated exactly for more complex problems than trivial toy problems, and the gradient can only be estimated. This is reflected by the fact that all RBM derivatives have the Flag `HAS_VALUE` (this is a Shark class property that is not exposed to Ruby yet -- this is why `Shark::Algorithms::LBFGS` will not work here.) deactivated. Thus, most optimizers will not be able to optimize it. One which is capable of optimizing it is the GradientDescent algorithm, which we will use in the following
