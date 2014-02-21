@@ -5,6 +5,8 @@ extern VALUE rb_optimizer_barsandstripes_klass;
 
 #include "rb_pointer_wrapping.extras"
 
+VALUE rb_BarsAndStripes::rb_class = rb_optimizer_barsandstripes_klass;
+
 rb_BarsAndStripes::rb_BarsAndStripes() {};
 
 VALUE method_barsandstripes_get_data(VALUE self) {

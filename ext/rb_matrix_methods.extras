@@ -704,7 +704,7 @@ VALUE method_matrix_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
 }
 
 template<class Obtype>
-VALUE method_vector_deep_copy(VALUE self) {
+VALUE method_matrix_deep_copy(VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 
@@ -765,7 +765,7 @@ template<class Obtype>
 void Init_MatrixMethods (VALUE klass) {
 
 	rb_define_method(klass, "initialize_copy", (rb_method)method_matrix_initialize_copy<Obtype>, 1);
-	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
+	rb_define_method(klass, "deep_copy", (rb_method)method_matrix_deep_copy<Obtype>, 0);
 	rb_define_method(klass, "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
 	rb_define_method(klass, "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
 	rb_define_method(klass, "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);

@@ -1,0 +1,29 @@
+template<class Obtype, class DestinationType>
+VALUE method_datatype_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
+	Obtype *orig;
+	Obtype *copy;
+	if (rb_copy == rb_orig)
+		return rb_copy;
+	Check_Type(rb_orig, T_DATA);
+	Data_Get_Struct(rb_orig, Obtype, orig);
+	Data_Get_Struct(rb_copy, Obtype, copy);
+	copy->data = orig->data;
+
+	return rb_copy;
+}
+
+template<class Obtype, class DestinationType>
+VALUE method_datatype_deep_copy(VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<DestinationType>(
+		DestinationType::rb_class,
+		new DestinationType(*(m->getData()))
+		);
+}
+
+template<class Obtype, class DestinationType>
+void Init_DatatypeDeepCopy(VALUE klass) {
+	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
+	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
+}

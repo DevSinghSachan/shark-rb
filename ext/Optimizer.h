@@ -21,6 +21,7 @@ using namespace std;
 using namespace shark;
 class Optimizer {
 	public:
+		static VALUE rb_class;
 		shark::FFNet<shark::LogisticNeuron, shark::LogisticNeuron> model;
 		shark::LBFGS optimizer;
 		shark::SparseFFNetError error;

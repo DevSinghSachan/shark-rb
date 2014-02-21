@@ -9,6 +9,7 @@
 class rb_BarsAndStripes {
 
 	public:
+		static VALUE rb_class;
 		BarsAndStripes problem;
 		rb_BarsAndStripes();
 };

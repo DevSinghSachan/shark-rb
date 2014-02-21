@@ -12,6 +12,7 @@
 
 class rb_RegressionDataset {
 	public:
+		static VALUE rb_class;
 		int visibleSize;
 		rb_RegressionDataset(int,int,int);
 		rb_RegressionDataset(VALUE);

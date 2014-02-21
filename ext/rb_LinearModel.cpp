@@ -10,6 +10,8 @@ extern VALUE rb_optimizer_unlabeleddata_klass;
 #include "rb_pointer_wrapping.extras"
 #include "rb_abstract_model.extras"
 
+VALUE rb_LinearModel::rb_class = rb_optimizer_linearmodel_klass;
+
 RealVector& rb_LinearModel::offset() {
 	return model.offset();
 };

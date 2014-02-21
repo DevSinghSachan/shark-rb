@@ -2,6 +2,7 @@
 class rb_Rprop {
 
 	public:
+		static VALUE rb_class;
 		RpropMinus algorithm;
 		rb_Rprop();
 

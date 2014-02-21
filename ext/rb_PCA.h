@@ -17,6 +17,7 @@ using namespace std;
 class rb_PCA {
 
 	public:
+		static VALUE rb_class;
 		void train(LinearModel<RealVector>&, UnlabeledData<RealVector> const&);
 		void setWhitening(bool);
 		bool whitening();

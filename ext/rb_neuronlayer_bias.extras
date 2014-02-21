@@ -8,3 +8,45 @@ VALUE method_neuronlayer_get_bias(VALUE self) {
 		new rb_RealVectorReference(&(n->getData()->bias()))
 	);
 }
+
+template<class Obtype>
+VALUE method_neuronlayer_set_bias(VALUE self, VALUE assignment) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+
+	if (TYPE(assignment) == T_DATA) {
+		if (CLASS_OF(assignment) == rb_optimizer_realvector_klass) {
+			rb_RealVector *v;
+			Data_Get_Struct(assignment, rb_RealVector, v);
+			m->getData()->bias() = *(v->getData());
+		} else if (CLASS_OF(assignment) == rb_optimizer_realvector_reference_klass) {
+			rb_RealVectorReference *v;
+			Data_Get_Struct(assignment, rb_RealVectorReference, v);
+			m->getData()->bias() = *(v->getData());
+		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_row_klass) {
+			rb_RealMatrixRow *v;
+			Data_Get_Struct(assignment, rb_RealMatrixRow, v);
+			m->getData()->bias() = *(v->getData());
+		} else if (CLASS_OF(assignment) == rb_optimizer_realmatrix_column_klass) {
+			rb_RealMatrixColumn *v;
+			Data_Get_Struct(assignment, rb_RealMatrixColumn, v);
+			m->getData()->bias() = *(v->getData());
+		} else {
+			rb_raise(rb_eArgError, "Can only assign RealVector/Array/RealMatrixRow/RealMatrixColumn.");
+		}
+	} else if (TYPE(assignment) == T_ARRAY) {
+		if (TYPE(rb_ary_entry(assignment, 0)) != T_FIXNUM && TYPE(rb_ary_entry(assignment, 0)) != T_FLOAT)
+			rb_raise(rb_eArgError, "Can only use floats.");
+		RealVector vec = rb_ary_to_1d_realvector(assignment);
+		m->getData()->bias() = vec;
+	} else {
+		rb_raise(rb_eArgError, "Can only assign RealVector/Array/RealMatrixRow/RealMatrixColumn.");
+	}
+	return self;
+}
+
+template<class Obtype>
+void Init_LayerBias(VALUE klass) {
+	rb_define_method(klass, "bias", (rb_method) method_neuronlayer_get_bias<Obtype>, 0);
+	rb_define_method(klass, "bias=", (rb_method) method_neuronlayer_set_bias<Obtype>, 1);
+}

@@ -11,6 +11,7 @@ using namespace std;
 class rb_SolutionSet {
 
 	public:
+		static VALUE rb_class;
 		RealVector point;
 		double value;
 		rb_SolutionSet(RealVector const&, double);

@@ -14,6 +14,7 @@ using namespace std;
 class rb_BinaryCD {
 		BinaryCD _objective;
 	public:
+		static VALUE rb_class;
 		BinaryCD& objective();
 		rb_BinaryCD(BinaryRBM &);
 };

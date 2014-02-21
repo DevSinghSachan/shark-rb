@@ -9,6 +9,8 @@ extern VALUE rb_optimizer_realvector_klass;
 using namespace shark;
 using namespace std;
 
+VALUE rb_BinaryCD::rb_class = rb_optimizer_binarycd_klass;
+
 rb_BinaryCD::rb_BinaryCD(BinaryRBM &rbm): _objective(&rbm) {};
 
 BinaryCD& rb_BinaryCD::objective() {

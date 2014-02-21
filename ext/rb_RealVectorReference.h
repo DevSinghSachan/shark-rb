@@ -13,6 +13,7 @@ using namespace std;
 using namespace shark;
 class rb_RealVectorReference {
 	public:
+		static VALUE rb_class;
 		rb_RealVectorReference(RealVector *);
 		RealVector* data;
 		RealVector* getData();

@@ -10,6 +10,8 @@ using namespace std;
 
 #include "rb_pointer_wrapping.extras"
 
+VALUE rb_ExactGradient::rb_class = rb_optimizer_exactgradient_klass;
+
 rb_ExactGradient::rb_ExactGradient(BinaryRBM &rbm): _objective(&rbm) {};
 
 ExactGradient<BinaryRBM>& rb_ExactGradient::objective() {

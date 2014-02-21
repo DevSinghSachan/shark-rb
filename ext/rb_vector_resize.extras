@@ -1,3 +1,4 @@
+
 template<class Obtype>
 VALUE method_vector_resize (VALUE self, VALUE newlength) {
 	Check_Type(newlength, T_FIXNUM);
@@ -7,9 +8,9 @@ VALUE method_vector_resize (VALUE self, VALUE newlength) {
 		rb_raise(rb_eArgError, "Can only create positive length vectors due to lack of antimatter.");
 	s->getData()->resize(NUM2INT(newlength));
 	return self;
-}
+};
 
 template<class Obtype>
-void Init_VectorResize(klass) {
+void Init_VectorResize(VALUE klass) {
 	rb_define_method(klass, "resize", (rb_method)method_vector_resize<Obtype>,1);
-}
+};

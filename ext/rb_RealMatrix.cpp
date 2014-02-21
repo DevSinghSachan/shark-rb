@@ -5,6 +5,8 @@ using namespace std;
 #include "rb_pointer_wrapping.extras"
 #include "rb_matrix_methods.extras"
 
+VALUE rb_RealMatrix::rb_class = rb_optimizer_realmatrix_klass;
+
 rb_RealMatrix::rb_RealMatrix() {}
 rb_RealMatrix::rb_RealMatrix(RealMatrix const& _data) {
 	data = _data;// implicit copy here

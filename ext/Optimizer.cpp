@@ -2,6 +2,9 @@
 using namespace std;
 using namespace shark;
 
+extern VALUE rb_optimizer_klass;
+VALUE Optimizer::rb_class = rb_optimizer_klass;
+
 Optimizer::Optimizer(
 	int    _visibleSize,
 	int    _hiddenSize,

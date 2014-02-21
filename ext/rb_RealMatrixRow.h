@@ -12,6 +12,7 @@ using namespace std;
 using namespace shark;
 class rb_RealMatrixRow {
 	public:
+		static VALUE rb_class;
 		rb_RealMatrixRow(RealMatrix *, int);
 		shark::blas::matrix_row<RealMatrix> data;
 		shark::blas::matrix_row<RealMatrix>* getData();

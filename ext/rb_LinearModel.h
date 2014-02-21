@@ -16,6 +16,7 @@ using namespace shark;
 class rb_LinearModel {
 
 	public:
+		static VALUE rb_class;
 		RealVector& offset();
 		RealMatrix& matrix();
 		void setStructure(RealMatrix const&, RealVector const&);

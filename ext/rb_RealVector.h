@@ -13,6 +13,7 @@ using namespace std;
 using namespace shark;
 class rb_RealVector {
 	public:
+		static VALUE rb_class;
 		rb_RealVector(RealVector const &);
 		rb_RealVector();
 		RealVector data;

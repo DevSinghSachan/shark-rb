@@ -6,6 +6,7 @@
 class rb_BFGS {
 
 	public:
+		static VALUE rb_class;
 		BFGS algorithm;
 		rb_BFGS();
 

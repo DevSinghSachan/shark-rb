@@ -5,6 +5,7 @@ extern VALUE rb_optimizer_realmatrix_klass;
 extern VALUE rb_optimizer_realvector_klass;
 
 #include "rb_vector_length.extras"
+#include "rb_datatype_deep_copy.extras"
 
 extern void exportPGM( const char *, const RealVector &, int, int, bool);
 
@@ -431,31 +432,6 @@ VALUE method_vector_insert (VALUE self, VALUE position, VALUE assignment) {
 	return self;
 }
 
-
-template<class Obtype>
-VALUE method_vector_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
-	Obtype *orig;
-	Obtype *copy;
-	if (rb_copy == rb_orig)
-		return rb_copy;
-	Check_Type(rb_orig, T_DATA);
-	Data_Get_Struct(rb_orig, Obtype, orig);
-	Data_Get_Struct(rb_copy, Obtype, copy);
-	copy->data = orig->data;
-
-	return rb_copy;
-}
-
-template<class Obtype>
-VALUE method_vector_deep_copy(VALUE self) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
-	return wrap_pointer<rb_RealVector>(
-		rb_optimizer_realvector_klass,
-		new rb_RealVector(*(m->getData()))
-		);
-}
-
 template<class Obtype, class OtherObtype>
 VALUE method_vector_compare(VALUE left, VALUE right) {
 	Obtype *v;
@@ -508,7 +484,8 @@ VALUE method_vector_eql(VALUE self, VALUE rb_other) {
 
 template<class Obtype>
 void Init_VectorMinMethods (VALUE klass) {
-	Init_VectorSize<Obtype>(klass);
+	Init_VectorLength<Obtype>(klass);
+	Init_DatatypeDeepCopy<Obtype, rb_RealVector>(klass);
 	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
 	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
 	rb_define_method(klass, "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);

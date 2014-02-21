@@ -13,6 +13,7 @@ using namespace shark;
 class rb_SteepestDescent {
 		SteepestDescent _algorithm;
 	public:
+		static VALUE rb_class;
 		SteepestDescent& algorithm();
 		rb_SteepestDescent();
 

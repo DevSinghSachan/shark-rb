@@ -15,6 +15,7 @@ using namespace std;
 using namespace shark;
 class rb_UnlabeledData {
 	public:
+		static VALUE rb_class;
 		rb_UnlabeledData();
 		rb_UnlabeledData(UnlabeledData<RealVector>);
 		UnlabeledData<RealVector> data;
