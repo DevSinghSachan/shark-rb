@@ -1,12 +1,18 @@
 #include "rb_RealVector.h"
 
+extern VALUE rb_array_klass;
+
 //extern VALUE method_realvector_export_pgm; // this is a promise!
 
 using namespace shark;
 using namespace std;
 
-#include "rb_pointer_wrapping.extras"
-#include "rb_vector_methods.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/vector/rb_vector_methods.extras"
+
+VALUE rb_RealVector::rb_class () {
+	return rb_optimizer_realvector_klass;
+}
 
 rb_RealVector::rb_RealVector(RealVector const& _data) {
 	data = _data;

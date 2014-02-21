@@ -3,11 +3,15 @@
 using namespace shark;
 using namespace std;
 
-// extern VALUE rb_optimizer_unlabeleddata_klass;
-// extern VALUE rb_optimizer_realvector_klass;
-// extern VALUE rb_optimizer_realmatrix_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
+extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_realmatrix_klass;
 
-#include "rb_pointer_wrapping.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+
+VALUE rb_UnlabeledData::rb_class () {
+	return rb_optimizer_unlabeleddata_klass;
+}
 
 rb_UnlabeledData::rb_UnlabeledData(UnlabeledData<RealVector> _data) {
 	data = _data;

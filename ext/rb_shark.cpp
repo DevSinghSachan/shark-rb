@@ -46,7 +46,7 @@
 #include <shark/Data/Pgm.h>
 #include "Optimizer.h"
 
-#include "rb_pointer_wrapping.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 using namespace std;
 using namespace shark;

@@ -3,7 +3,12 @@
 using namespace std;
 using namespace shark;
 
-#include "rb_pointer_wrapping.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+extern VALUE rb_optimizer_regressionset_klass;
+
+VALUE rb_RealVectorReference::rb_class () {
+	return rb_optimizer_regressionset_klass;
+}
 
 // Or create fake samples:
 shark::UnlabeledData<shark::RealVector> test_regressionset_getSamples(int numSamples, int height, int width) {
@@ -166,8 +171,6 @@ VALUE method_regressionset_get_size(VALUE self) {
 	return INT2FIX((s->data).numberOfElements());
 }
 
-
-
 void Init_RegressionDataset () {
 
 	// Shark Regression sets for supervisied / labeled learning:
@@ -179,6 +182,5 @@ void Init_RegressionDataset () {
 	rb_define_method(rb_optimizer_regressionset_klass, "elements",       (rb_method)method_regressionset_get_inputs,0);
 	rb_define_method(rb_optimizer_regressionset_klass, "to_a",           (rb_method)method_regressionset_get_inputs,0);
 	rb_define_singleton_method(rb_optimizer_klass, "regression_dataset", (rb_method)method_regressionset_create,-1);
-
 }
 

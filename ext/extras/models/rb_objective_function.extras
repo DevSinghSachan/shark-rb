@@ -117,7 +117,7 @@ VALUE method_objective_function_init (int number_of_arguments, VALUE* ruby_argum
 
 template<class Obtype>
 void InitObjectiveFunction() {
-	rb_define_method(Obtype::rb_class, "step", (rb_method) method_objective_function_step<Obtype>, 1);
-	rb_define_method(Obtype::rb_class, "init", (rb_method) method_objective_function_init<Obtype>, -1);
-	rb_define_method(Obtype::rb_class, "solution", (rb_method) method_objective_function_solution<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "step", (rb_method) method_objective_function_step<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "init", (rb_method) method_objective_function_init<Obtype>, -1);
+	rb_define_method(Obtype::rb_class(), "solution", (rb_method) method_objective_function_solution<Obtype>, 0);
 }

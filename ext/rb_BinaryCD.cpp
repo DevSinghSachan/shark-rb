@@ -1,5 +1,5 @@
 #include "rb_BinaryCD.h"
-#include "rb_pointer_wrapping.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 extern VALUE rb_optimizer_binarycd_klass;
 extern VALUE rb_optimizer_unlabeleddata_klass;

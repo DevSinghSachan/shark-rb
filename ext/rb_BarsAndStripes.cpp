@@ -3,7 +3,7 @@
 extern VALUE rb_optimizer_unlabeleddata_klass;
 extern VALUE rb_optimizer_barsandstripes_klass;
 
-#include "rb_pointer_wrapping.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 VALUE rb_BarsAndStripes::rb_class() {
 	return rb_optimizer_barsandstripes_klass;

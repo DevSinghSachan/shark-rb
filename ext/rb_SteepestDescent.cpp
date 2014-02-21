@@ -15,8 +15,8 @@ SteepestDescent& rb_SteepestDescent::algorithm() {
 	return _algorithm;
 }
 
-#include "rb_pointer_wrapping.extras"
-#include "rb_objective_function.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/models/rb_objective_function.extras"
 
 VALUE method_steepestdescent_allocate (VALUE klass) {
 	return wrap_pointer<rb_SteepestDescent>(

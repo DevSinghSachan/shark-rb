@@ -2,13 +2,17 @@
 using namespace std;
 using namespace shark;
 
-// extern VALUE rb_optimizer_linearmodel_klass;
-// extern VALUE rb_optimizer_realvector_klass;
-// extern VALUE rb_optimizer_realmatrix_klass;
-// extern VALUE rb_optimizer_unlabeleddata_klass;
+extern VALUE rb_optimizer_linearmodel_klass;
+extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_realmatrix_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
 
-#include "rb_pointer_wrapping.extras"
-#include "rb_abstract_model.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/models/rb_abstract_model.extras"
+
+VALUE rb_LinearModel::rb_class () {
+	return rb_optimizer_linearmodel_klass;
+}
 
 RealVector& rb_LinearModel::offset() {
 	return model.offset();

@@ -1,16 +1,20 @@
 #include "rb_RBMBinaryLayer.h"
 
-// extern VALUE rb_optimizer_realvector_klass;
-// extern VALUE rb_optimizer_realvector_reference_klass;
-// extern VALUE rb_optimizer_rbm_binarylayer_klass;
-// extern VALUE rb_optimizer_realmatrix_row_klass;
-// extern VALUE rb_optimizer_realmatrix_column_klass;
+extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_realvector_reference_klass;
+extern VALUE rb_optimizer_rbm_binarylayer_klass;
+extern VALUE rb_optimizer_realmatrix_row_klass;
+extern VALUE rb_optimizer_realmatrix_column_klass;
 
-#include "rb_pointer_wrapping.extras"
-#include "rb_abstract_model.extras"
-#include "rb_vector_resize.extras"
-#include "rb_vector_length.extras"
-#include "rb_neuronlayer_bias.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/models/rb_abstract_model.extras"
+#include "extras/vector/rb_vector_resize.extras"
+#include "extras/vector/rb_vector_length.extras"
+#include "extras/rbm/rb_neuronlayer_bias.extras"
+
+VALUE rb_RBMBinaryLayer::rb_class () {
+	return rb_optimizer_rbm_binarylayer_klass;
+}
 
 shark::BinaryLayer* rb_RBMBinaryLayer::getData() {
 	return &model;

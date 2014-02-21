@@ -31,7 +31,7 @@ VALUE method_abstract_model_set_parameter_vector (VALUE self, VALUE rb_parameter
 
 template<class Obtype>
 void InitAbstractModel() {
-	rb_define_method(Obtype::rb_class, "parameter_vector=", (rb_method) method_abstract_model_set_parameter_vector<Obtype>, 1);
-	rb_define_method(Obtype::rb_class, "parameter_vector", (rb_method) method_abstract_model_get_parameter_vector<Obtype>, 0);
-	rb_define_method(Obtype::rb_class, "number_of_parameters", (rb_method) method_abstract_model_get_number_of_parameters<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "parameter_vector=", (rb_method) method_abstract_model_set_parameter_vector<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "parameter_vector", (rb_method) method_abstract_model_get_parameter_vector<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "number_of_parameters", (rb_method) method_abstract_model_get_number_of_parameters<Obtype>, 0);
 }

@@ -11,5 +11,5 @@ VALUE method_vector_resize (VALUE self, VALUE newlength) {
 
 template<class Obtype>
 void Init_VectorResize() {
-	rb_define_method(Obtype::rb_class, "resize", (rb_method)method_vector_resize<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "resize", (rb_method)method_vector_resize<Obtype>,1);
 };

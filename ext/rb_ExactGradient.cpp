@@ -1,14 +1,18 @@
 #include "rb_ExactGradient.h"
 
-// extern VALUE rb_optimizer_exactgradient_klass;
-// extern VALUE rb_optimizer_unlabeleddata_klass;
-// extern VALUE rb_optimizer_binaryrbm_klass;
-// extern VALUE rb_optimizer_solutionset_klass;
+extern VALUE rb_optimizer_exactgradient_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
+extern VALUE rb_optimizer_binaryrbm_klass;
+extern VALUE rb_optimizer_solutionset_klass;
 
 using namespace shark;
 using namespace std;
 
-#include "rb_pointer_wrapping.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+
+VALUE rb_ExactGradient::rb_class() {
+	return rb_optimizer_exactgradient_klass;
+}
 
 rb_ExactGradient::rb_ExactGradient(BinaryRBM &rbm): _objective(&rbm) {};
 

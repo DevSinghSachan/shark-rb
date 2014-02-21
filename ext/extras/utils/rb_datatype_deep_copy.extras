@@ -17,13 +17,13 @@ VALUE method_datatype_deep_copy(VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	return wrap_pointer<DestinationType>(
-		DestinationType::rb_class,
+		DestinationType::rb_class(),
 		new DestinationType(*(m->getData()))
 		);
 }
 
 template<class Obtype, class DestinationType>
 void Init_DatatypeDeepCopy() {
-	rb_define_method(Obtype::rb_class, "initialize_copy", (rb_method) method_datatype_initialize_copy<Obtype>, 1);
-	rb_define_method(Obtype::rb_class, "deep_copy", (rb_method)method_datatype_deep_copy<Obtype, DestinationType>, 0);
+	rb_define_method(Obtype::rb_class(), "initialize_copy", (rb_method) method_datatype_initialize_copy<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "deep_copy", (rb_method)method_datatype_deep_copy<Obtype, DestinationType>, 0);
 }

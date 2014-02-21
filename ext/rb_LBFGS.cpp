@@ -1,16 +1,20 @@
 #include "rb_LBFGS.h"
-// extern VALUE rb_optimizer_lbfgs_klass;
-// // datatypes:
-// extern VALUE rb_optimizer_solutionset_klass;
-// extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_lbfgs_klass;
+// datatypes:
+extern VALUE rb_optimizer_solutionset_klass;
+extern VALUE rb_optimizer_realvector_klass;
 
 rb_LBFGS::rb_LBFGS() {};
 LBFGS& rb_LBFGS::algorithm() {
 	return _algorithm;
 }
 
-#include "rb_pointer_wrapping.extras"
-#include "rb_objective_function.extras"
+VALUE rb_LBFGS::rb_class() {
+	return rb_optimizer_lbfgs_klass;
+}
+
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/models/rb_objective_function.extras"
 
 VALUE method_lbfgs_allocate (VALUE klass) {
 	return wrap_pointer<rb_LBFGS>(

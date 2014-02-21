@@ -2,8 +2,12 @@
 using namespace shark;
 using namespace std;
 
-#include "rb_pointer_wrapping.extras"
-#include "rb_vector_min_methods.extras"
+#include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/vector/rb_vector_min_methods.extras"
+
+VALUE rb_RealMatrixRow::rb_class () {
+	return rb_optimizer_realmatrix_row_klass;
+}
 
 rb_RealMatrixRow::rb_RealMatrixRow(RealMatrix *matrix, int row) : data(*matrix, row) {}
 

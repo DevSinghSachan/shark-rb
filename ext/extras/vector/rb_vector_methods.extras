@@ -12,7 +12,7 @@ VALUE method_vector_empty (VALUE self) {
 
 template<class Obtype>
 void Init_VectorMethods() {
-	rb_define_method(Obtype::rb_class, "empty?", (rb_method)method_vector_empty<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "empty?", (rb_method)method_vector_empty<Obtype>,0);
 
 	Init_VectorResize<Obtype>();
 	Init_VectorMinMethods<Obtype>();

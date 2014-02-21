@@ -1,12 +1,12 @@
 #include "rb_SolutionSet.h"
-#include "rb_pointer_wrapping.extras"
-
-rb_SolutionSet::rb_SolutionSet (RealVector const& _point, double _value) : point(_point), value(_value) {};
-rb_SolutionSet::rb_SolutionSet () {};
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 VALUE rb_SolutionSet::rb_class () {
 	return rb_optimizer_solutionset_klass;
 }
+
+rb_SolutionSet::rb_SolutionSet (RealVector const& _point, double _value) : point(_point), value(_value) {};
+rb_SolutionSet::rb_SolutionSet () {};
 
 VALUE method_solutionset_point (VALUE self) {
 	rb_SolutionSet *s;

@@ -1,13 +1,17 @@
 #include "rb_BinaryRBM.h"
 #include "rb_pointer_wrapping.extras"
 
-// extern VALUE rb_optimizer_binaryrbm_klass;
-// extern VALUE rb_optimizer_realvector_klass;
-// extern VALUE rb_optimizer_realmatrix_klass;
-// extern VALUE rb_optimizer_realmatrix_reference_klass;
-// extern VALUE rb_optimizer_unlabeleddata_klass;
+extern VALUE rb_optimizer_binaryrbm_klass;
+extern VALUE rb_optimizer_realvector_klass;
+extern VALUE rb_optimizer_realmatrix_klass;
+extern VALUE rb_optimizer_realmatrix_reference_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
 
-#include "rb_abstract_model.extras"
+#include "extras/utils/rb_abstract_model.extras"
+
+VALUE rb_BinaryRBM::rb_class () {
+	return rb_optimizer_binaryrbm_klass;
+}
 
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
