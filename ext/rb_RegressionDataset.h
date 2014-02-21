@@ -9,6 +9,7 @@
 #include <shark/Data/Statistics.h> //for normalization
 #include "rb_UnlabeledData.h"
 #include "rb_conversions.h"
+#include "rb_classes.h"
 
 class rb_RegressionDataset {
 	public:
@@ -21,5 +22,7 @@ class rb_RegressionDataset {
 };
 
 void Init_RegressionDataset();
+
+VALUE rb_RegressionDataset::rb_class = rb_optimizer_regressionset_klass;
 
 #endif

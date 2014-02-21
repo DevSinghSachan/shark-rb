@@ -1,8 +1,9 @@
 #include "rb_LBFGS.h"
-extern VALUE rb_optimizer_lbfgs_klass;
-// datatypes:
-extern VALUE rb_optimizer_solutionset_klass;
-extern VALUE rb_optimizer_realvector_klass;
+// extern VALUE rb_optimizer_lbfgs_klass;
+// // datatypes:
+// extern VALUE rb_optimizer_solutionset_klass;
+// extern VALUE rb_optimizer_realvector_klass;
+
 rb_LBFGS::rb_LBFGS() {};
 LBFGS& rb_LBFGS::algorithm() {
 	return _algorithm;
@@ -35,7 +36,7 @@ VALUE method_lbfgs_set_history_count (VALUE self, VALUE rb_history_count) {
 	return self;
 }
 void Init_LBFGS () {
-	InitObjectiveFunction<rb_LBFGS>(rb_optimizer_lbfgs_klass);
+	InitObjectiveFunction<rb_LBFGS>();
 	rb_define_alloc_func(rb_optimizer_lbfgs_klass,  (rb_alloc_func_t) method_lbfgs_allocate);
 	rb_define_method(rb_optimizer_lbfgs_klass, "initialize", (rb_method) method_lbfgs_initialize, -1);
 	rb_define_method(rb_optimizer_lbfgs_klass, "history_count=", (rb_method) method_lbfgs_set_history_count, 1);

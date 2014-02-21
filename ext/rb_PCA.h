@@ -11,6 +11,7 @@
 #include "rb_RealVector.h"
 #include "rb_LinearModel.h"
 #include "rb_UnlabeledData.h"
+#include "rb_classes.h"
 
 using namespace shark;
 using namespace std;
@@ -37,5 +38,7 @@ class rb_PCA {
 };
 
 void Init_PCA();
+
+VALUE rb_PCA::rb_class = rb_optimizer_pca_klass;
 
 #endif

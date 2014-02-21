@@ -12,5 +12,5 @@ shark::blas::matrix_row<RealMatrix>* rb_RealMatrixRow::getData() {
 }
 
 void Init_RealMatrixRow () {
-	Init_VectorMinMethods<rb_RealMatrixRow>(rb_optimizer_realmatrix_row_klass);
+	Init_VectorMinMethods<rb_RealMatrixRow>();
 }

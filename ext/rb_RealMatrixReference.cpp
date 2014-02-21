@@ -14,5 +14,5 @@ RealMatrix* rb_RealMatrixReference::getData() {
 }
 
 void Init_RealMatrixReference () {
-	Init_MatrixMethods<rb_RealMatrixReference>(rb_optimizer_realmatrix_reference_klass);
+	Init_MatrixMethods<rb_RealMatrixReference>();
 }

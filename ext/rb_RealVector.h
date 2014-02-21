@@ -8,6 +8,7 @@
 #include "rb_conversions.h"
 #include "rb_RealMatrix.h"
 #include "rb_RealVectorReference.h"
+#include "rb_classes.h"
 
 using namespace std;
 using namespace shark;
@@ -22,5 +23,7 @@ class rb_RealVector {
 
 void Init_RealVector ();
 VALUE stdvector_realvector_to_rb_ary_of_realvectors(const std::vector<RealVector*>&);
+
+VALUE rb_RealVector::rb_class = rb_optimizer_realvector_klass;
 
 #endif

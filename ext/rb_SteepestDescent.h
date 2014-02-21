@@ -7,6 +7,7 @@
 #include "rb_ExactGradient.h"
 #include "rb_SolutionSet.h"
 #include "rb_conversions.h"
+#include "rb_classes.h"
 
 using namespace shark;
 
@@ -18,6 +19,8 @@ class rb_SteepestDescent {
 		rb_SteepestDescent();
 
 };
+
+VALUE rb_SteepestDescent::rb_class = rb_optimizer_steepestdescent_klass;
 
 void Init_Steepest_Descent();
 

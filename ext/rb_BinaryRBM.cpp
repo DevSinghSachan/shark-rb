@@ -1,15 +1,13 @@
 #include "rb_BinaryRBM.h"
 #include "rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_binaryrbm_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
-extern VALUE rb_optimizer_realmatrix_reference_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
+// extern VALUE rb_optimizer_binaryrbm_klass;
+// extern VALUE rb_optimizer_realvector_klass;
+// extern VALUE rb_optimizer_realmatrix_klass;
+// extern VALUE rb_optimizer_realmatrix_reference_klass;
+// extern VALUE rb_optimizer_unlabeleddata_klass;
 
 #include "rb_abstract_model.extras"
-
-VALUE rb_BinaryRBM::rb_class = rb_optimizer_binaryrbm_klass;
 
 VALUE method_binaryrbm_allocate (VALUE klass) {
 	return wrap_pointer<rb_BinaryRBM>(
@@ -171,7 +169,7 @@ VALUE method_binaryrbm_get_weight_matrix (VALUE self) {
 }
 
 void Init_BinaryRBM () {
-	InitAbstractModel<rb_BinaryRBM>(rb_optimizer_binaryrbm_klass);
+	InitAbstractModel<rb_BinaryRBM>();
 	rb_define_alloc_func(rb_optimizer_binaryrbm_klass, (rb_alloc_func_t) method_binaryrbm_allocate);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "eval", (rb_method) method_binaryrbm_eval, 1);
 	rb_define_method(rb_optimizer_binaryrbm_klass, "set_structure", (rb_method) method_binaryrbm_set_structure, -1);

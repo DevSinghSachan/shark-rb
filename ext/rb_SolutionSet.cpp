@@ -1,9 +1,6 @@
 #include "rb_SolutionSet.h"
 #include "rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_solutionset_klass;
-extern VALUE rb_optimizer_realvector_klass;
-
 rb_SolutionSet::rb_SolutionSet (RealVector const& _point, double _value) : point(_point), value(_value) {};
 rb_SolutionSet::rb_SolutionSet () {};
 

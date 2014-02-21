@@ -2,15 +2,13 @@
 using namespace std;
 using namespace shark;
 
-extern VALUE rb_optimizer_linearmodel_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
+// extern VALUE rb_optimizer_linearmodel_klass;
+// extern VALUE rb_optimizer_realvector_klass;
+// extern VALUE rb_optimizer_realmatrix_klass;
+// extern VALUE rb_optimizer_unlabeleddata_klass;
 
 #include "rb_pointer_wrapping.extras"
 #include "rb_abstract_model.extras"
-
-VALUE rb_LinearModel::rb_class = rb_optimizer_linearmodel_klass;
 
 RealVector& rb_LinearModel::offset() {
 	return model.offset();
@@ -222,7 +220,7 @@ VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {
 
 void Init_LinearModel() {
 	// Shark LinearModel class:
-	InitAbstractModel<rb_LinearModel>(rb_optimizer_linearmodel_klass);
+	InitAbstractModel<rb_LinearModel>();
 	rb_define_alloc_func(rb_optimizer_linearmodel_klass,  (rb_alloc_func_t) method_linearmodel_allocate);
 	rb_define_method(rb_optimizer_linearmodel_klass, "initialize", (rb_method)method_linearmodel_initialize, -1);
 	rb_define_method(rb_optimizer_linearmodel_klass, "set_structure", (rb_method)method_linearmodel_initialize, -1);

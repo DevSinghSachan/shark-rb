@@ -483,30 +483,28 @@ VALUE method_vector_eql(VALUE self, VALUE rb_other) {
 }
 
 template<class Obtype>
-void Init_VectorMinMethods (VALUE klass) {
-	Init_VectorLength<Obtype>(klass);
-	Init_DatatypeDeepCopy<Obtype, rb_RealVector>(klass);
-	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
-	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
-	rb_define_method(klass, "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
-	rb_define_method(klass, "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
-	rb_define_method(klass, "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
-	rb_define_method(klass, "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
-	rb_define_method(klass, "==", (rb_method) method_vector_soft_eql<Obtype>,1);
-	rb_define_method(klass, "eql?", (rb_method) method_vector_eql<Obtype>,1);
-	rb_define_method(klass, "to_matrix", (rb_method)method_vector_to_matrix<Obtype>,-1);
-	rb_define_method(klass, "*", (rb_method)method_vector_multiply<Obtype>,1);
-	rb_define_method(klass, "*=", (rb_method)method_vector_multiply_equals<Obtype>,1);
-	rb_define_method(klass, "/", (rb_method)method_vector_divide<Obtype>,1);
-	rb_define_method(klass, "/=", (rb_method)method_vector_divide_equals<Obtype>,1);
-	rb_define_method(klass, "+", (rb_method)method_vector_add<Obtype>,1);
-	rb_define_method(klass, "+=", (rb_method)method_vector_add_equals<Obtype>,1);
-	rb_define_method(klass, "-=", (rb_method)method_vector_remove_equals<Obtype>,1);
-	rb_define_method(klass, "clear", (rb_method)method_vector_clear<Obtype>,0);
-	rb_define_method(klass, "-", (rb_method)method_vector_remove<Obtype>,1);
-	rb_define_method(klass, "-@", (rb_method)method_vector_negate<Obtype>,0);
-	rb_define_method(klass, "stride", (rb_method)method_vector_stride<Obtype>,0);
-	rb_define_method(klass, "fill", (rb_method)method_vector_fill<Obtype>,1);
-	rb_define_method(klass, "[]", (rb_method)method_vector_query<Obtype>,1);
-	rb_define_method(klass, "[]=", (rb_method)method_vector_insert<Obtype>,2);
+void Init_VectorMinMethods () {
+	Init_VectorLength<Obtype>();
+	Init_DatatypeDeepCopy<Obtype, rb_RealVector>();
+	rb_define_method(Obtype::rb_class, "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
+	rb_define_method(Obtype::rb_class, "==", (rb_method) method_vector_soft_eql<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "eql?", (rb_method) method_vector_eql<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "to_matrix", (rb_method)method_vector_to_matrix<Obtype>,-1);
+	rb_define_method(Obtype::rb_class, "*", (rb_method)method_vector_multiply<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "*=", (rb_method)method_vector_multiply_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "/", (rb_method)method_vector_divide<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "/=", (rb_method)method_vector_divide_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "+", (rb_method)method_vector_add<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "+=", (rb_method)method_vector_add_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "-=", (rb_method)method_vector_remove_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "clear", (rb_method)method_vector_clear<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "-", (rb_method)method_vector_remove<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "-@", (rb_method)method_vector_negate<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "stride", (rb_method)method_vector_stride<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "fill", (rb_method)method_vector_fill<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "[]", (rb_method)method_vector_query<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "[]=", (rb_method)method_vector_insert<Obtype>,2);
 }

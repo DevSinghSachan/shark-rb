@@ -8,6 +8,7 @@
 #include "rb_RealMatrix.h"
 #include "rb_RealMatrixReference.h"
 #include "rb_conversions.h"
+#include "rb_classes.h"
 
 class rb_RBMBinaryLayer {
 
@@ -18,6 +19,8 @@ class rb_RBMBinaryLayer {
 		rb_RBMBinaryLayer(BinaryLayer const &);
 
 };
+
+VALUE rb_RBMBinaryLayer::rb_class = rb_optimizer_rbm_binarylayer_klass;
 
 void Init_RBMBinaryLayer();
 

@@ -7,6 +7,7 @@
 #include <shark/Data/Dataset.h>
 #include "rb_conversions.h"
 #include "rb_RealVector.h"
+#include "rb_classes.h"
 
 using namespace std;
 using namespace shark;
@@ -20,5 +21,8 @@ class rb_RealMatrixRow {
 };
 
 void Init_RealMatrixRow ();
+
+VALUE rb_RealMatrixRow::rb_class = rb_optimizer_realmatrix_row_klass;
+
 
 #endif

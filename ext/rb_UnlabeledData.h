@@ -10,6 +10,7 @@
 #include "rb_RealVector.h"
 #include "rb_RealMatrix.h"
 #include "rb_conversions.h"
+#include "rb_classes.h"
 
 using namespace std;
 using namespace shark;
@@ -25,5 +26,7 @@ class rb_UnlabeledData {
 };
 
 void Init_UnlabeledData();
+
+VALUE rb_UnlabeledData::rb_class = rb_optimizer_unlabeleddata_klass;
 
 #endif

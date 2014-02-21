@@ -5,8 +5,6 @@ using namespace std;
 #include "rb_pointer_wrapping.extras"
 #include "rb_matrix_methods.extras"
 
-VALUE rb_RealMatrix::rb_class = rb_optimizer_realmatrix_klass;
-
 rb_RealMatrix::rb_RealMatrix() {}
 rb_RealMatrix::rb_RealMatrix(RealMatrix const& _data) {
 	data = _data;// implicit copy here
@@ -41,7 +39,7 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 }
 
 void Init_RealMatrix () {
-	Init_MatrixMethods<rb_RealMatrix>(rb_optimizer_realmatrix_klass);
+	Init_MatrixMethods<rb_RealMatrix>();
 	rb_define_alloc_func(rb_optimizer_realmatrix_klass, (rb_alloc_func_t) method_realmatrix_allocate);
 	rb_define_method(rb_optimizer_realmatrix_klass, "initialize", (rb_method)method_realmatrix_initialize,-1);
 }

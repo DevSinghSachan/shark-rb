@@ -1,7 +1,5 @@
 #include "rb_RealVector.h"
 
-extern VALUE rb_array_klass;
-
 //extern VALUE method_realvector_export_pgm; // this is a promise!
 
 using namespace shark;
@@ -64,7 +62,7 @@ VALUE method_rb_ary_to_realvector (VALUE self) {
 
 void Init_RealVector () {
 
-	Init_VectorMethods<rb_RealVector>(rb_optimizer_realvector_klass);
+	Init_VectorMethods<rb_RealVector>();
 
 	rb_define_method(rb_array_klass, "to_realvector", (rb_method)method_rb_ary_to_realvector, 0);
 	rb_define_alloc_func(rb_optimizer_realvector_klass, (rb_alloc_func_t) method_realvector_allocate);

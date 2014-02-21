@@ -10,6 +10,7 @@
 #include "rb_RealVector.h"
 #include "rb_RealMatrix.h"
 #include "rb_conversions.h"
+#include "rb_classes.h"
 
 using namespace std;
 using namespace shark;
@@ -37,5 +38,7 @@ class rb_LinearModel {
 };
 
 void Init_LinearModel();
+
+VALUE rb_LinearModel::rb_class = rb_optimizer_linearmodel_klass;
 
 #endif

@@ -1,4 +1,3 @@
-
 template<class Obtype>
 VALUE method_vector_resize (VALUE self, VALUE newlength) {
 	Check_Type(newlength, T_FIXNUM);
@@ -11,6 +10,6 @@ VALUE method_vector_resize (VALUE self, VALUE newlength) {
 };
 
 template<class Obtype>
-void Init_VectorResize(VALUE klass) {
-	rb_define_method(klass, "resize", (rb_method)method_vector_resize<Obtype>,1);
+void Init_VectorResize() {
+	rb_define_method(Obtype::rb_class, "resize", (rb_method)method_vector_resize<Obtype>,1);
 };

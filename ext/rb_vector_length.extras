@@ -6,7 +6,7 @@ VALUE method_vector_length (VALUE self) {
 }
 
 template<class Obtype>
-void Init_VectorLength(VALUE klass) {
-	rb_define_method(klass, "length", (rb_method)method_vector_length<Obtype>,0);
-	rb_define_alias(klass, "size", "length");
+void Init_VectorLength() {
+	rb_define_method(Obtype::rb_class, "length", (rb_method)method_vector_length<Obtype>,0);
+	rb_define_alias(Obtype::rb_class, "size", "length");
 }

@@ -12,5 +12,5 @@ shark::blas::matrix_column<RealMatrix>* rb_RealMatrixColumn::getData() {
 }
 
 void Init_RealMatrixColumn () {
-	Init_VectorMinMethods<rb_RealMatrixColumn>(rb_optimizer_realmatrix_column_klass);
+	Init_VectorMinMethods<rb_RealMatrixColumn>();
 }

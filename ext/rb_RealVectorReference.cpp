@@ -14,5 +14,5 @@ RealVector* rb_RealVectorReference::getData() {
 }
 
 void Init_RealVectorReference () {
-	Init_VectorMethods<rb_RealVectorReference>(rb_optimizer_realvector_reference_klass);
+	Init_VectorMethods<rb_RealVectorReference>();
 }

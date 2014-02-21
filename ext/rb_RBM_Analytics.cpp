@@ -101,8 +101,6 @@ VALUE method_rbm_analytics_negative_log_likelihood (int number_of_arguments, VAL
 	}
 };
 
-
-
 void Init_RBM_Analytics () {
 	rb_define_singleton_method(rb_optimizer_rbm_analytics_module, "negative_log_likelihood", (rb_method) method_rbm_analytics_negative_log_likelihood, -1);
 	rb_define_singleton_method(rb_optimizer_rbm_analytics_module, "log_partition_function", (rb_method) method_rbm_analytics_log_partition_function, -1);

@@ -1,4 +1,4 @@
-template<class Obtype, class DestinationType>
+template<class Obtype>
 VALUE method_datatype_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
 	Obtype *orig;
 	Obtype *copy;
@@ -23,7 +23,7 @@ VALUE method_datatype_deep_copy(VALUE self) {
 }
 
 template<class Obtype, class DestinationType>
-void Init_DatatypeDeepCopy(VALUE klass) {
-	rb_define_method(klass, "initialize_copy", (rb_method)method_vector_initialize_copy<Obtype>, 1);
-	rb_define_method(klass, "deep_copy", (rb_method)method_vector_deep_copy<Obtype>, 0);
+void Init_DatatypeDeepCopy() {
+	rb_define_method(Obtype::rb_class, "initialize_copy", (rb_method) method_datatype_initialize_copy<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "deep_copy", (rb_method)method_datatype_deep_copy<Obtype, DestinationType>, 0);
 }

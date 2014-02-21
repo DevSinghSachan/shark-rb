@@ -1,9 +1,9 @@
 #include "rb_SteepestDescent.h"
 
-extern VALUE rb_optimizer_steepestdescent_klass;
-// Datatypes:
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_solutionset_klass;
+// extern VALUE rb_optimizer_steepestdescent_klass;
+// // Datatypes:
+// extern VALUE rb_optimizer_realvector_klass;
+// extern VALUE rb_optimizer_solutionset_klass;
 
 rb_SteepestDescent::rb_SteepestDescent() {};
 
@@ -64,7 +64,7 @@ VALUE method_steepestdescent_get_learning_rate (VALUE self) {
 }
 
 void Init_Steepest_Descent () {
-	InitObjectiveFunction<rb_SteepestDescent>(rb_optimizer_steepestdescent_klass);
+	InitObjectiveFunction<rb_SteepestDescent>();
 	rb_define_alloc_func(rb_optimizer_steepestdescent_klass,  (rb_alloc_func_t) method_steepestdescent_allocate);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "initialize", (rb_method) method_steepestdescent_initialize, -1);
 	rb_define_method(rb_optimizer_steepestdescent_klass, "momentum=", (rb_method) method_steepestdescent_set_momentum, 1);

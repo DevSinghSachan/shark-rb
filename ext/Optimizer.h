@@ -15,7 +15,7 @@
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squard loss usd for regression
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 rgulariziation
 #include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h> //binds together the regularizer with the Error
-
+#include "rb_classes.h"
 
 using namespace std;
 using namespace shark;
@@ -49,11 +49,4 @@ class Optimizer {
 		void setStartingPoint();
 };
 
-/*class Samples {
-	public:
-		int visibleSize;
-		Samples(int,int,int);
-		Samples(VALUE, VALUE);
-		shark::RegressionDataset data;
-		std::vector<shark::RealVector> input ();
-};*/
+VALUE Optimizer::rb_class = rb_optimizer_klass;

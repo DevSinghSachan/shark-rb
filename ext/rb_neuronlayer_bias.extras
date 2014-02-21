@@ -46,7 +46,7 @@ VALUE method_neuronlayer_set_bias(VALUE self, VALUE assignment) {
 }
 
 template<class Obtype>
-void Init_LayerBias(VALUE klass) {
-	rb_define_method(klass, "bias", (rb_method) method_neuronlayer_get_bias<Obtype>, 0);
-	rb_define_method(klass, "bias=", (rb_method) method_neuronlayer_set_bias<Obtype>, 1);
+void Init_LayerBias() {
+	rb_define_method(Obtype::rb_class, "bias", (rb_method) method_neuronlayer_get_bias<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "bias=", (rb_method) method_neuronlayer_set_bias<Obtype>, 1);
 }

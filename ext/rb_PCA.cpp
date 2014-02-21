@@ -3,15 +3,13 @@
 using namespace shark;
 using namespace std;
 
-extern VALUE rb_optimizer_pca_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
-extern VALUE rb_optimizer_linearmodel_klass;
-extern VALUE rb_optimizer_realvector_klass;
-extern VALUE rb_optimizer_realmatrix_klass;
+// extern VALUE rb_optimizer_pca_klass;
+// extern VALUE rb_optimizer_unlabeleddata_klass;
+// extern VALUE rb_optimizer_linearmodel_klass;
+// extern VALUE rb_optimizer_realvector_klass;
+// extern VALUE rb_optimizer_realmatrix_klass;
 
 #include "rb_pointer_wrapping.extras"
-
-VALUE rb_PCA::rb_class = rb_optimizer_pca_klass;
 
 void rb_PCA::train(LinearModel<RealVector> &model, UnlabeledData<RealVector> const& inputs) {
 	trainer.train(model, inputs);

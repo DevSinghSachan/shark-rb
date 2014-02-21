@@ -3,10 +3,6 @@
 using namespace std;
 using namespace shark;
 
-extern VALUE rb_optimizer_regressionset_klass;
-extern VALUE rb_optimizer_unlabeleddata_klass;
-extern VALUE rb_optimizer_klass;
-
 #include "rb_pointer_wrapping.extras"
 
 // Or create fake samples:

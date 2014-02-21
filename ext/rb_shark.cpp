@@ -18,6 +18,7 @@
 // RBM types:
 #include "rb_BinaryRBM.h"
 #include "rb_GaussianBinaryRBM.h"
+#include "rb_RBMBinaryLayer.h"
 // additional RBM goodies:
 #include "rb_RBM_Analytics.h"
 
@@ -456,6 +457,7 @@ extern "C"  {
 		Init_PCA();
 		Init_BinaryRBM();
 		Init_RBM_Analytics();
+		Init_RBMBinaryLayer();
 
 		// Objective Function optimizers:
 		Init_Steepest_Descent();

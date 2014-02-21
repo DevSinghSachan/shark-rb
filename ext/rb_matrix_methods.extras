@@ -4,6 +4,7 @@ extern VALUE rb_optimizer_realvector_klass;
 extern VALUE rb_optimizer_realvector_reference_klass;
 extern VALUE rb_optimizer_realmatrix_row_klass;
 extern VALUE rb_optimizer_realmatrix_column_klass;
+#include "rb_datatype_deep_copy.extras"
 
 template<class Obtype>
 VALUE method_matrix_get_sqrt (VALUE self) {
@@ -689,30 +690,30 @@ VALUE method_matrix_to_columns (VALUE self) {
 	return ary;
 }
 
-template<class Obtype>
-VALUE method_matrix_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
-	Obtype *orig;
-	Obtype *copy;
-	if (rb_copy == rb_orig)
-		return rb_copy;
-	Check_Type(rb_orig, T_DATA);
-	Data_Get_Struct(rb_orig, Obtype, orig);
-	Data_Get_Struct(rb_copy, Obtype, copy);
-	copy->data = orig->data;
+// template<class Obtype>
+// VALUE method_matrix_initialize_copy(VALUE rb_copy, VALUE rb_orig) {
+// 	Obtype *orig;
+// 	Obtype *copy;
+// 	if (rb_copy == rb_orig)
+// 		return rb_copy;
+// 	Check_Type(rb_orig, T_DATA);
+// 	Data_Get_Struct(rb_orig, Obtype, orig);
+// 	Data_Get_Struct(rb_copy, Obtype, copy);
+// 	copy->data = orig->data;
 
-	return rb_copy;
-}
+// 	return rb_copy;
+// }
 
-template<class Obtype>
-VALUE method_matrix_deep_copy(VALUE self) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
+// template<class Obtype>
+// VALUE method_matrix_deep_copy(VALUE self) {
+// 	Obtype *m;
+// 	Data_Get_Struct(self, Obtype, m);
 
-	return wrap_pointer<rb_RealMatrix>(
-		rb_optimizer_realmatrix_klass,
-		new rb_RealMatrix(*(m->getData()))
-		);
-}
+// 	return wrap_pointer<rb_RealMatrix>(
+// 		rb_optimizer_realmatrix_klass,
+// 		new rb_RealMatrix(*(m->getData()))
+// 		);
+// }
 
 template<class Obtype, class OtherObtype>
 VALUE method_matrix_compare(VALUE left, VALUE right) {
@@ -762,38 +763,36 @@ VALUE method_matrix_eql(VALUE self, VALUE rb_other) {
 }
 
 template<class Obtype>
-void Init_MatrixMethods (VALUE klass) {
-
-	rb_define_method(klass, "initialize_copy", (rb_method)method_matrix_initialize_copy<Obtype>, 1);
-	rb_define_method(klass, "deep_copy", (rb_method)method_matrix_deep_copy<Obtype>, 0);
-	rb_define_method(klass, "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
-	rb_define_method(klass, "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
-	rb_define_method(klass, "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
-	rb_define_method(klass, "columns", (rb_method)method_matrix_to_columns<Obtype>,0);
-	rb_define_method(klass, "cols", (rb_method)method_matrix_to_columns<Obtype>,0);
-	rb_define_method(klass, "*", (rb_method)method_matrix_multiply<Obtype>, 1);
-	rb_define_method(klass, "*=", (rb_method)method_matrix_multiply_equals<Obtype>, 1);
-	rb_define_method(klass, "/", (rb_method)method_matrix_divide<Obtype>, 1);
-	rb_define_method(klass, "+", (rb_method)method_matrix_add<Obtype>, 1);
-	rb_define_method(klass, "+=", (rb_method)method_matrix_add_equals<Obtype>, 1);
-	rb_define_method(klass, "length", (rb_method)method_matrix_length<Obtype>, 0);
-	rb_define_method(klass, "==", (rb_method) method_matrix_soft_eql<Obtype>,1);
-	rb_define_method(klass, "eql?", (rb_method) method_matrix_eql<Obtype>,1);
-	rb_define_alias(klass, "size", "length");
-	rb_define_method(klass, "transpose", (rb_method)method_matrix_transpose<Obtype>, 0);
-	rb_define_method(klass, "~", (rb_method)method_matrix_transpose<Obtype>, 0);
-	rb_define_method(klass, "size1", (rb_method)method_matrix_size1<Obtype>, 0);
-	rb_define_method(klass, "size2", (rb_method)method_matrix_size2<Obtype>, 0);
-	rb_define_method(klass, "stride1", (rb_method)method_matrix_stride1<Obtype>, 0);
-	rb_define_method(klass, "stride2", (rb_method)method_matrix_stride2<Obtype>, 0);
-	rb_define_method(klass, "row", (rb_method)method_matrix_get_row<Obtype>, 1);
-	rb_define_method(klass, "column", (rb_method)method_matrix_get_column<Obtype>, 1);
-	rb_define_method(klass, "col", (rb_method)method_matrix_get_column<Obtype>, 1);
-	rb_define_method(klass, "fill", (rb_method)method_matrix_fill<Obtype>, 1);
-	rb_define_method(klass, "clear", (rb_method)method_matrix_clear<Obtype>, 0);
-	rb_define_method(klass, "-@", (rb_method)method_matrix_negate<Obtype>,0);
-	rb_define_method(klass, "[]", (rb_method)method_matrix_query<Obtype>,-1);
-	rb_define_method(klass, "resize", (rb_method)method_matrix_resize<Obtype>, 2);
-	rb_define_method(klass, "[]=", (rb_method)method_matrix_insert<Obtype>,-1);
+void Init_MatrixMethods () {
+	Init_DatatypeDeepCopy<Obtype, rb_RealMatrix>();
+	rb_define_method(Obtype::rb_class, "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "columns", (rb_method)method_matrix_to_columns<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "cols", (rb_method)method_matrix_to_columns<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "*", (rb_method)method_matrix_multiply<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "*=", (rb_method)method_matrix_multiply_equals<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "/", (rb_method)method_matrix_divide<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "+", (rb_method)method_matrix_add<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "+=", (rb_method)method_matrix_add_equals<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "length", (rb_method)method_matrix_length<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "==", (rb_method) method_matrix_soft_eql<Obtype>,1);
+	rb_define_method(Obtype::rb_class, "eql?", (rb_method) method_matrix_eql<Obtype>,1);
+	rb_define_alias(Obtype::rb_class, "size", "length");
+	rb_define_method(Obtype::rb_class, "transpose", (rb_method)method_matrix_transpose<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "~", (rb_method)method_matrix_transpose<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "size1", (rb_method)method_matrix_size1<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "size2", (rb_method)method_matrix_size2<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "stride1", (rb_method)method_matrix_stride1<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "stride2", (rb_method)method_matrix_stride2<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "row", (rb_method)method_matrix_get_row<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "column", (rb_method)method_matrix_get_column<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "col", (rb_method)method_matrix_get_column<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "fill", (rb_method)method_matrix_fill<Obtype>, 1);
+	rb_define_method(Obtype::rb_class, "clear", (rb_method)method_matrix_clear<Obtype>, 0);
+	rb_define_method(Obtype::rb_class, "-@", (rb_method)method_matrix_negate<Obtype>,0);
+	rb_define_method(Obtype::rb_class, "[]", (rb_method)method_matrix_query<Obtype>,-1);
+	rb_define_method(Obtype::rb_class, "resize", (rb_method)method_matrix_resize<Obtype>, 2);
+	rb_define_method(Obtype::rb_class, "[]=", (rb_method)method_matrix_insert<Obtype>,-1);
 
 }
