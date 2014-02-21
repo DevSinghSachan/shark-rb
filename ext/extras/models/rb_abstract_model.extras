@@ -2,7 +2,7 @@ template<class Obtype>
 VALUE method_abstract_model_get_number_of_parameters (VALUE self) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);
-	return INT2FIX(r->model.numberOfParameters());
+	return INT2FIX(r->getModel()->numberOfParameters());
 }
 template<class Obtype>
 VALUE method_abstract_model_get_parameter_vector (VALUE self) {
@@ -10,7 +10,7 @@ VALUE method_abstract_model_get_parameter_vector (VALUE self) {
 	Data_Get_Struct(self, Obtype, r);
 	return wrap_pointer<rb_RealVector>(
 		rb_optimizer_realvector_klass,
-		new rb_RealVector(r->model.parameterVector())
+		new rb_RealVector(r->getModel()->parameterVector())
 	);
 }
 template<class Obtype>
@@ -25,7 +25,7 @@ VALUE method_abstract_model_set_parameter_vector (VALUE self, VALUE rb_parameter
 	rb_RealVector *vec;
 	Data_Get_Struct(rb_parameter_vector, rb_RealVector, vec);
 
-	r->model.setParameterVector(vec->data);
+	r->getModel()->setParameterVector(vec->data);
 	return self;
 }
 

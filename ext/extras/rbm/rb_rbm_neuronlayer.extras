@@ -1,0 +1,25 @@
+template<class Obtype, class NeuronType>
+VALUE method_rbm_get_visible_neurons(VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<NeuronType>(
+		NeuronType::rb_class(),
+		new NeuronType(&(m->visibleNeurons()))
+		);
+}
+
+template<class Obtype, class NeuronType>
+VALUE method_rbm_get_hidden_neurons(VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<NeuronType>(
+		NeuronType::rb_class(),
+		new NeuronType(&(m->hiddenNeurons()))
+		);
+}
+
+template<class Obtype, class NeuronType>
+void Init_RBMNeurons() {
+	rb_define_method(Obtype::rb_class(), "hidden_neurons", (rb_method) method_rbm_get_hidden_neurons<Obtype,NeuronType>, 0);
+	rb_define_method(Obtype::rb_class(), "visible_neurons", (rb_method) method_rbm_get_visible_neurons<Obtype,NeuronType>, 0);
+}

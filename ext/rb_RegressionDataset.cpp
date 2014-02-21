@@ -5,8 +5,10 @@ using namespace shark;
 
 #include "extras/utils/rb_pointer_wrapping.extras"
 extern VALUE rb_optimizer_regressionset_klass;
+extern VALUE rb_optimizer_klass;
+extern VALUE rb_optimizer_unlabeleddata_klass;
 
-VALUE rb_RealVectorReference::rb_class () {
+VALUE rb_RegressionDataset::rb_class () {
 	return rb_optimizer_regressionset_klass;
 }
 

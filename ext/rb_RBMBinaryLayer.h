@@ -14,9 +14,10 @@ class rb_RBMBinaryLayer {
 
 	public:
 		static VALUE rb_class();
-		BinaryLayer model;
+		BinaryLayer* model;
+		BinaryLayer* getModel();
 		BinaryLayer* getData();
-		rb_RBMBinaryLayer(BinaryLayer const &);
+		rb_RBMBinaryLayer(BinaryLayer*);
 
 };
 

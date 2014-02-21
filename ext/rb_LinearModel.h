@@ -35,6 +35,7 @@ class rb_LinearModel {
 		rb_LinearModel(RealMatrix const&, RealVector const&);
 		// should add eval as well.
 		LinearModel<> model;
+		LinearModel<>* getModel();
 };
 
 void Init_LinearModel();

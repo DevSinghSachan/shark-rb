@@ -17,8 +17,15 @@ VALUE rb_RBMBinaryLayer::rb_class () {
 }
 
 shark::BinaryLayer* rb_RBMBinaryLayer::getData() {
-	return &model;
+	return model;
 };
+shark::BinaryLayer* rb_RBMBinaryLayer::getModel() {
+	return model;
+};
+
+rb_RBMBinaryLayer::rb_RBMBinaryLayer(shark::BinaryLayer* _model) {
+	model = _model;
+}
 
 void Init_RBMBinaryLayer() {
 	InitAbstractModel<rb_RBMBinaryLayer>();

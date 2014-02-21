@@ -1,6 +1,9 @@
 #include "rb_SolutionSet.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
+extern VALUE rb_optimizer_solutionset_klass;
+extern VALUE rb_optimizer_realvector_klass;
+
 VALUE rb_SolutionSet::rb_class () {
 	return rb_optimizer_solutionset_klass;
 }
