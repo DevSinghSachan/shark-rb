@@ -47,6 +47,7 @@ VALUE rb_optimizer_rbm_module = rb_define_module_under(rb_optimizer_klass, "RBM"
 
 // RBM Models:
 VALUE rb_optimizer_binaryrbm_klass     = rb_define_class_under(rb_optimizer_rbm_module, "BinaryRBM", rb_cObject);
+VALUE rb_optimizer_rbm_binarylayer_klass = rb_define_class_under(rb_optimizer_rbm_module, "BinaryLayer", rb_cObject);
 VALUE rb_optimizer_gaussbinaryrbm_klass= rb_define_class_under(rb_optimizer_rbm_module, "GaussianBinaryRBM", rb_cObject);
 // RBM submodules: (analytics, energy, etc...)
 VALUE rb_optimizer_rbm_analytics_module = rb_define_module_under(rb_optimizer_rbm_module, "Analytics");

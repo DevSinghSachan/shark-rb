@@ -1,0 +1,10 @@
+template<class Obtype>
+VALUE method_neuronlayer_get_bias(VALUE self) {
+	Obtype *n;
+	Data_Get_Struct(self, Obtype, n);
+
+	return wrap_pointer<rb_RealVectorReference>(
+		rb_optimizer_realvector_reference_klass,
+		new rb_RealVectorReference(&(n->getData()->bias()))
+	);
+}
