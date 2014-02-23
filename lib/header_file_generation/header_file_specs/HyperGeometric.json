@@ -1,31 +1,30 @@
 {
-	"class" : "rb_RNG_Gamma",
-	"wrapped_class": "shark::Gamma< shark::Rng::rng_type >",
+	"class" : "rb_RNG_HyperGeometric",
+	"wrapped_class": "shark::HyperGeometric< shark::Rng::rng_type >",
 	"dependencies": [
-		"<shark/Rng/Gamma.h>",
+		"<shark/Rng/HyperGeometric.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_gamma_klass",
+	"rb_class" : "rb_optimizer_rng_hypergeometric_klass",
 	"getters" : [
 		{
-			"name": "k",
+			"name": "mean",
 			"type": "double"
 		},
 		{
-			"name": "theta",
+			"name": "variance",
 			"type": "double"
 		},
 		{
 			"name": "p",
-			"accessor_name": "p",
 			"number_of_inputs": 1,
 			"types": ["double"],
 			"type": "double"
 		},
 		{
 			"name": "prob",
-			"accessor_name":"p",
+			"accessor_name": "p",
 			"number_of_inputs": 1,
 			"types": ["double"],
 			"type": "double"
@@ -33,11 +32,11 @@
 	],
 	"setters" : [
 		{
-			"name": "k",
+			"name": "mean",
 			"types": ["double"]
 		},
 		{
-			"name": "theta",
+			"name": "variance",
 			"types": ["double"]
 		}
 	],

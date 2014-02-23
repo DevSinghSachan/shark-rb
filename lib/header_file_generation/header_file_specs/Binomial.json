@@ -6,7 +6,7 @@
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_binomial",
+	"rb_class" : "rb_optimizer_rng_binomial_klass",
 	"getters" : [
 		{
 			"name": "n",

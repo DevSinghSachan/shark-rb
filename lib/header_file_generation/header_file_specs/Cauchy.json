@@ -6,7 +6,7 @@
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_cauchy",
+	"rb_class" : "rb_optimizer_rng_cauchy_klass",
 	"getters" : [
 		{
 			"name": "sigma",

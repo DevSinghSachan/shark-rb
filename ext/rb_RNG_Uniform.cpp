@@ -7,17 +7,6 @@ VALUE rb_RNG_Uniform::rb_class() {
 	return rb_optimizer_rng_uniform;
 }
 
-VALUE method_rb_RNG_Uniform_set_n (VALUE self, VALUE parameter_1) {
-	rb_RNG_Uniform *r;
-	Data_Get_Struct(self, rb_RNG_Uniform, r);
-
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-
-	r->getModel()->n(NUM2DBL(parameter_1));
-	return self;
-}
-
 VALUE method_rb_RNG_Uniform_set_set_range (VALUE self, VALUE parameter_1, VALUE parameter_2) {
 	rb_RNG_Uniform *r;
 	Data_Get_Struct(self, rb_RNG_Uniform, r);
@@ -82,7 +71,6 @@ VALUE method_rb_RNG_Uniform_sample (VALUE self) {
 }
 
 void Init_rb_RNG_Uniform () {
-	rb_define_method(rb_RNG_Uniform::rb_class(), "n=", (rb_method) method_rb_RNG_Uniform_set_n, 1);
 	rb_define_method(rb_RNG_Uniform::rb_class(), "set_range=", (rb_method) method_rb_RNG_Uniform_set_set_range, 2);
 	rb_define_method(rb_RNG_Uniform::rb_class(), "low", (rb_method) method_rb_RNG_Uniform_get_low, 0);
 	rb_define_method(rb_RNG_Uniform::rb_class(), "high", (rb_method) method_rb_RNG_Uniform_get_high, 0);

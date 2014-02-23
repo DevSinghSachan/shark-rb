@@ -6,7 +6,7 @@
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_uniform",
+	"rb_class" : "rb_optimizer_rng_uniform_klass",
 	"getters" : [
 		{
 			"name": "low",
@@ -31,10 +31,6 @@
 		}
 	],
 	"setters" : [
-		{
-			"name": "n",
-			"types": ["double"]
-		},
 		{
 			"name": "set_range",
 			"accessor_name": "setRange",
