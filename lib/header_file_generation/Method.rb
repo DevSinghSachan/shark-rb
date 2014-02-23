@@ -1,6 +1,47 @@
 module HeaderFileGenerator
 	class HeaderFile
 		class Method
+			class Input
+				attr_reader :type
+
+				def initialize(opts={})
+					@type = opts[:type].to_sym
+					@position = opts[:position]
+				end
+
+				def parameter_name
+					"parameter_#{@position+1}"
+				end
+
+				def convert_from_double val
+					"NUM2DBL(#{val})"
+				end
+
+				def check
+case @type
+when :double
+"""
+	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
+		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");
+"""
+else# implement other checks as needs be.
+""
+end
+				end
+
+				def to_converted_form
+					case @type
+					when :double
+						convert_from_double parameter_name
+					else # must've been converted beforehand...
+						parameter_name
+					end
+				end
+
+				def to_s
+					to_converted_form
+				end
+			end
 
 			def className
 				@header_file.cpp_class_name
@@ -11,9 +52,13 @@ module HeaderFileGenerator
 				@header_file      = opts["hf"]
 				@cpp_method_name  = opts["accessor_name"] || opts["name"]
 				@method_name      = opts["name"]
-				@input_type       = opts["types"] || "nil"
+				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
-				@return_type      = opts["type"] || "nil"
+				@parameters       = []
+				@number_of_inputs.times do |i|
+					@parameters << Input.new(:type => (@input_type[i] || @input_type[0]), :position => i)
+				end
+				@return_type      = (opts["type"] || "nil").to_sym
 			end
 
 			def symbol
@@ -32,26 +77,38 @@ module HeaderFileGenerator
 				ip
 			end
 
-			def call_methodology
+			def parameters
 				params = []
-				@number_of_inputs.times do |i|
-					params << parameter_name(i)
+				@parameters.each do |param|
+					params << param.to_s
 				end
+				params.join(", ")
+			end
+
+			def checking_methodology
+				checks = []
+				@parameters.each do |param|
+					checks << param.check
+				end
+				checks.join("\n")
+			end
+
+			def call_methodology
 				if @cpp_method_name =~ /operator(.+)/
 					if $1 == "()"
-						"(*#{symbol}->#{@header_file.pointer_acquirer}())(#{params.join(", ")})"
+						"(*#{symbol}->#{@header_file.pointer_acquirer}())(#{parameters})"
 					else
-						"(*#{symbol}->#{@header_file.pointer_acquirer}())#{$1}(#{params.join(", ")})"
+						"(*#{symbol}->#{@header_file.pointer_acquirer}())#{$1}(#{parameters})"
 					end
 				else
-					"#{symbol}->#{@header_file.pointer_acquirer}()->#{@cpp_method_name}(#{params.join(", ")})"
+					"#{symbol}->#{@header_file.pointer_acquirer}()->#{@cpp_method_name}(#{parameters})"
 				end
 			end
 
 			def return_methodology
 				case @return_type
-				when "double"
-					"\treturn NUM2DBL(#{call_methodology})"
+				when :double
+					"\treturn rb_float_new(#{call_methodology})"
 				else
 					"\t#{call_methodology};\n\treturn self"
 				end
@@ -62,6 +119,7 @@ module HeaderFileGenerator
 VALUE #{function_name} (#{input_parameters}) {
 	#{className} *#{symbol};
 	Data_Get_Struct(self, #{className}, #{symbol});
+#{checking_methodology}
 #{return_methodology};
 }
 """

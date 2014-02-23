@@ -13,10 +13,6 @@
 			"type": "double"
 		},
 		{
-			"name": "prob",
-			"type": "double"
-		},
-		{
 			"name": "p",
 			"accessor_name": "prob",
 			"type": "double"
