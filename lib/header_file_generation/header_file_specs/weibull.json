@@ -2,6 +2,7 @@
 	"class" : "rb_RNG_Weibull",
 	"wrapped_class": "shark::Weibull< shark::Rng::rng_type >",
 	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
 		"<shark/Rng/Weibull.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""

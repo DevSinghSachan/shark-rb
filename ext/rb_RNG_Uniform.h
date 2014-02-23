@@ -1,6 +1,7 @@
 #ifndef RB_RNG_UNIFORM_H
 #define RB_RNG_UNIFORM_H
 
+#include <shark/Rng/GlobalRng.h>
 #include <shark/Rng/Uniform.h>
 #include "ruby.h"
 #include "rb_conversions.h"

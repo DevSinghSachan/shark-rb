@@ -1,6 +1,7 @@
 #ifndef RB_RNG_CAUCHY_H
 #define RB_RNG_CAUCHY_H
 
+#include <shark/Rng/GlobalRng.h>
 #include <shark/Rng/Cauchy.h>
 #include "ruby.h"
 #include "rb_conversions.h"

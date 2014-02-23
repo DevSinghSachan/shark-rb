@@ -1,6 +1,7 @@
 #ifndef RB_RNG_HYPERGEOMETRIC_H
 #define RB_RNG_HYPERGEOMETRIC_H
 
+#include <shark/Rng/GlobalRng.h>
 #include <shark/Rng/HyperGeometric.h>
 #include "ruby.h"
 #include "rb_conversions.h"

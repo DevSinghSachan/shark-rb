@@ -2,6 +2,7 @@
 	"class" : "rb_RNG_HyperGeometric",
 	"wrapped_class": "shark::HyperGeometric< shark::Rng::rng_type >",
 	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
 		"<shark/Rng/HyperGeometric.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""

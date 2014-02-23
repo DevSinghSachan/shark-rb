@@ -1,6 +1,7 @@
 #ifndef RB_RNG_BINOMIAL_H
 #define RB_RNG_BINOMIAL_H
 
+#include <shark/Rng/GlobalRng.h>
 #include <shark/Rng/Binomial.h>
 #include "ruby.h"
 #include "rb_conversions.h"

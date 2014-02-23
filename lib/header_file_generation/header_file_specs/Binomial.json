@@ -2,6 +2,7 @@
 	"class" : "rb_RNG_Binomial",
 	"wrapped_class": "shark::Binomial< shark::Rng::rng_type >",
 	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
 		"<shark/Rng/Binomial.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""

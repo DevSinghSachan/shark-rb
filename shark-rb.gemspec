@@ -71,6 +71,8 @@ Gem::Specification.new do |s|
     "ext/rb_RNG_Cauchy.h",
     "ext/rb_RNG_Gamma.cpp",
     "ext/rb_RNG_Gamma.h",
+    "ext/rb_RNG_HyperGeometric.cpp",
+    "ext/rb_RNG_HyperGeometric.h",
     "ext/rb_RNG_Uniform.cpp",
     "ext/rb_RNG_Uniform.h",
     "ext/rb_RNG_Weibull.cpp",

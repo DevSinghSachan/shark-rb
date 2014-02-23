@@ -1,6 +1,7 @@
 #ifndef RB_RNG_WEIBULL_H
 #define RB_RNG_WEIBULL_H
 
+#include <shark/Rng/GlobalRng.h>
 #include <shark/Rng/Weibull.h>
 #include "ruby.h"
 #include "rb_conversions.h"
