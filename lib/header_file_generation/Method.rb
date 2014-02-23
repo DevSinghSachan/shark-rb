@@ -7,6 +7,7 @@ module HeaderFileGenerator
 			end
 
 			def initialize(opts={})
+				raise StandardError.new "\"name\" cannot contain any non a-Z 0-9 _ characters" if (opts["name"] and opts["name"].match(/[^a-zA-Z0-9_]/))
 				@header_file      = opts["hf"]
 				@cpp_method_name  = opts["accessor_name"] || opts["name"]
 				@method_name      = opts["name"]
@@ -70,8 +71,12 @@ VALUE #{function_name} (#{input_parameters}) {
 				"method_#{className}_#{@method_name}"
 			end
 
+			def rb_method_name
+				@method_name
+			end
+
 			def to_rb_function_definition
-				"rb_define_method(#{className}::rb_class(), \"#{@method_name}\", (rb_method) #{function_name}, #{@number_of_inputs});"
+				"rb_define_method(#{className}::rb_class(), \"#{rb_method_name}\", (rb_method) #{function_name}, #{@number_of_inputs});"
 			end
 
 			def to_s
@@ -113,6 +118,10 @@ VALUE #{function_name} (VALUE klass) {
 		class HeaderFileGenerator::HeaderFile::Setter < HeaderFile::Method
 			def initialize(opts={})
 				super({"number_of_inputs" => 1}.merge(opts))
+			end
+
+			def rb_method_name
+				@method_name + "="
 			end
 
 			def function_name

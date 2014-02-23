@@ -1,19 +1,19 @@
 {
-	"class" : "rb_RNG_Weibull",
-	"wrapped_class": "shark::Weibull< shark::Rng::rng_type >",
+	"class" : "rb_RNG_Cauchy",
+	"wrapped_class": "shark::Cauchy< shark::Rng::rng_type >",
 	"dependencies": [
-		"<shark/Rng/Weibull.h>",
+		"<shark/Rng/Cauchy.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_weibull",
+	"rb_class" : "rb_optimizer_rng_cauchy",
 	"getters" : [
 		{
-			"name": "beta",
+			"name": "sigma",
 			"type": "double"
 		},
 		{
-			"name": "alpha",
+			"name": "median",
 			"type": "double"
 		},
 		{
@@ -32,11 +32,13 @@
 	],
 	"setters" : [
 		{
-			"name": "alpha",
+			"name": "n",
 			"types": ["double"]
 		},
 		{
-			"name": "vbeta",
+			"name": "set_range",
+			"accessor_name": "setRange",
+			"number_of_inputs":2,
 			"types": ["double"]
 		}
 	],

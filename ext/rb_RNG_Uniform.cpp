@@ -59,8 +59,8 @@ VALUE method_rb_RNG_Uniform_sample (VALUE self) {
 }
 
 void Init_rb_RNG_Uniform () {
-	rb_define_method(rb_RNG_Uniform::rb_class(), "n", (rb_method) method_rb_RNG_Uniform_set_n, 1);
-	rb_define_method(rb_RNG_Uniform::rb_class(), "set_range", (rb_method) method_rb_RNG_Uniform_set_set_range, 2);
+	rb_define_method(rb_RNG_Uniform::rb_class(), "n=", (rb_method) method_rb_RNG_Uniform_set_n, 1);
+	rb_define_method(rb_RNG_Uniform::rb_class(), "set_range=", (rb_method) method_rb_RNG_Uniform_set_set_range, 2);
 	rb_define_method(rb_RNG_Uniform::rb_class(), "low", (rb_method) method_rb_RNG_Uniform_get_low, 0);
 	rb_define_method(rb_RNG_Uniform::rb_class(), "high", (rb_method) method_rb_RNG_Uniform_get_high, 0);
 	rb_define_method(rb_RNG_Uniform::rb_class(), "p", (rb_method) method_rb_RNG_Uniform_get_p, 1);

@@ -31,17 +31,17 @@
 	],
 	"setters" : [
 		{
-			"name": "n=",
+			"name": "n",
 			"accessor_name":"n",
 			"types": ["double"]
 		},
 		{
-			"name": "p=",
+			"name": "p",
 			"accessor_name":"p",
 			"types": ["double"]
 		},
 		{
-			"name": "prob=",
+			"name": "prob",
 			"accessor_name":"p",
 			"types": ["double"]
 		}

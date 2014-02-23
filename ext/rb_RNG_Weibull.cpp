@@ -7,17 +7,17 @@ VALUE rb_RNG_Weibull::rb_class() {
 	return rb_optimizer_rng_weibull;
 }
 
-VALUE method_rb_RNG_Weibull_set_alpha= (VALUE self, VALUE parameter_1) {
+VALUE method_rb_RNG_Weibull_set_alpha (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
 	Data_Get_Struct(self, rb_RNG_Weibull, r);
-	r->getModel()->alpha=(parameter_1);
+	r->getModel()->alpha(parameter_1);
 	return self;
 }
 
-VALUE method_rb_RNG_Weibull_set_vbeta= (VALUE self, VALUE parameter_1) {
+VALUE method_rb_RNG_Weibull_set_vbeta (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
 	Data_Get_Struct(self, rb_RNG_Weibull, r);
-	r->getModel()->vbeta=(parameter_1);
+	r->getModel()->vbeta(parameter_1);
 	return self;
 }
 
@@ -59,8 +59,8 @@ VALUE method_rb_RNG_Weibull_sample (VALUE self) {
 }
 
 void Init_rb_RNG_Weibull () {
-	rb_define_method(rb_RNG_Weibull::rb_class(), "alpha=", (rb_method) method_rb_RNG_Weibull_set_alpha=, 1);
-	rb_define_method(rb_RNG_Weibull::rb_class(), "vbeta=", (rb_method) method_rb_RNG_Weibull_set_vbeta=, 1);
+	rb_define_method(rb_RNG_Weibull::rb_class(), "alpha=", (rb_method) method_rb_RNG_Weibull_set_alpha, 1);
+	rb_define_method(rb_RNG_Weibull::rb_class(), "vbeta=", (rb_method) method_rb_RNG_Weibull_set_vbeta, 1);
 	rb_define_method(rb_RNG_Weibull::rb_class(), "beta", (rb_method) method_rb_RNG_Weibull_get_beta, 0);
 	rb_define_method(rb_RNG_Weibull::rb_class(), "alpha", (rb_method) method_rb_RNG_Weibull_get_alpha, 0);
 	rb_define_method(rb_RNG_Weibull::rb_class(), "p", (rb_method) method_rb_RNG_Weibull_get_p, 1);
