@@ -61,4 +61,27 @@ VALUE rb_optimizer_binarycd_klass           = rb_define_class_under(rb_optimizer
 VALUE rb_optimizer_exactgradient_klass      = rb_define_class_under(rb_optimizer_klass, "ExactGradient", rb_optimizer_objective_function_klass);
 
 
+// RNG
+VALUE rb_optimizer_rng_klass = rb_define_class_under(rb_optimizer_klass, "RNG", rb_cObject);
+
+VALUE rb_optimizer_rng_weibull = rb_define_class_under(rb_optimizer_rng_klass, "Weibull", rb_cObject);
+VALUE rb_optimizer_rng_bernoulli = rb_define_class_under(rb_optimizer_rng_klass, "Bernoulli", rb_cObject);
+VALUE rb_optimizer_rng_binomial = rb_define_class_under(rb_optimizer_rng_klass, "Binomial", rb_cObject);
+VALUE rb_optimizer_rng_cauchy = rb_define_class_under(rb_optimizer_rng_klass, "Cauchy", rb_cObject);
+VALUE rb_optimizer_rng_diffgeometric = rb_define_class_under(rb_optimizer_rng_klass, "DiffGeometric", rb_cObject);
+VALUE rb_optimizer_rng_dirichlet = rb_define_class_under(rb_optimizer_rng_klass, "Dirichlet", rb_cObject);
+VALUE rb_optimizer_rng_discreteuniform = rb_define_class_under(rb_optimizer_rng_klass, "DiscreteUniform", rb_cObject);
+VALUE rb_optimizer_rng_erlang = rb_define_class_under(rb_optimizer_rng_klass, "Erlang", rb_cObject);
+VALUE rb_optimizer_rng_gamma = rb_define_class_under(rb_optimizer_rng_klass, "Gamma", rb_cObject);
+VALUE rb_optimizer_rng_geometric = rb_define_class_under(rb_optimizer_rng_klass, "Geometric", rb_cObject);
+VALUE rb_optimizer_rng_globalrng = rb_define_class_under(rb_optimizer_rng_klass, "GlobalRng", rb_cObject);
+VALUE rb_optimizer_rng_hypergeometric = rb_define_class_under(rb_optimizer_rng_klass, "HyperGeometric", rb_cObject);
+VALUE rb_optimizer_rng_lognormal = rb_define_class_under(rb_optimizer_rng_klass, "LogNormal", rb_cObject);
+VALUE rb_optimizer_rng_negexponential = rb_define_class_under(rb_optimizer_rng_klass, "NegExponential", rb_cObject);
+VALUE rb_optimizer_rng_normal = rb_define_class_under(rb_optimizer_rng_klass, "Normal", rb_cObject);
+VALUE rb_optimizer_rng_poisson = rb_define_class_under(rb_optimizer_rng_klass, "Poisson", rb_cObject);
+VALUE rb_optimizer_rng_uniform = rb_define_class_under(rb_optimizer_rng_klass, "Uniform", rb_cObject);
+
+
+
 #endif

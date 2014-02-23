@@ -590,7 +590,7 @@ static void method_matrix_insert_column (Obtype *m, int col, VALUE assignment) {
 		}
 	} else if (TYPE(assignment) == T_ARRAY) {
 		if (RARRAY_LEN(assignment) != int(m->getData()->size1()))
-			rb_raise(rb_eArgError, "Can only assign a new column of equal size to previous column length.");
+			rb_raise(rb_eArgError, "Can only insert a new column of equal size to previous column length.");
 		if (RARRAY_LEN(assignment) > 0) {
 			if (TYPE(rb_ary_entry(assignment, 0)) != T_FIXNUM && TYPE(rb_ary_entry(assignment, 0)) != T_FLOAT)
 				rb_raise(rb_eArgError, "Can only insert floats.");

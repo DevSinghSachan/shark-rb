@@ -48,6 +48,7 @@
 #include "Optimizer.h"
 
 #include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/utils/rb_generated_headers.extras"
 
 using namespace std;
 using namespace shark;

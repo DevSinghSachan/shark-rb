@@ -11,19 +11,23 @@ class Optimizer
 				hidden_layer_array.each_with_index do |layer_size, k|
 					input_size         = k == 0 ? @input_size : hidden_layer_array[k-1]
 					# construct sigmoid_layer
-					@sigmoid_layers[k] = HiddenLayer.new @input_size, @layer_size
+					@sigmoid_layers[k] = HiddenLayer.new :input_size => @input_size,
+						:output_size => layer_size,
+						:activation => 
+						:input => k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v
 					# construct rbm_layer
 					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
 					@rbm_layers[k].set_structure hidden: layer_size,
 												 visible: input_size
 					@sigmoid_layers[k].parameters = @rbm_layers[k].weight_matrix
-					# ties both bias and non-bias parameters together.
+					@sigmoid_layers[k].bias       = @rbm_layers[k].hidden_neurons.bias
 				end
 
 				# TODO: add log layer too for logistic regression (Feb 13th 2014).
 			end
 
 			def initialize(opts={})
+				@input          = opts[:samples]
 				@input_size     = opts[:input_size]
 				@output_size    = opts[:output_size]
 				create_rbms_from_layers opts[:hidden_layers]
@@ -47,8 +51,9 @@ class Optimizer
 							if l == 0
 								layer_input = @unlabeled_data
 							else
-								layer_input = @hidden_layers[l-1].sample_h_given_v layer_input
+								layer_input = @sigmoid_layers[l-1].sample_h_given_v layer_input
 							end
+							# may need to be modified...
 							cd.data = layer_input
 
 							# optimize this layer:

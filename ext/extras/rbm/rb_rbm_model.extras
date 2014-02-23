@@ -95,7 +95,7 @@ VALUE method_rbm_eval (VALUE self, VALUE rb_opts) {
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
 					rb_UnlabeledData::rb_class(),
-					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(&r, d->data))
+					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(r, d->data))
 				);
 			} catch (shark::Exception e) {
 				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
@@ -108,7 +108,7 @@ VALUE method_rbm_eval (VALUE self, VALUE rb_opts) {
 			try {
 				return wrap_pointer<rb_UnlabeledData>(
 					rb_UnlabeledData::rb_class(),
-					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(&r, shark::createDataFromRange(vectors)))
+					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(r, shark::createDataFromRange(vectors)))
 				);
 			} catch (shark::Exception e) {
 				rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
@@ -123,7 +123,7 @@ VALUE method_rbm_eval (VALUE self, VALUE rb_opts) {
 		try {
 			return wrap_pointer<rb_UnlabeledData>(
 					rb_UnlabeledData::rb_class(),
-					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(&r, rb_ary_to_unlabeleddata(rb_dataset)))
+					new rb_UnlabeledData(method_rbm_eval_unlabeleddata(r, rb_ary_to_unlabeleddata(rb_dataset)))
 			);
 		} catch (shark::Exception e) {
 			rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the rbm's hidden or visible dimensions.").c_str());
@@ -136,6 +136,7 @@ VALUE method_rbm_eval (VALUE self, VALUE rb_opts) {
 	return self;
 }
 
+template<class Obtype>
 VALUE method_rbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_eval_mean) {
 	if ((rb_forward != Qtrue || rb_forward != Qfalse) && (rb_eval_mean != Qtrue || rb_eval_mean != Qfalse))
 		rb_raise(rb_eArgError, "Evaluation type takes 2 boolean options:\n    1. @param forward whether the forward view should be used false=backwards\n    2. @param evalMean whether the mean state should be returned. false=a sample is\n      returned.");
@@ -145,17 +146,22 @@ VALUE method_rbm_evaluation_type (VALUE self, VALUE rb_forward, VALUE rb_eval_me
 	r->getModel()->evaluationType(rb_forward == Qtrue, rb_eval_mean == Qtrue);
 	return self;
 }
+
+template<class Obtype>
 VALUE method_rbm_number_of_hidden_neurons(VALUE self) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);
 	return INT2FIX(r->getModel()->numberOfHN());
 }
+
+template<class Obtype>
 VALUE method_rbm_number_of_visible_neurons(VALUE self) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);
 	return INT2FIX(r->getModel()->numberOfVN());
 }
 
+template<class Obtype>
 VALUE method_rbm_get_weight_matrix (VALUE self) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);

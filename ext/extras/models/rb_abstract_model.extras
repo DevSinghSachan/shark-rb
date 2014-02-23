@@ -17,15 +17,38 @@ template<class Obtype>
 VALUE method_abstract_model_set_parameter_vector (VALUE self, VALUE rb_parameter_vector) {
 	Obtype *r;
 	Data_Get_Struct(self, Obtype, r);
-
-	Check_Type(rb_parameter_vector, T_DATA);
-	if (CLASS_OF(rb_parameter_vector) != rb_RealVector::rb_class())
-		rb_raise(rb_eArgError, "%s's parameter vector can only be set using a RealVector.", rb_obj_classname(self));
-
-	rb_RealVector *vec;
-	Data_Get_Struct(rb_parameter_vector, rb_RealVector, vec);
-
-	r->getModel()->setParameterVector(vec->data);
+	try {
+		if (TYPE(rb_parameter_vector) == T_DATA) {
+			if (CLASS_OF(rb_parameter_vector) == rb_RealVector::rb_class()) {
+				rb_RealVector *v;
+				Data_Get_Struct(rb_parameter_vector, rb_RealVector, v);
+				r->getModel()->setParameterVector(*(v->getData()));
+			} else if (CLASS_OF(rb_parameter_vector) == rb_RealVectorReference::rb_class()) {
+				rb_RealVectorReference *v;
+				Data_Get_Struct(rb_parameter_vector, rb_RealVectorReference, v);
+				r->getModel()->setParameterVector(*(v->getData()));
+			} else if (CLASS_OF(rb_parameter_vector) == rb_RealMatrixRow::rb_class()) {
+				rb_RealMatrixRow *v;
+				Data_Get_Struct(rb_parameter_vector, rb_RealMatrixRow, v);
+				r->getModel()->setParameterVector(*(v->getData()));
+			} else if (CLASS_OF(rb_parameter_vector) == rb_RealMatrixColumn::rb_class()) {
+				rb_RealMatrixColumn *v;
+				Data_Get_Struct(rb_parameter_vector, rb_RealMatrixColumn, v);
+				r->getModel()->setParameterVector(*(v->getData()));
+			} else {
+				rb_raise(rb_eArgError, "Can only assign RealVector/Array/RealMatrixRow/RealMatrixColumn.");
+			}
+		} else if (TYPE(rb_parameter_vector) == T_ARRAY) {
+			if (TYPE(rb_ary_entry(rb_parameter_vector, 0)) != T_FIXNUM && TYPE(rb_ary_entry(rb_parameter_vector, 0)) != T_FLOAT)
+				rb_raise(rb_eArgError, "Can only assign floats.");
+			RealVector vec = rb_ary_to_1d_realvector(rb_parameter_vector);
+			r->getModel()->setParameterVector(vec);
+		} else {
+			rb_raise(rb_eArgError, "Can only assign RealVector/Array/RealMatrixRow/RealMatrixColumn.");
+		}
+	} catch (shark::Exception e) {
+		rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the parameter vector you are setting corresponds to the expected format of %s").c_str(), rb_class2name(Obtype::rb_class()));
+	}
 	return self;
 }
 

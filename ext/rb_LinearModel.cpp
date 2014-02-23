@@ -103,7 +103,7 @@ VALUE method_linearmodel_offset(VALUE self) {
 		new rb_RealVector(m->getModel()->offset())
 	);
 };
-g
+
 VALUE method_linearmodel_matrix(VALUE self) {
 	rb_LinearModel *m;
 	Data_Get_Struct(self, rb_LinearModel, m);

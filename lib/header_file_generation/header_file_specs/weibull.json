@@ -1,0 +1,44 @@
+{
+	"class" : "rb_RNG_Weibull",
+	"wrapped_class": "shark::Weibull< shark::Rng::rng_type >",
+	"dependencies": [
+		"<shark/Rng/Weibull.h>",
+		"\"ruby.h\"",
+		"\"rb_conversions.h\""
+	],
+	"rb_class" : "rb_optimizer_rng_weibull",
+	"getters" : [
+		{
+			"name": "beta",
+			"type": "double"
+		},
+		{
+			"name": "alpha",
+			"type": "double"
+		}
+	],
+	"setters" : [
+		{
+			"name": "alpha",
+			"types": ["double"]
+		},
+		{
+			"name": "vbeta",
+			"types": ["double"]
+		}
+	],
+	"methods": [
+		{
+			"name": "p",
+			"accessor_name": "p",
+			"types": ["double"]
+		},
+		{
+			"name": "sample",
+			"accessor_name": "operator()",
+			"types": ["double"],
+			"number_of_inputs": 1,
+			"type": "double"
+		}
+	]
+}

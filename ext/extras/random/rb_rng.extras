@@ -1,0 +1,20 @@
+template<class Obtype>
+VALUE method_rng_allocate (VALUE klass) {
+	return wrap_pointer<Obtype>(
+		Obtype::rb_class(),
+		new Obtype()
+		);
+}
+
+template<class Obtype>
+VALUE method_rng_sample (VALUE self) {
+	Obtype *r;
+	Data_Get_Struct(self, Obtype, r);
+	return NUM2DBL((*r)());
+}
+
+template<class Obtype>
+void Init_RNG() {
+	rb_define_alloc_func(Obtype::rb_class(), (rb_alloc_func_t) method_rng_allocate<Obtype>);
+	rb_define_method(Obtype::rb_class(), "sample", (rb_method) method_rng_sample<Obtype>, 0);
+}

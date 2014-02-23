@@ -11,6 +11,7 @@
 #include "rb_RBM_Analytics.h"
 #include "rb_SteepestDescent.h"
 #include "rb_RBMBinaryLayer.h"
+#include "rb_RBMGaussianLayer.h"
 #include <shark/Data/Dataset.h>
 #include <shark/Unsupervised/RBM/GaussianBinaryRBM.h>
 
