@@ -1,6 +1,8 @@
 #include "rb_RNG_Binomial.h"
+#include "rb_RNG_Uniform.h"
 #include "rb_RNG_Weibull.h"
 void Init_Generated_Headers() {
 	Init_rb_RNG_Binomial();
+	Init_rb_RNG_Uniform();
 	Init_rb_RNG_Weibull();
 }

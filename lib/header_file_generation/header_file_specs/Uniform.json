@@ -1,29 +1,30 @@
 {
-	"class" : "rb_RNG_Binomial",
-	"wrapped_class": "shark::Binomial< shark::Rng::rng_type >",
+	"class" : "rb_RNG_Uniform",
+	"wrapped_class": "shark::Uniform< shark::Rng::rng_type >",
 	"dependencies": [
-		"<shark/Rng/Binomial.h>",
+		"<shark/Rng/Uniform.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_binomial",
+	"rb_class" : "rb_optimizer_rng_uniform",
 	"getters" : [
 		{
-			"name": "n",
+			"name": "low",
 			"type": "double"
 		},
 		{
-			"name": "prob",
+			"name": "high",
 			"type": "double"
 		},
 		{
 			"name": "p",
 			"accessor_name": "prob",
+			"number_of_inputs": 1,
+			"types": ["double"],
 			"type": "double"
 		},
 		{
 			"name": "prob",
-			"accessor_name":"p",
 			"number_of_inputs": 1,
 			"types": ["double"],
 			"type": "double"
@@ -31,18 +32,13 @@
 	],
 	"setters" : [
 		{
-			"name": "n=",
-			"accessor_name":"n",
+			"name": "n",
 			"types": ["double"]
 		},
 		{
-			"name": "p=",
-			"accessor_name":"p",
-			"types": ["double"]
-		},
-		{
-			"name": "prob=",
-			"accessor_name":"p",
+			"name": "set_range",
+			"accessor_name": "setRange",
+			"number_of_inputs":2,
 			"types": ["double"]
 		}
 	],

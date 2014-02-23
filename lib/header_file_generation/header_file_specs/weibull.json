@@ -15,26 +15,32 @@
 		{
 			"name": "alpha",
 			"type": "double"
+		},
+		{
+			"name": "p",
+			"accessor_name": "prob",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		},
+		{
+			"name": "prob",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
 		}
 	],
 	"setters" : [
 		{
-			"name": "alpha",
+			"name": "alpha=",
 			"types": ["double"]
 		},
 		{
-			"name": "vbeta",
+			"name": "vbeta=",
 			"types": ["double"]
 		}
 	],
 	"methods": [
-		{
-			"name": "p",
-			"accessor_name": "p",
-			"types":["double"],
-			"number_of_inputs": 1,
-			"type": "double"
-		},
 		{
 			"name": "sample",
 			"accessor_name": "operator()",
