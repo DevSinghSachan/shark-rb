@@ -13,8 +13,8 @@ class Optimizer
 					# construct sigmoid_layer
 					@sigmoid_layers[k] = HiddenLayer.new :input_size => @input_size,
 						:output_size => layer_size,
-						:activation => 
-						:input => k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v
+						:activation => :sigmoid,
+						:input => (k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v)
 					# construct rbm_layer
 					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
 					@rbm_layers[k].set_structure hidden: layer_size,

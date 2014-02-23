@@ -31,10 +31,6 @@ module HeaderFileGenerator
 				ip
 			end
 
-			def pointer_acquirer
-				"getModel()"
-			end
-
 			def call_methodology
 				params = []
 				@number_of_inputs.times do |i|
@@ -42,12 +38,12 @@ module HeaderFileGenerator
 				end
 				if @cpp_method_name =~ /operator(.+)/
 					if $1 == "()"
-						"(*#{symbol}->#{pointer_acquirer})(#{params.join(", ")})"
+						"(*#{symbol}->#{@header_file.pointer_acquirer}())(#{params.join(", ")})"
 					else
-						"(*#{symbol}->#{pointer_acquirer})#{$1}(#{params.join(", ")})"
+						"(*#{symbol}->#{@header_file.pointer_acquirer}())#{$1}(#{params.join(", ")})"
 					end
 				else
-					"#{symbol}->#{pointer_acquirer}->#{@cpp_method_name}(#{params.join(", ")})"
+					"#{symbol}->#{@header_file.pointer_acquirer}()->#{@cpp_method_name}(#{params.join(", ")})"
 				end
 			end
 
@@ -60,7 +56,7 @@ module HeaderFileGenerator
 				end
 			end
 
-			def to_function_definition
+			def to_cpp_function_definition
 """
 VALUE #{function_name} (#{input_parameters}) {
 	#{className} *#{symbol};
@@ -79,12 +75,12 @@ VALUE #{function_name} (#{input_parameters}) {
 			end
 
 			def to_s
-				to_function_definition
+				to_cpp_function_definition
 			end
 		end
 
 		class HeaderFileGenerator::HeaderFile::Allocator < HeaderFile::Method
-			def to_function_defintion
+			def to_cpp_function_definition
 """
 VALUE #{function_name} (VALUE klass) {
 	return wrap_pointer<#{className}>(

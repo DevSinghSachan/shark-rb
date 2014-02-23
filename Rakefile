@@ -14,9 +14,10 @@ rescue LoadError
 	puts "Jeweler not available. Install it with: gem install jeweler"
 end
 
-require './lib/header_file_generation.rb'
+
 
 desc 'Generate Header Files'
 task :header do
-	SharkHeaderFileGenerator.generate_header_files
+	require './lib/header_file_generation/header_file_generation.rb'
+	HeaderFileGenerator.generate_header_files
 end

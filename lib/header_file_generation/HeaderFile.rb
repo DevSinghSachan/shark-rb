@@ -3,6 +3,7 @@ module HeaderFileGenerator
 		attr_reader :getters
 		attr_reader :setters
 		attr_reader :cpp_class_name
+		attr_reader :pointer_acquirer
 
 		def define_getters getter_list=[]
 			if !getter_list.nil?
@@ -29,18 +30,21 @@ module HeaderFileGenerator
 		end
 
 		def initialize(opts={})
-			@setters = []
-			@getters = []
-			@methods = []
-			@wrapped_class = opts["wrapped_class"]
-			@dependencies = opts["dependencies"]
+			@setters, @methods, @getters = [], [], []
+			@wrapped_class  = opts["wrapped_class"]
+			@dependencies   = opts["dependencies"]
+			@pointer_acquirer = opts["pointer_getter"] || "getModel"
 			@cpp_class_name = opts["class"]
-			@rb_class_name = opts["rb_class"]
+			@rb_class_name  = opts["rb_class"]
 			# this is to define the function that returns the class and singleton methods too
 			@methods << Allocator.new("hf" => self)
-			define_setters(opts["setters"])
-			define_getters(opts["getters"])
-			define_methods(opts["methods"])
+			define_setters opts["setters"]
+			define_getters opts["getters"]
+			define_methods opts["methods"]
+		end
+
+		def init_function_name
+			"Init_#{@cpp_class_name}"
 		end
 
 		def generate_init_function
@@ -56,7 +60,7 @@ module HeaderFileGenerator
 			end
 			func_definition = rb_function_definitions.join("\n")
 """
-void Init_#{@cpp_class_name} () {
+void #{init_function_name} () {
 #{func_definition}
 }"""
 		end
@@ -87,25 +91,24 @@ VALUE #{@cpp_class_name}::rb_class() {
 			cpp += "\n"
 			cpp += generate_rb_class_function
 			@setters.each do |setter|
-				cpp += setter.to_function_definition
+				cpp += setter.to_cpp_function_definition
 			end
 			@getters.each do |getter|
-				cpp += getter.to_function_definition
+				cpp += getter.to_cpp_function_definition
 			end
 			@methods.each do |method|
-				cpp += method.to_function_definition
+				cpp += method.to_cpp_function_definition
 			end
 			cpp += generate_init_function
 			cpp
 		end
 
 		def h_file_dependencies
-	@dependencies.map {|i| "#include "+i}.join("\n")
+			@dependencies.map {|i| "#include "+i}.join("\n")
 		end
 
 		def to_h_file
-			"""
-#ifndef #{@cpp_class_name.upcase}_H
+"""#ifndef #{@cpp_class_name.upcase}_H
 #define #{@cpp_class_name.upcase}_H
 
 #{h_file_dependencies}
@@ -113,11 +116,14 @@ VALUE #{@cpp_class_name}::rb_class() {
 class #{@cpp_class_name} {
 
 	public:
-		VALUE rb_class();
+		static VALUE rb_class();
 		#{@wrapped_class}   model;
 		#{@wrapped_class} * getModel();
 		#{@cpp_class_name}();
 };
+
+void #{init_function_name}();
+
 #endif
 """
 		end

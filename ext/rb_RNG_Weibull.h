@@ -1,4 +1,3 @@
-
 #ifndef RB_RNG_WEIBULL_H
 #define RB_RNG_WEIBULL_H
 
@@ -9,9 +8,12 @@
 class rb_RNG_Weibull {
 
 	public:
-		VALUE rb_class();
+		static VALUE rb_class();
 		shark::Weibull< shark::Rng::rng_type >   model;
 		shark::Weibull< shark::Rng::rng_type > * getModel();
 		rb_RNG_Weibull();
 };
+
+void Init_rb_RNG_Weibull();
+
 #endif

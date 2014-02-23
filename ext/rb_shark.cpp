@@ -466,5 +466,7 @@ extern "C"  {
 		// Sample Problems:
 		Init_BarsAndStripes();
 
+		Init_Generated_Headers();
+
 	}
 }

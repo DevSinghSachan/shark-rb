@@ -31,13 +31,13 @@
 		{
 			"name": "p",
 			"accessor_name": "p",
-			"types": ["double"]
+			"types":["double"],
+			"number_of_inputs": 1,
+			"type": "double"
 		},
 		{
 			"name": "sample",
 			"accessor_name": "operator()",
-			"types": ["double"],
-			"number_of_inputs": 1,
 			"type": "double"
 		}
 	]

@@ -33,24 +33,23 @@ VALUE method_rb_RNG_Weibull_get_alpha (VALUE self) {
 	return NUM2DBL(r->getModel()->alpha());
 }
 
-VALUE method_rb_RNG_Weibull_allocate (VALUE self) {
-	rb_RNG_Weibull *r;
-	Data_Get_Struct(self, rb_RNG_Weibull, r);
-	r->getModel()->();
-	return self;
+VALUE method_rb_RNG_Weibull_allocate (VALUE klass) {
+	return wrap_pointer<rb_RNG_Weibull>(
+		rb_RNG_Weibull::rb_class(),
+		new rb_RNG_Weibull()
+		);
 }
 
-VALUE method_rb_RNG_Weibull_p (VALUE self) {
+VALUE method_rb_RNG_Weibull_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
 	Data_Get_Struct(self, rb_RNG_Weibull, r);
-	r->getModel()->p();
-	return self;
+	return NUM2DBL(r->getModel()->p(parameter_1));
 }
 
-VALUE method_rb_RNG_Weibull_sample (VALUE self, VALUE parameter_1) {
+VALUE method_rb_RNG_Weibull_sample (VALUE self) {
 	rb_RNG_Weibull *r;
 	Data_Get_Struct(self, rb_RNG_Weibull, r);
-	return NUM2DBL((*r->getModel())(parameter_1));
+	return NUM2DBL((*r->getModel())());
 }
 
 void Init_rb_RNG_Weibull () {
@@ -59,6 +58,6 @@ void Init_rb_RNG_Weibull () {
 	rb_define_method(rb_RNG_Weibull::rb_class(), "beta", (rb_method) method_rb_RNG_Weibull_get_beta, 0);
 	rb_define_method(rb_RNG_Weibull::rb_class(), "alpha", (rb_method) method_rb_RNG_Weibull_get_alpha, 0);
 	rb_define_alloc_func(rb_RNG_Weibull::rb_class(), (rb_alloc_func_t) method_rb_RNG_Weibull_allocate);
-	rb_define_method(rb_RNG_Weibull::rb_class(), "p", (rb_method) method_rb_RNG_Weibull_p, 0);
-	rb_define_method(rb_RNG_Weibull::rb_class(), "sample", (rb_method) method_rb_RNG_Weibull_sample, 1);
+	rb_define_method(rb_RNG_Weibull::rb_class(), "p", (rb_method) method_rb_RNG_Weibull_p, 1);
+	rb_define_method(rb_RNG_Weibull::rb_class(), "sample", (rb_method) method_rb_RNG_Weibull_sample, 0);
 }

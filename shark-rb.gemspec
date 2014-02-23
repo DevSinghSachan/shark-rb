@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-02-21"
+  s.date = "2014-02-23"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -29,10 +29,13 @@ Gem::Specification.new do |s|
     "ext/extras/matrix/rb_matrix_methods.extras",
     "ext/extras/models/rb_abstract_model.extras",
     "ext/extras/models/rb_objective_function.extras",
+    "ext/extras/random/rb_rng.extras",
     "ext/extras/rbm/rb_neuronlayer_bias.extras",
     "ext/extras/rbm/rb_neuronlayer_model.extras",
+    "ext/extras/rbm/rb_rbm_model.extras",
     "ext/extras/rbm/rb_rbm_neuronlayer.extras",
     "ext/extras/utils/rb_datatype_deep_copy.extras",
+    "ext/extras/utils/rb_generated_headers.extras",
     "ext/extras/utils/rb_pointer_wrapping.extras",
     "ext/extras/vector/rb_vector_length.extras",
     "ext/extras/vector/rb_vector_methods.extras",
@@ -47,6 +50,7 @@ Gem::Specification.new do |s|
     "ext/rb_BinaryRBM.h",
     "ext/rb_ExactGradient.cpp",
     "ext/rb_ExactGradient.h",
+    "ext/rb_GaussianBinaryRBM.cpp",
     "ext/rb_GaussianBinaryRBM.h",
     "ext/rb_LBFGS.cpp",
     "ext/rb_LBFGS.h",
@@ -60,6 +64,9 @@ Gem::Specification.new do |s|
     "ext/rb_RBMGaussianLayer.h",
     "ext/rb_RBM_Analytics.cpp",
     "ext/rb_RBM_Analytics.h",
+    "ext/rb_RNG.h",
+    "ext/rb_RNG_Weibull.cpp",
+    "ext/rb_RNG_Weibull.h",
     "ext/rb_RealMatrix.cpp",
     "ext/rb_RealMatrix.h",
     "ext/rb_RealMatrixColumn.cpp",
@@ -84,7 +91,6 @@ Gem::Specification.new do |s|
     "ext/rb_classes.h",
     "ext/rb_conversions.cpp",
     "ext/rb_conversions.h",
-    "ext/rb_matrix_methods.extras",
     "ext/rb_shark.bundle",
     "ext/rb_shark.cpp",
     "lib/autoencoder_text/autoencoder_text.rb",
@@ -94,6 +100,10 @@ Gem::Specification.new do |s|
     "lib/deep_belief_network/DBN.rb",
     "lib/deep_belief_network/HiddenLayer.rb",
     "lib/deep_belief_network/deep_belief_network.rb",
+    "lib/header_file_generation/HeaderFile.rb",
+    "lib/header_file_generation/Method.rb",
+    "lib/header_file_generation/header_file_generation.rb",
+    "lib/header_file_generation/header_file_specs/weibull.json",
     "lib/pca_text/pca_text.rb",
     "lib/shark-rb.rb",
     "shark-rb.gemspec"
