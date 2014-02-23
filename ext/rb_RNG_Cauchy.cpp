@@ -1,10 +1,10 @@
 #include "rb_RNG_Cauchy.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_rng_cauchy;
+extern VALUE rb_optimizer_rng_cauchy_klass;
 
 VALUE rb_RNG_Cauchy::rb_class() {
-	return rb_optimizer_rng_cauchy;
+	return rb_optimizer_rng_cauchy_klass;
 }
 
 VALUE method_rb_RNG_Cauchy_set_median (VALUE self, VALUE parameter_1) {

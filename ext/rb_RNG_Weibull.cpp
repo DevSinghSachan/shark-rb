@@ -1,10 +1,10 @@
 #include "rb_RNG_Weibull.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_rng_weibull;
+extern VALUE rb_optimizer_rng_weibull_klass;
 
 VALUE rb_RNG_Weibull::rb_class() {
-	return rb_optimizer_rng_weibull;
+	return rb_optimizer_rng_weibull_klass;
 }
 
 VALUE method_rb_RNG_Weibull_set_alpha (VALUE self, VALUE parameter_1) {

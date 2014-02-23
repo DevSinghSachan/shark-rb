@@ -1,10 +1,10 @@
 #include "rb_RNG_Binomial.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_rng_binomial;
+extern VALUE rb_optimizer_rng_binomial_klass;
 
 VALUE rb_RNG_Binomial::rb_class() {
-	return rb_optimizer_rng_binomial;
+	return rb_optimizer_rng_binomial_klass;
 }
 
 VALUE method_rb_RNG_Binomial_set_n (VALUE self, VALUE parameter_1) {

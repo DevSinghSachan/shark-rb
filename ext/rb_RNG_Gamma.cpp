@@ -1,10 +1,10 @@
 #include "rb_RNG_Gamma.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_rng_gamma;
+extern VALUE rb_optimizer_rng_gamma_klass;
 
 VALUE rb_RNG_Gamma::rb_class() {
-	return rb_optimizer_rng_gamma;
+	return rb_optimizer_rng_gamma_klass;
 }
 
 VALUE method_rb_RNG_Gamma_set_k (VALUE self, VALUE parameter_1) {

@@ -1,10 +1,10 @@
 #include "rb_RNG_Uniform.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
-extern VALUE rb_optimizer_rng_uniform;
+extern VALUE rb_optimizer_rng_uniform_klass;
 
 VALUE rb_RNG_Uniform::rb_class() {
-	return rb_optimizer_rng_uniform;
+	return rb_optimizer_rng_uniform_klass;
 }
 
 VALUE method_rb_RNG_Uniform_set_set_range (VALUE self, VALUE parameter_1, VALUE parameter_2) {
