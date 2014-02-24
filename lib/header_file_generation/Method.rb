@@ -117,14 +117,14 @@ module HeaderFileGenerator
 					end
 				end
 
-				def convert_into_class inputClass
+				def convert_into_class inputClass, indent=0
 """
-	#{inputClass.pointer} #{converted_parameter_name};
-	Data_Get_Struct(#{parameter_name}, #{inputClass}, #{converted_parameter_name});
+#{"\t"*indent}#{inputClass.pointer} #{converted_parameter_name};
+#{"\t"*indent}Data_Get_Struct(#{parameter_name}, #{inputClass}, #{converted_parameter_name});
 """
 				end
 
-				def convert_and_embed(all_params, remaining_params, calling_methodology)
+				def convert_and_embed(all_params, remaining_params, calling_methodology, indent=0)
 					if requires_conversion?
 						cpp = ""
 						compatible_classes.each_with_index do |cpp_class, k|
@@ -132,17 +132,17 @@ module HeaderFileGenerator
 							cpp += convert_into_class cpp_class
 							self.input_class = cpp_class
 							if remaining_params.length > 0
-								cpp += remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology
+								cpp += remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology, indent+1
 							else
 								cpp += (calling_methodology.call() + ";\n")
 							end
-							cpp += "}"
+							cpp += ("\t"*indent+"}")
 						end
 						cpp += "\n"
 						cpp
 					else
 						if remaining_params.length > 0
-							remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology
+							remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology, indent
 						else
 							calling_methodology.call() + ";\n"
 						end
@@ -293,7 +293,8 @@ module HeaderFileGenerator
 				cpp += @parameters.first.convert_and_embed(
 					@parameters,
 					@parameters[1..(@parameters.length - 1)],
-					Proc.new {self.call_methodology})
+					Proc.new {self.call_methodology},
+					1)
 				cpp
 			end
 
