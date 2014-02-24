@@ -251,7 +251,7 @@ module HeaderFileGenerator
 				@method_name      = opts["name"]
 				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
-				if opts["types"] and opts["types"].length > 0 and (opts["number_of_inputs"].nil? || opts["number_of_inputs"] != opts["types"].length)
+				if opts["types"] and opts["types"].length > 0 and (opts["number_of_inputs"].nil? || opts["number_of_inputs"] < opts["types"].length)
 					puts "@header_file.cpp_class_name = #{@header_file.cpp_class_name}\n@method_name  = #{@method_name}\nopts[\"types\"] = #{opts["types"]}\n\n"
 					@number_of_inputs = opts["types"].length
 				end
