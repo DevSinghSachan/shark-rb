@@ -37,19 +37,23 @@ task :header do
 	if hfiles.length > 0 or json_spec_files.length > 0
 		g = Git.open(File.dirname(__FILE__))
 		if (g.status.untracked.keys.map {|i| File.dirname(__FILE__) + "/" + i} & hfiles).length > 0
-			puts "case 1"
+			# add json descriptions
 			g.add(json_spec_files)
+			# add header files:
 			g.add(hfiles)
+			# add cpp files:
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
 			g.commit_all("new header files")
 			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
 			puts "new header files, rebuilding"
 			Rake::Task["clean"]
 			Rake::Task["build"]
-		elsif intersection = ((g.status.changed.keys + g.status.untracked.keys).map {|i| File.dirname(__FILE__) + "/" + i} & hfiles) and intersection.length > 0
-			puts "case 2", intersection
+		elsif ((g.status.changed.keys + g.status.untracked.keys).map {|i| File.dirname(__FILE__) + "/" + i} & hfiles).length > 0
+			# add json descriptions
 			g.add(json_spec_files)
+			# add header files:
 			g.add(hfiles)
+			# add cpp files:
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
 			g.commit_all("modified json + header files")
 			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
