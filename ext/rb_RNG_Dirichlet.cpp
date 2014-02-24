@@ -29,7 +29,7 @@ r->getModel()->lambdas((* parameter_1_converted->getData()));
 
 	rb_RealVectorReference * parameter_1_converted;
 	Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
-r->getModel()->lambdas((* parameter_1_converted->rb_RealVectorReference));
+r->getModel()->lambdas((* parameter_1_converted->getData()));
 }else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
 
 	rb_RealMatrixColumn * parameter_1_converted;

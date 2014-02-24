@@ -9,6 +9,18 @@ module HeaderFileGenerator
 						@type = typeName
 					end
 
+					MatrixClasses = [
+						InputClass.new("rb_RealMatrix"),
+						InputClass.new("rb_RealMatrixReference")
+					]
+
+					ArrayClasses = [
+						InputClass.new("rb_RealVector"),
+						InputClass.new("rb_RealVectorReference"),
+						InputClass.new("rb_RealMatrixColumn"),
+						InputClass.new("rb_RealMatrixRow")
+					]
+
 					def rb_class
 						@type + "::rb_class()"
 					end
@@ -27,7 +39,7 @@ module HeaderFileGenerator
 
 					def wrapped_class_pointer
 						case @type
-						when "rb_RealVector", "rb_RealMatrix", "RealVectorReference","rb_RealMatrixColumn","rb_RealMatrixRow"
+						when *((ArrayClasses + MatrixClasses).map {|i| i.to_s})
 							"getData()"
 						else
 							cpp_class
@@ -97,25 +109,13 @@ module HeaderFileGenerator
 				def compatible_classes
 					case @type
 					when :array
-						ArrayClasses
+						InputClass::ArrayClasses
 					when :"2darray"
-						Matrix_Classes
+						InputClass::MatrixClasses
 					else
 						[]
 					end
 				end
-
-				Matrix_Classes = [
-					InputClass.new("rb_RealMatrix"),
-					InputClass.new("rb_RealMatrixReference")
-				]
-
-				ArrayClasses = [
-					InputClass.new("rb_RealVector"),
-					InputClass.new("rb_RealVectorReference"),
-					InputClass.new("rb_RealMatrixColumn"),
-					InputClass.new("rb_RealMatrixRow")
-				]
 
 				def convert_into_class inputClass
 """
@@ -206,8 +206,8 @@ module HeaderFileGenerator
 	"""
 					when :array
 	"""
-		if (TYPE(#{parameter_name}) != T_ARRAY && #{differs_from_classes ArrayClasses})
-			rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");
+		if (TYPE(#{parameter_name}) != T_ARRAY && #{differs_from_classes InputClass::ArrayClasses})
+			rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");
 	"""
 					else# implement other checks as needs be.
 						""
