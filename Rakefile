@@ -1,3 +1,6 @@
+require 'rake/hooks'
+require 'git'
+
 begin
 	require 'jeweler'
 	Jeweler::Tasks.new do |gemspec|
@@ -12,6 +15,15 @@ begin
 	end
 rescue LoadError
 	puts "Jeweler not available. Install it with: gem install jeweler"
+end
+
+before 'install' do
+	g = Git.open(File.dirname(__FILE__))
+	modified_files = g.status.changed.keys
+	json_modified_files = modified_files.reject {|i| !(i.match(/header_file_specs\/[^\.]+.json/))}.map {|i| i.match(/header_file_specs\/([^\.]+.json)/)[1]}
+	if json_modified_files.length > 0
+		raise RuntimeError.new "Warning: Some new headers were not added to the git, and may not be ready:\n\t- \"#{json_modified_files.join("\",\n\t- \"")}\"\nRun \"rake header\" to confirm these new additions, or delete these files.\n\n"
+	end
 end
 
 
