@@ -54,17 +54,13 @@ VALUE method_rb_RNG_DiscreteUniform_initialize (VALUE self) {
 	return self;
 }
 
-VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VALUE parameter_2) {
+VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiscreteUniform *r;
 	
 		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	
-
-		if (TYPE(parameter_2) != T_FIXNUM && TYPE(parameter_2) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 2 must be a Float.");
-	
-	r->getModel()->setRange(NUM2DBL(parameter_1), NUM2DBL(parameter_2));
+	r->getModel()->setRange(NUM2DBL(parameter_1));
 	return self;
 
 
@@ -81,6 +77,6 @@ void Init_rb_RNG_DiscreteUniform () {
 	rb_define_method(rb_RNG_DiscreteUniform::rb_class(), "prob", (rb_method) method_rb_RNG_DiscreteUniform_get_prob, 1);
 	rb_define_alloc_func(rb_RNG_DiscreteUniform::rb_class(), (rb_alloc_func_t) method_rb_RNG_DiscreteUniform_allocate);
 	rb_define_method(rb_RNG_DiscreteUniform::rb_class(), "initialize", (rb_method) method_rb_RNG_DiscreteUniform_initialize, 0);
-	rb_define_method(rb_RNG_DiscreteUniform::rb_class(), "set_range", (rb_method) method_rb_RNG_DiscreteUniform_set_range, 2);
+	rb_define_method(rb_RNG_DiscreteUniform::rb_class(), "set_range", (rb_method) method_rb_RNG_DiscreteUniform_set_range, 1);
 	rb_define_method(rb_RNG_DiscreteUniform::rb_class(), "sample", (rb_method) method_rb_RNG_DiscreteUniform_sample, 0);
 }

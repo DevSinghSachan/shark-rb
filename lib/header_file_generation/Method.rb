@@ -132,7 +132,7 @@ module HeaderFileGenerator
 							cpp += convert_into_class cpp_class
 							self.input_class = cpp_class
 							if remaining_params.length > 0
-								cpp += params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology
+								cpp += remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology
 							else
 								cpp += (calling_methodology.call() + ";\n")
 							end
@@ -141,7 +141,11 @@ module HeaderFileGenerator
 						cpp += "\n"
 						cpp
 					else
-						params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology
+						if remaining_params.length > 0
+							remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology
+						else
+							calling_methodology.call() + ";\n"
+						end
 					end
 				end
 
@@ -247,10 +251,7 @@ module HeaderFileGenerator
 				@method_name      = opts["name"]
 				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
-				if opts["types"] and opts["types"].include? "2darray"
-					puts opts["types"].length, opts["types"], opts["number_of_inputs"].nil?
-				end
-				if opts["types"] and opts["types"].length > 0 and opts["number_of_inputs"].nil?
+				if opts["types"] and opts["types"].length > 0 and (opts["number_of_inputs"].nil? || opts["number_of_inputs"] != opts["types"].length)
 					puts "yeah"
 					@number_of_inputs = opts["types"].length
 				end
