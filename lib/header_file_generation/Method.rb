@@ -196,6 +196,14 @@ module HeaderFileGenerator
 	# 				end
 	# 			end
 
+				def test_if_not_1darray
+					"TYPE(#{parameter_name}) != T_ARRAY || (RARRAY_LEN(#{parameter_name}) > 0 && TYPE(rb_ary_entry(#{parameter_name}, 0)) != T_FLOAT && TYPE(rb_ary_entry(#{parameter_name}, 0)) != T_FIXNUM)"
+				end
+
+				def test_if_not_2darray
+					"TYPE(#{parameter_name}) != T_ARRAY || (RARRAY_LEN(#{parameter_name}) > 0 && TYPE(rb_ary_entry(ary, 0))) != T_ARRAY || (RARRAY_LEN(#{parameter_name}) > 0 && RARRAY_LEN(rb_ary_entry(#{parameter_name}, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(#{parameter_name}, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(#{parameter_name}, 0), 0)) != T_FIXNUM)"
+				end
+
 				def check
 					case @type
 					when :double
@@ -208,8 +216,12 @@ module HeaderFileGenerator
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");"""
 					when :array
 """
-	if (TYPE(#{parameter_name}) != T_ARRAY && #{differs_from_classes InputClass::ArrayClasses})
+	if (#{test_if_not_1darray} && #{differs_from_classes InputClass::ArrayClasses})
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");"""
+					when :"2darray"
+"""
+	if (#{test_if_not_2darray} && #{differs_from_classes InputClass::MatrixClasses})
+		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an MatrixType (\\\"#{(InputClass::MatrixClasses.map {|i| i.wrapped_class} + ["Array< Array< Float > >"]).join("\\\", \\\"")}\\\").\");"""
 					else# implement other checks as needs be.
 						""
 					end
