@@ -87,7 +87,7 @@ module HeaderFileGenerator
 					case @type
 					when :array
 						InputClass.new "RealVector"
-					when :"2darray"
+					when :"2darray", :matrix
 						InputClass.new "RealMatrix"
 					else
 						InputClass.new @type.to_s
@@ -110,7 +110,7 @@ module HeaderFileGenerator
 					case @type
 					when :array
 						InputClass::ArrayClasses
-					when :"2darray"
+					when :"2darray", :matrix
 						InputClass::MatrixClasses
 					else
 						[]
@@ -150,7 +150,7 @@ module HeaderFileGenerator
 				end
 
 				def requires_conversion?
-					[:array, :"2darray"].include? @type
+					[:array, :"2darray", :matrix].include? @type
 				end
 
 				def matches_classes classes
@@ -218,7 +218,7 @@ module HeaderFileGenerator
 """
 	if (#{test_if_not_1darray} && #{differs_from_classes InputClass::ArrayClasses})
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");"""
-					when :"2darray"
+					when :"2darray", :matrix
 """
 	if (#{test_if_not_2darray} && #{differs_from_classes InputClass::MatrixClasses})
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an MatrixType (\\\"#{(InputClass::MatrixClasses.map {|i| i.wrapped_class} + ["Array< Array< Float > >"]).join("\\\", \\\"")}\\\").\");"""
@@ -233,7 +233,7 @@ module HeaderFileGenerator
 						convert_from_double parameter_name
 					when :integer, :int
 						convert_from_int parameter_name
-					when :array
+					when :array, :"2darray", :matrix
 						raise RuntimeError.new "#{parameter_name} of type #{@type} was used before an input class was determined." if @input_class.nil?
 						converted_parameter_object
 					else # must've been converted beforehand...
