@@ -303,7 +303,7 @@ module HeaderFileGenerator
 			def parameter_conversions
 				parameters_to_convert = @parameters
 				cpp = ""
-				cpp += "\t// Converting parameters #{"\""+@parameters.select {|i| i.requires_conversion?}.map {|i| i.parameter_name}.join("\", \"")+"\""} before they can be used."
+				cpp += "\t// Converting parameters #{"\""+@parameters.select {|i| i.requires_conversion?}.map {|i| i.parameter_name}.join("\", \"")+"\""} before they can be used.\n"
 				cpp += @parameters.first.convert_and_embed(
 					@parameters,
 					@parameters[1..(@parameters.length - 1)],
