@@ -154,8 +154,7 @@ module HeaderFileGenerator
 				end
 
 				def requires_conversion?
-					puts @type, ([ArrayTypes + MatrixTypes].include? @type)
-					[ArrayTypes + MatrixTypes].include? @type
+					(ArrayTypes + MatrixTypes).include? @type
 				end
 
 				def matches_classes classes

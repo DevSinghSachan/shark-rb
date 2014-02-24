@@ -23,8 +23,59 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 	// Checking whether parameter_2 is a "matrix"
 	if (TYPE(parameter_2) != T_ARRAY || (RARRAY_LEN(parameter_2) > 0 && TYPE(rb_ary_entry(ary, 0))) != T_ARRAY || (RARRAY_LEN(parameter_2) > 0 && RARRAY_LEN(rb_ary_entry(parameter_2, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_2, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_2, 0), 0)) != T_FIXNUM) && CLASS_OF(parameter_2) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_2) != rb_RealMatrixReference::rb_class())
 		rb_raise(rb_eArgError, "Argument 2 must be an MatrixType (\"RealMatrix\", \"RealMatrixReference\", \"Array< Array< Float > >\").");
-	r->getModel()->lambdas(parameter_1, parameter_2);
-	return self
+
+	// Converting parameters "parameter_1", "parameter_2" before they can be used.
+	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
+		rb_RealVector * parameter_1_converted;
+		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
+		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
+			rb_RealMatrix * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
+			rb_RealMatrixReference * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		}
+	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
+		rb_RealVectorReference * parameter_1_converted;
+		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
+		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
+			rb_RealMatrix * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
+			rb_RealMatrixReference * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		}
+	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
+		rb_RealMatrixColumn * parameter_1_converted;
+		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
+		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
+			rb_RealMatrix * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
+			rb_RealMatrixReference * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		}
+	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
+		rb_RealMatrixRow * parameter_1_converted;
+		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
+		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
+			rb_RealMatrix * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
+			rb_RealMatrixReference * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1, parameter_2);
+		}
+	}
+
+	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
 }
 
 
