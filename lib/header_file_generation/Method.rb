@@ -128,7 +128,7 @@ module HeaderFileGenerator
 					if requires_conversion?
 						cpp = ""
 						compatible_classes.each_with_index do |cpp_class, k|
-							cpp += (k==0 ? "#{"\t"*indent}if" : " else if") + " (" + (matches_classes [cpp_class] ) + ") " + "{\n"
+							cpp += (k==0 ? "#{"\t"*indent}if" : " else if") + " (" + (matches_classes [cpp_class] ) + ") " + "{"
 							cpp += convert_into_class cpp_class, indent+1
 							self.input_class = cpp_class
 							if remaining_params.length > 0
