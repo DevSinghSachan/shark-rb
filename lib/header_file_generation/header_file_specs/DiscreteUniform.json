@@ -1,0 +1,50 @@
+{
+	"class" : "rb_RNG_DiscreteUniform",
+	"wrapped_class": "shark::DiscreteUniform< shark::Rng::rng_type >",
+	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
+		"<shark/Rng/DiscreteUniform.h>",
+		"\"ruby.h\"",
+		"\"rb_conversions.h\""
+	],
+	"rb_class" : "rb_optimizer_rng_discreteuniform_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"getters" : [
+		{
+			"name": "low",
+			"type": "double"
+		},
+		{
+			"name": "high",
+			"type": "double"
+		},
+		{
+			"name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		},
+		{
+			"name": "prob",
+			"accessor_name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		}
+	],
+	"setters" : [
+	],
+	"methods": [
+		{
+			"name": "set_range",
+			"accessor_name": "setRange",
+			"number_of_inputs":2,
+			"types": ["double"]
+		},
+		{
+			"name": "sample",
+			"accessor_name": "operator()",
+			"type": "double"
+		}
+	]
+}

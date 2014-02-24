@@ -1,0 +1,18 @@
+{
+	"class" : "rb_RNG_Dirichlet",
+	"wrapped_class": "shark::Dirichlet< shark::Rng::rng_type >",
+	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
+		"<shark/Rng/Dirichlet.h>",
+		"\"ruby.h\"",
+		"\"rb_conversions.h\""
+	],
+	"rb_class" : "rb_optimizer_rng_dirichlet_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"getters" : [
+	],
+	"setters" : [
+	],
+	"methods": [
+	]
+}

@@ -1,0 +1,52 @@
+{
+	"class" : "rb_RNG_LogNormal",
+	"wrapped_class": "shark::LogNormal< shark::Rng::rng_type >",
+	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
+		"<shark/Rng/LogNormal.h>",
+		"\"ruby.h\"",
+		"\"rb_conversions.h\""
+	],
+	"rb_class" : "rb_optimizer_rng_lognormal_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"getters" : [
+		{
+			"name": "scale",
+			"type": "double"
+		},
+		{
+			"name": "location",
+			"type": "double"
+		},
+		{
+			"name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		},
+		{
+			"name": "prob",
+			"accessor_name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		}
+	],
+	"setters" : [
+		{
+			"name": "scale",
+			"types": ["double"]
+		},
+		{
+			"name": "location",
+			"types": ["double"]
+		}
+	],
+	"methods": [
+		{
+			"name": "sample",
+			"accessor_name": "operator()",
+			"type": "double"
+		}
+	]
+}

@@ -1,0 +1,44 @@
+{
+	"class" : "rb_RNG_Poisson",
+	"wrapped_class": "shark::Poisson< shark::Rng::rng_type >",
+	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
+		"<shark/Rng/Poisson.h>",
+		"\"ruby.h\"",
+		"\"rb_conversions.h\""
+	],
+	"rb_class" : "rb_optimizer_rng_poisson_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"getters" : [
+		{
+			"name": "mean",
+			"type": "double"
+		},
+		{
+			"name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		},
+		{
+			"name": "prob",
+			"accessor_name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		}
+	],
+	"setters" : [
+		{
+			"name": "mean",
+			"types": ["double"]
+		}
+	],
+	"methods": [
+		{
+			"name": "sample",
+			"accessor_name": "operator()",
+			"type": "double"
+		}
+	]
+}

@@ -1,0 +1,49 @@
+{
+	"class" : "rb_RNG_TruncatedExponential",
+	"wrapped_class": "shark::TruncatedExponential< shark::Rng::rng_type >",
+	"dependencies": [
+		"<shark/Rng/GlobalRng.h>",
+		"<shark/Rng/TruncatedExponential.h>",
+		"\"ruby.h\"",
+		"\"rb_conversions.h\""
+	],
+	"rb_class" : "rb_optimizer_rng_truncatedexponential_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"pointer_getter" : ["getDistribution","getModel"],
+	"getters" : [
+		{
+			"name": "lambda",
+			"type": "double"
+		},
+		{
+			"name": "max",
+			"type": "double"
+		},
+		{
+			"name": "prob",
+			"accessor_name":"p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		}
+	],
+	"setters" : [
+		{
+			"name": "lambda",
+			"accessor_name":"setLambda",
+			"types": ["double"]
+		},
+		{
+			"name": "max",
+			"accessor_name":"setMax",
+			"types": ["double"]
+		}
+	],
+	"methods": [
+		{
+			"name": "sample",
+			"accessor_name": "operator()",
+			"type": "double"
+		}
+	]
+}
