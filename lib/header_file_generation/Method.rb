@@ -248,6 +248,7 @@ module HeaderFileGenerator
 				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
 				if opts["types"] and opts["types"].length > 0 and opts["number_of_inputs"].nil?
+					puts "yeah"
 					@number_of_inputs = opts["types"].length
 				end
 				@parameters       = []
