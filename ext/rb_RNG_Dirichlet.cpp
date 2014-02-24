@@ -75,7 +75,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		}
 	}
 
-	return self; // cpp functions requires return variable, so if all tests fail "self" is returned.
+	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
 }
 
 

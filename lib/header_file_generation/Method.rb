@@ -323,7 +323,7 @@ module HeaderFileGenerator
 			def call_methodology_with_conversion
 """
 #{parameter_conversions}
-	return self; // cpp functions requires return variable, so if all tests fail \"self\" is returned.
+	return self; // cpp functions require return variable, so if all tests fail \"self\" is returned.
 """
 			end
 
