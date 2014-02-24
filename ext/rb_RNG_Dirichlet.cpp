@@ -20,7 +20,6 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"RealVector\", \"RealVectorReference\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
 
 
-
 	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);

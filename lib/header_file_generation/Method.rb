@@ -201,18 +201,15 @@ module HeaderFileGenerator
 					when :double
 """
 	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");
-"""
+		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");"""
 					when :integer, :int
 """
 	if (TYPE(#{parameter_name}) != T_FIXNUM)
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");
-"""
+		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");"""
 					when :array
 """
 	if (TYPE(#{parameter_name}) != T_ARRAY && #{differs_from_classes InputClass::ArrayClasses})
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");
-"""
+		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");"""
 					else# implement other checks as needs be.
 						""
 					end
