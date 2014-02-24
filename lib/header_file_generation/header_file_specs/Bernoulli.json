@@ -1,16 +1,20 @@
 {
-	"class" : "rb_RNG_Geometric",
-	"wrapped_class": "shark::Geometric< shark::Rng::rng_type >",
+	"class" : "rb_RNG_Bernoulli",
+	"wrapped_class": "shark::Bernoulli< shark::Rng::rng_type >",
 	"dependencies": [
 		"<shark/Rng/GlobalRng.h>",
-		"<shark/Rng/Geometric.h>",
+		"<shark/Rng/Bernoulli.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_geometric_klass",
+	"rb_class" : "rb_optimizer_rng_bernoulli_klass",
 	"constructor_arguments": ["shark::Rng::globalRng"],
 	"pointer_getter" : ["getDistribution","getModel"],
 	"getters" : [
+		{
+			"name": "n",
+			"type": "double"
+		},
 		{
 			"name": "p",
 			"accessor_name": "prob",
@@ -26,12 +30,13 @@
 	],
 	"setters" : [
 		{
-			"name": "p",
-			"accessor_name":"prob",
+			"name": "n",
+			"accessor_name":"n",
 			"types": ["double"]
 		},
 		{
-			"name": "prob",
+			"name": "p",
+			"accessor_name":"prob",
 			"types": ["double"]
 		}
 	],
