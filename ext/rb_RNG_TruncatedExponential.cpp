@@ -19,49 +19,44 @@ VALUE rb_RNG_TruncatedExponential::rb_class() {
 
 VALUE method_rb_RNG_TruncatedExponential_set_lambda (VALUE self, VALUE parameter_1) {
 	rb_RNG_TruncatedExponential *r;
-	Data_Get_Struct(self, rb_RNG_TruncatedExponential, r);
-
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-
+	
+		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	
 	r->getDistribution()->setLambda(NUM2DBL(parameter_1));
 	return self;
-}
+
 
 VALUE method_rb_RNG_TruncatedExponential_set_max (VALUE self, VALUE parameter_1) {
 	rb_RNG_TruncatedExponential *r;
-	Data_Get_Struct(self, rb_RNG_TruncatedExponential, r);
-
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-
+	
+		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	
 	r->getDistribution()->setMax(NUM2DBL(parameter_1));
 	return self;
-}
+
 
 VALUE method_rb_RNG_TruncatedExponential_get_lambda (VALUE self) {
 	rb_RNG_TruncatedExponential *r;
-	Data_Get_Struct(self, rb_RNG_TruncatedExponential, r);
-
+	
 	return rb_float_new(r->getDistribution()->lambda());
-}
+
 
 VALUE method_rb_RNG_TruncatedExponential_get_max (VALUE self) {
 	rb_RNG_TruncatedExponential *r;
-	Data_Get_Struct(self, rb_RNG_TruncatedExponential, r);
-
+	
 	return rb_float_new(r->getDistribution()->max());
-}
+
 
 VALUE method_rb_RNG_TruncatedExponential_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_TruncatedExponential *r;
-	Data_Get_Struct(self, rb_RNG_TruncatedExponential, r);
-
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-
+	
+		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	
 	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)));
-}
+
 
 VALUE method_rb_RNG_TruncatedExponential_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_TruncatedExponential>(
@@ -76,10 +71,9 @@ VALUE method_rb_RNG_TruncatedExponential_initialize (VALUE self) {
 
 VALUE method_rb_RNG_TruncatedExponential_sample (VALUE self) {
 	rb_RNG_TruncatedExponential *r;
-	Data_Get_Struct(self, rb_RNG_TruncatedExponential, r);
-
+	
 	return rb_float_new((*r->getDistribution())());
-}
+
 
 void Init_rb_RNG_TruncatedExponential () {
 	rb_define_method(rb_RNG_TruncatedExponential::rb_class(), "lambda=", (rb_method) method_rb_RNG_TruncatedExponential_set_lambda, 1);

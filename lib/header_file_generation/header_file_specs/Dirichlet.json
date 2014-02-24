@@ -10,8 +10,16 @@
 	"rb_class" : "rb_optimizer_rng_dirichlet_klass",
 	"constructor_arguments": ["shark::Rng::globalRng"],
 	"getters" : [
+		{
+			"name": "lambdas",
+			"type": "array"
+		}
 	],
 	"setters" : [
+		{
+			"name": "lambdas",
+			"types": ["array"]
+		}
 	],
 	"methods": [
 	]

@@ -17,3 +17,12 @@ require_relative './datatypes/datatypes.rb'
 # In GlobalRNG
 # Gamma distribution calls cauchy instead of gamma... should be changed.
 #
+
+# In Erlang.h
+# switched:
+#
+# "double p(double&x) const"
+#     to
+# "double p(double x) const",
+#
+# because what the hell was the "&" doing?

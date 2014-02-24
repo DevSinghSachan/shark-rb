@@ -48,6 +48,8 @@ task :header do
 			puts "new header files, rebuilding"
 			Rake::Task["clean"]
 			Rake::Task["build"]
+			Rake::Task["gemspec:generate"].reenable
+			Rake::Task["gemspec:generate"].invoke
 		elsif ((g.status.changed.keys + g.status.untracked.keys).map {|i| File.dirname(__FILE__) + "/" + i} & hfiles).length > 0
 			# add json descriptions
 			g.add(json_spec_files)
@@ -57,8 +59,9 @@ task :header do
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
 			g.commit_all("modified json + header files")
 			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
+			Rake::Task["gemspec:generate"].reenable
+			Rake::Task["gemspec:generate"].invoke
 		end
 	end
-	Rake::Task["gemspec:generate"].reenable
-	Rake::Task["gemspec:generate"].invoke
+	
 end
