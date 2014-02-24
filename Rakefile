@@ -44,7 +44,15 @@ task :header do
 			g.add(hfiles)
 			# add cpp files:
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
-			g.commit_all("new header files")
+			begin
+				g.commit_all("new header files")
+			rescue Git::GitExecuteError => e
+				if e.message["nothing to commit, working directory clean"]
+					puts "No changes to commit."
+				else
+					raise e
+				end
+			end
 			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
 			puts "new header files, rebuilding"
 			Rake::Task["clean"]
@@ -61,8 +69,12 @@ task :header do
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
 			begin
 				g.commit_all("modified json + header files")
-			rescue => e
-				puts e.class, e.message
+			rescue Git::GitExecuteError
+				if e.message["nothing to commit, working directory clean"]
+					puts "No changes to commit."
+				else
+					raise e
+				end
 			end
 			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
 			Rake::Task["gemspec:generate"].reenable
