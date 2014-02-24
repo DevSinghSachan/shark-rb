@@ -37,6 +37,7 @@ task :header do
 	if hfiles.length > 0 or json_spec_files.length > 0
 		g = Git.open(File.dirname(__FILE__))
 		if (g.status.untracked.keys.map {|i| File.dirname(__FILE__) + "/" + i} & hfiles).length > 0
+			puts "case 1"
 			# add json descriptions
 			g.add(json_spec_files)
 			# add header files:
@@ -51,6 +52,7 @@ task :header do
 			Rake::Task["gemspec:generate"].reenable
 			Rake::Task["gemspec:generate"].invoke
 		elsif ((g.status.changed.keys + g.status.untracked.keys).map {|i| File.dirname(__FILE__) + "/" + i} & hfiles).length > 0
+			puts "case 2"
 			# add json descriptions
 			g.add(json_spec_files)
 			# add header files:
