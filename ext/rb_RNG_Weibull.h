@@ -12,6 +12,7 @@ class rb_RNG_Weibull {
 		static VALUE rb_class();
 		shark::Weibull< shark::Rng::rng_type >   model;
 		shark::Weibull< shark::Rng::rng_type > * getModel();
+
 		rb_RNG_Weibull();
 };
 

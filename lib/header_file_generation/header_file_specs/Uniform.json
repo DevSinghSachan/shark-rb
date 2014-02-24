@@ -8,6 +8,7 @@
 		"\"rb_conversions.h\""
 	],
 	"rb_class" : "rb_optimizer_rng_uniform_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
 	"getters" : [
 		{
 			"name": "low",
@@ -32,14 +33,14 @@
 		}
 	],
 	"setters" : [
+	],
+	"methods": [
 		{
 			"name": "set_range",
 			"accessor_name": "setRange",
 			"number_of_inputs":2,
 			"types": ["double"]
-		}
-	],
-	"methods": [
+		},
 		{
 			"name": "sample",
 			"accessor_name": "operator()",

@@ -1,28 +1,23 @@
 {
-	"class" : "rb_RNG_Cauchy",
-	"wrapped_class": "shark::Cauchy< shark::Rng::rng_type >",
+	"class" : "rb_RNG_Geometric",
+	"wrapped_class": "shark::Geometric< shark::Rng::rng_type >",
 	"dependencies": [
 		"<shark/Rng/GlobalRng.h>",
-		"<shark/Rng/Cauchy.h>",
+		"<shark/Rng/Geometric.h>",
 		"\"ruby.h\"",
 		"\"rb_conversions.h\""
 	],
-	"rb_class" : "rb_optimizer_rng_cauchy_klass",
+	"rb_class" : "rb_optimizer_rng_geometric_klass",
 	"constructor_arguments": ["shark::Rng::globalRng"],
+	"pointer_getter" : ["getDistribution","getModel"],
 	"getters" : [
 		{
-			"name": "sigma",
-			"type": "double"
-		},
-		{
-			"name": "median",
+			"name": "n",
 			"type": "double"
 		},
 		{
 			"name": "p",
-			"accessor_name": "p",
-			"number_of_inputs": 1,
-			"types": ["double"],
+			"accessor_name": "prob",
 			"type": "double"
 		},
 		{
@@ -35,11 +30,18 @@
 	],
 	"setters" : [
 		{
-			"name": "median",
+			"name": "n",
+			"accessor_name":"n",
 			"types": ["double"]
 		},
 		{
-			"name": "sigma",
+			"name": "p",
+			"accessor_name":"prob",
+			"types": ["double"]
+		},
+		{
+			"name": "prob",
+			"accessor_name":"p",
 			"types": ["double"]
 		}
 	],

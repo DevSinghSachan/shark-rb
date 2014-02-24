@@ -12,6 +12,7 @@ class rb_RNG_Uniform {
 		static VALUE rb_class();
 		shark::Uniform< shark::Rng::rng_type >   model;
 		shark::Uniform< shark::Rng::rng_type > * getModel();
+
 		rb_RNG_Uniform();
 };
 

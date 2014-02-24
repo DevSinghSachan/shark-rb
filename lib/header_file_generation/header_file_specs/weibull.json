@@ -8,6 +8,7 @@
 		"\"rb_conversions.h\""
 	],
 	"rb_class" : "rb_optimizer_rng_weibull_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
 	"getters" : [
 		{
 			"name": "beta",
@@ -19,13 +20,13 @@
 		},
 		{
 			"name": "p",
-			"accessor_name": "prob",
 			"number_of_inputs": 1,
 			"types": ["double"],
 			"type": "double"
 		},
 		{
 			"name": "prob",
+			"accessor_name": "p",
 			"number_of_inputs": 1,
 			"types": ["double"],
 			"type": "double"
@@ -38,6 +39,11 @@
 		},
 		{
 			"name": "vbeta",
+			"types": ["double"]
+		},
+		{
+			"name": "beta",
+			"accessor_name":"vbeta",
 			"types": ["double"]
 		}
 	],

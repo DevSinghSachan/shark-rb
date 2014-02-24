@@ -48,6 +48,12 @@
 #include "Optimizer.h"
 
 #include "extras/utils/rb_pointer_wrapping.extras"
+
+#include "rb_RNG_Binomial.h"
+#include "rb_RNG_Cauchy.h"
+#include "rb_RNG_Uniform.h"
+#include "rb_RNG_Weibull.h"
+
 #include "extras/utils/rb_generated_headers.extras"
 
 using namespace std;

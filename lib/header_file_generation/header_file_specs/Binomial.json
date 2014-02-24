@@ -8,6 +8,8 @@
 		"\"rb_conversions.h\""
 	],
 	"rb_class" : "rb_optimizer_rng_binomial_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"pointer_getter" : ["getDistribution","getModel"],
 	"getters" : [
 		{
 			"name": "n",
@@ -34,12 +36,7 @@
 		},
 		{
 			"name": "p",
-			"accessor_name":"p",
-			"types": ["double"]
-		},
-		{
-			"name": "prob",
-			"accessor_name":"p",
+			"accessor_name":"prob",
 			"types": ["double"]
 		}
 	],

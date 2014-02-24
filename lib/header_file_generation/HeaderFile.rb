@@ -4,6 +4,7 @@ module HeaderFileGenerator
 		attr_reader :setters
 		attr_reader :cpp_class_name
 		attr_reader :pointer_acquirer
+		attr_reader :pointer_name
 
 		def define_getters getter_list=[]
 			if !getter_list.nil?
@@ -33,11 +34,15 @@ module HeaderFileGenerator
 			@setters, @methods, @getters = [], [], []
 			@wrapped_class  = opts["wrapped_class"]
 			@dependencies   = opts["dependencies"]
-			@pointer_acquirer = opts["pointer_getter"] || "getModel"
+			@pointer_acquirer = [(opts["pointer_getter"] || "getModel")].flatten
+			@pointer_name   = opts["pointer_name"] || "model"
+			raise StandardError.new "pointer_name: \"#{opts["pointer_name"] || "model"}\" cannot have the same name as one of the class methods (pointer_getter) : \"#{[(opts["pointer_getter"] || "getModel")].flatten.join("\", \"")}\"" if [(opts["pointer_getter"] || "getModel")].flatten.include?(opts["pointer_name"] || "model")
 			@cpp_class_name = opts["class"]
 			@rb_class_name  = opts["rb_class"]
+			@default_constructor_arguments = opts["constructor_arguments"] || []
 			# this is to define the function that returns the class and singleton methods too
 			@methods << Allocator.new("hf" => self)
+			@methods << Initializer.new("hf" => self)
 			define_setters opts["setters"]
 			define_getters opts["getters"]
 			define_methods opts["methods"]
@@ -73,6 +78,30 @@ void #{init_function_name} () {
 			"#include \"extras/utils/rb_pointer_wrapping.extras\""
 		end
 
+		def generate_cpp_pointer_acquirer_functions
+			cpp = ""
+			@pointer_acquirer.each do |pointer_acq|
+cpp+= """
+#{pointer_acquirer_return_type} #{@cpp_class_name}::#{pointer_acq}() {
+	return &#{@pointer_name};
+}
+"""
+			end
+			cpp
+		end
+
+		def generate_cpp_constructor_function
+			if @default_constructor_arguments
+"""
+#{@cpp_class_name}::#{@cpp_class_name}() : model(#{@default_constructor_arguments.join(", ")}) {}
+"""	
+			else
+"""
+#{@cpp_class_name}::#{@cpp_class_name}() {}
+"""
+			end
+		end
+
 		def generate_rb_class_function
 """
 extern VALUE #{@rb_class_name};
@@ -89,6 +118,8 @@ VALUE #{@cpp_class_name}::rb_class() {
 			cpp += "\n"
 			cpp += include_pointer_wrapper_extras
 			cpp += "\n"
+			cpp += generate_cpp_constructor_function
+			cpp += generate_cpp_pointer_acquirer_functions
 			cpp += generate_rb_class_function
 			@setters.each do |setter|
 				cpp += setter.to_cpp_function_definition
@@ -107,6 +138,19 @@ VALUE #{@cpp_class_name}::rb_class() {
 			@dependencies.map {|i| "#include "+i}.join("\n")
 		end
 
+		def pointer_acquirer_return_type
+			"#{@wrapped_class} *"
+		end
+
+		def pointer_acquirer_h_definition
+			cpp = ""
+			@pointer_acquirer.each do |pointer_acq|
+cpp+="""		#{pointer_acquirer_return_type} #{pointer_acq}();
+"""
+			end
+			cpp
+		end
+
 		def to_h_file
 """#ifndef #{@cpp_class_name.upcase}_H
 #define #{@cpp_class_name.upcase}_H
@@ -117,8 +161,8 @@ class #{@cpp_class_name} {
 
 	public:
 		static VALUE rb_class();
-		#{@wrapped_class}   model;
-		#{@wrapped_class} * getModel();
+		#{@wrapped_class}   #{@pointer_name};
+#{pointer_acquirer_h_definition}
 		#{@cpp_class_name}();
 };
 

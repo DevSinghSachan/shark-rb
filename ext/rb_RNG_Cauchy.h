@@ -12,6 +12,7 @@ class rb_RNG_Cauchy {
 		static VALUE rb_class();
 		shark::Cauchy< shark::Rng::rng_type >   model;
 		shark::Cauchy< shark::Rng::rng_type > * getModel();
+
 		rb_RNG_Cauchy();
 };
 

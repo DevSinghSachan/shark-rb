@@ -2,6 +2,7 @@ require_relative 'HeaderFile'
 require_relative 'Method'
 require 'json'
 module HeaderFileGenerator
+	# TODO: add shark error catching.
 
 	def self.generate_header_files
 
@@ -22,8 +23,8 @@ module HeaderFileGenerator
 
 		File.open(File.dirname(__FILE__) + "/../../ext/extras/utils/rb_generated_headers.extras", "w") do |f|
 			f << (headers.map {|i| "#include \"#{i}\""}.join("\n") + "\n")
-			f << "void Init_Generated_Headers() {\n\t"
-			f << (header_init_functions.map {|i| i + "();"}.join("\n\t") + "\n")
+			f << "void Init_Generated_Headers() {\n"
+			f << ("\t" + header_init_functions.map {|i| i + "();"}.join("\n\t") + "\n")
 			f << "}"
 		end
 

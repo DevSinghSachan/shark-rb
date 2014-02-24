@@ -1,5 +1,6 @@
 module HeaderFileGenerator
 	class HeaderFile
+
 		class Method
 			class Input
 				attr_reader :type
@@ -18,15 +19,15 @@ module HeaderFileGenerator
 				end
 
 				def check
-case @type
-when :double
+					case @type
+					when :double
 """
 	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");
 """
-else# implement other checks as needs be.
-""
-end
+					else# implement other checks as needs be.
+						""
+					end
 				end
 
 				def to_converted_form
@@ -42,6 +43,9 @@ end
 					to_converted_form
 				end
 			end
+		end
+
+		class Method
 
 			def className
 				@header_file.cpp_class_name
@@ -96,12 +100,12 @@ end
 			def call_methodology
 				if @cpp_method_name =~ /operator(.+)/
 					if $1 == "()"
-						"(*#{symbol}->#{@header_file.pointer_acquirer}())(#{parameters})"
+						"(*#{symbol}->#{@header_file.pointer_acquirer.first}())(#{parameters})"
 					else
-						"(*#{symbol}->#{@header_file.pointer_acquirer}())#{$1}(#{parameters})"
+						"(*#{symbol}->#{@header_file.pointer_acquirer.first}())#{$1}(#{parameters})"
 					end
 				else
-					"#{symbol}->#{@header_file.pointer_acquirer}()->#{@cpp_method_name}(#{parameters})"
+					"#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{parameters})"
 				end
 			end
 
@@ -159,7 +163,21 @@ VALUE #{function_name} (VALUE klass) {
 			end
 
 			def to_rb_function_definition
-				"rb_define_alloc_func(#{className}::rb_class(), (rb_alloc_func_t) method_#{className}_allocate);"
+				"rb_define_alloc_func(#{className}::rb_class(), (rb_alloc_func_t) #{function_name});"
+			end
+		end
+
+		class HeaderFileGenerator::HeaderFile::Initializer < HeaderFile::Method
+			def initialize(opts={})
+				super ({"number_of_inputs" => 0, "name" => "initialize"}.merge(opts))
+			end
+
+			def to_cpp_function_definition
+"""
+VALUE #{function_name} (VALUE self) {
+	return self;
+}
+"""
 			end
 		end
 

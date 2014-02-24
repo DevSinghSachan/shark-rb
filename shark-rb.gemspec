@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-02-23"
+  s.date = "2014-02-24"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -69,10 +69,6 @@ Gem::Specification.new do |s|
     "ext/rb_RNG_Binomial.h",
     "ext/rb_RNG_Cauchy.cpp",
     "ext/rb_RNG_Cauchy.h",
-    "ext/rb_RNG_Gamma.cpp",
-    "ext/rb_RNG_Gamma.h",
-    "ext/rb_RNG_HyperGeometric.cpp",
-    "ext/rb_RNG_HyperGeometric.h",
     "ext/rb_RNG_Uniform.cpp",
     "ext/rb_RNG_Uniform.h",
     "ext/rb_RNG_Weibull.cpp",
@@ -115,8 +111,7 @@ Gem::Specification.new do |s|
     "lib/header_file_generation/header_file_generation.rb",
     "lib/header_file_generation/header_file_specs/Binomial.json",
     "lib/header_file_generation/header_file_specs/Cauchy.json",
-    "lib/header_file_generation/header_file_specs/Gamma.json",
-    "lib/header_file_generation/header_file_specs/HyperGeometric.json",
+    "lib/header_file_generation/header_file_specs/HyperGeometric.txt",
     "lib/header_file_generation/header_file_specs/Uniform.json",
     "lib/header_file_generation/header_file_specs/weibull.json",
     "lib/pca_text/pca_text.rb",

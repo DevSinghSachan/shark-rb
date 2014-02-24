@@ -1,6 +1,12 @@
 #include "rb_RNG_Cauchy.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
+rb_RNG_Cauchy::rb_RNG_Cauchy() : model(shark::Rng::globalRng) {}
+
+shark::Cauchy< shark::Rng::rng_type > * rb_RNG_Cauchy::getModel() {
+	return &model;
+}
+
 extern VALUE rb_optimizer_rng_cauchy_klass;
 
 VALUE rb_RNG_Cauchy::rb_class() {
@@ -70,6 +76,10 @@ VALUE method_rb_RNG_Cauchy_allocate (VALUE klass) {
 		);
 }
 
+VALUE method_rb_RNG_Cauchy_initialize (VALUE self) {
+	return self;
+}
+
 VALUE method_rb_RNG_Cauchy_sample (VALUE self) {
 	rb_RNG_Cauchy *r;
 	Data_Get_Struct(self, rb_RNG_Cauchy, r);
@@ -85,5 +95,6 @@ void Init_rb_RNG_Cauchy () {
 	rb_define_method(rb_RNG_Cauchy::rb_class(), "p", (rb_method) method_rb_RNG_Cauchy_get_p, 1);
 	rb_define_method(rb_RNG_Cauchy::rb_class(), "prob", (rb_method) method_rb_RNG_Cauchy_get_prob, 1);
 	rb_define_alloc_func(rb_RNG_Cauchy::rb_class(), (rb_alloc_func_t) method_rb_RNG_Cauchy_allocate);
+	rb_define_method(rb_RNG_Cauchy::rb_class(), "initialize", (rb_method) method_rb_RNG_Cauchy_initialize, 0);
 	rb_define_method(rb_RNG_Cauchy::rb_class(), "sample", (rb_method) method_rb_RNG_Cauchy_sample, 0);
 }
