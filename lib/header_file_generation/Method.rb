@@ -359,7 +359,7 @@ VALUE #{function_name} (#{input_parameters}) {
 				if @requires_conversion
 					cpp += "#{call_methodology_with_conversion}};\n\n"
 				else
-					cpp += "#{return_methodology(1)}};\n\n"
+					cpp += "#{return_methodology(1)}\n};\n\n"
 				end
 				cpp
 			end
