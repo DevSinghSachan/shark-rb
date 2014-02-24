@@ -59,7 +59,11 @@ task :header do
 			g.add(hfiles)
 			# add cpp files:
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
-			g.commit_all("modified json + header files")
+			begin
+				g.commit_all("modified json + header files")
+			rescue => e
+				puts e.class, e.message
+			end
 			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
 			Rake::Task["gemspec:generate"].reenable
 			Rake::Task["gemspec:generate"].invoke
