@@ -60,6 +60,10 @@ module HeaderFileGenerator
 				attr_reader :converted
 				attr_accessor :input_class
 
+				ArrayTypes = [:array, :"1darray", :vector]
+				MatrixTypes = [:matrix, :"2darray"]
+				IntegerTypes = [:integer, :int]
+
 				def initialize(opts={})
 					@type = (opts[:type].is_a? Array) ? opts[:type] : opts[:type].to_sym
 					@position = opts[:position]
@@ -85,9 +89,9 @@ module HeaderFileGenerator
 
 				def converted_parameter_class
 					case @type
-					when :array
+					when *ArrayTypes
 						InputClass.new "RealVector"
-					when :"2darray", :matrix
+					when *MatrixTypes
 						InputClass.new "RealMatrix"
 					else
 						InputClass.new @type.to_s
@@ -108,9 +112,9 @@ module HeaderFileGenerator
 
 				def compatible_classes
 					case @type
-					when :array
+					when *ArrayTypes
 						InputClass::ArrayClasses
-					when :"2darray", :matrix
+					when *MatrixTypes
 						InputClass::MatrixClasses
 					else
 						[]
@@ -150,7 +154,7 @@ module HeaderFileGenerator
 				end
 
 				def requires_conversion?
-					[:array, :"2darray", :matrix].include? @type
+					[ArrayTypes + MatrixTypes].include? @type
 				end
 
 				def matches_classes classes
@@ -211,17 +215,17 @@ module HeaderFileGenerator
 	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");"""
-					when :integer, :int
+					when *IntegerTypes
 """
 	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (TYPE(#{parameter_name}) != T_FIXNUM)
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");"""
-					when :array
+					when *ArrayTypes
 """
 	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (#{test_if_not_1darray} && #{differs_from_classes InputClass::ArrayClasses})
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");"""
-					when :"2darray", :matrix
+					when *MatrixTypes
 """
 	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (#{test_if_not_2darray} && #{differs_from_classes InputClass::MatrixClasses})
@@ -235,9 +239,9 @@ module HeaderFileGenerator
 					case @type
 					when :double
 						convert_from_double parameter_name
-					when :integer, :int
+					when *IntegerTypes
 						convert_from_int parameter_name
-					when :array, :"2darray", :matrix
+					when *[MatrixTypes+ArrayTypes]
 						raise RuntimeError.new "#{parameter_name} of type #{@type} was used before an input class was determined." if @input_class.nil?
 						converted_parameter_object
 					else # must've been converted beforehand...

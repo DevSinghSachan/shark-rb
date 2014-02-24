@@ -18,7 +18,7 @@
 	"setters" : [
 		{
 			"name": "lambdas",
-			"types": ["array", "2darray"]
+			"types": ["array", "matrix"]
 		}
 	],
 	"methods": [
