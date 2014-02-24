@@ -208,18 +208,22 @@ module HeaderFileGenerator
 					case @type
 					when :double
 """
+	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");"""
 					when :integer, :int
 """
+	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (TYPE(#{parameter_name}) != T_FIXNUM)
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");"""
 					when :array
 """
+	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (#{test_if_not_1darray} && #{differs_from_classes InputClass::ArrayClasses})
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(InputClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");"""
 					when :"2darray", :matrix
 """
+	// Checking whether #{parameter_name} is a \"#{@type}\"
 	if (#{test_if_not_2darray} && #{differs_from_classes InputClass::MatrixClasses})
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an MatrixType (\\\"#{(InputClass::MatrixClasses.map {|i| i.wrapped_class} + ["Array< Array< Float > >"]).join("\\\", \\\"")}\\\").\");"""
 					else# implement other checks as needs be.
@@ -299,6 +303,7 @@ module HeaderFileGenerator
 			def parameter_conversions
 				parameters_to_convert = @parameters
 				cpp = ""
+				cpp += "\t// Converting parameters #{"\""+@parameters.select {|i| i.requires_conversion?}.map {|i| i.parameter_name}.join("\", \"")+"\""} before they can be used."
 				cpp += @parameters.first.convert_and_embed(
 					@parameters,
 					@parameters[1..(@parameters.length - 1)],

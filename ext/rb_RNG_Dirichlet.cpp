@@ -16,13 +16,15 @@ VALUE rb_RNG_Dirichlet::rb_class() {
 VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE parameter_2) {
 	rb_RNG_Dirichlet *r;
 	
+	// Checking whether parameter_1 is a "array"
 	if (TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM) && CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class())
 		rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"RealVector\", \"RealVectorReference\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
 
+	// Checking whether parameter_2 is a "2darray"
 	if (TYPE(parameter_2) != T_ARRAY || (RARRAY_LEN(parameter_2) > 0 && TYPE(rb_ary_entry(ary, 0))) != T_ARRAY || (RARRAY_LEN(parameter_2) > 0 && RARRAY_LEN(rb_ary_entry(parameter_2, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_2, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_2, 0), 0)) != T_FIXNUM) && CLASS_OF(parameter_2) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_2) != rb_RealMatrixReference::rb_class())
 		rb_raise(rb_eArgError, "Argument 2 must be an MatrixType (\"RealMatrix\", \"RealMatrixReference\", \"Array< Array< Float > >\").");
 
-	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
+	// Converting parameters "parameter_1", "parameter_2" before they can be used.	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
 		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
