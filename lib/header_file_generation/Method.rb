@@ -247,6 +247,9 @@ module HeaderFileGenerator
 				@method_name      = opts["name"]
 				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
+				if opts["types"] and opts["types"].length > 0 and opts["number_of_inputs"].nil?
+					@number_of_inputs = opts["types"].length
+				end
 				@parameters       = []
 				@number_of_inputs.times do |i|
 					@parameters << Input.new(:type => (@input_type[i] || @input_type[0]), :position => i)
