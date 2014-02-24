@@ -134,7 +134,7 @@ module HeaderFileGenerator
 							if remaining_params.length > 0
 								cpp += remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology, indent+1
 							else
-								cpp += (calling_methodology.call() + ";\n")
+								cpp += (calling_methodology.call(indent+1) + ";\n")
 							end
 							cpp += ("\t"*indent+"}")
 						end
@@ -144,7 +144,7 @@ module HeaderFileGenerator
 						if remaining_params.length > 0
 							remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology, indent
 						else
-							calling_methodology.call() + ";\n"
+							calling_methodology.call(indent) + ";\n"
 						end
 					end
 				end
