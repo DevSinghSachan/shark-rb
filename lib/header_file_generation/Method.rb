@@ -247,6 +247,9 @@ module HeaderFileGenerator
 				@method_name      = opts["name"]
 				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
+				if opts["types"] and opts["types"].include? "2darray"
+					puts opts["types"].length, opts["types"], opts["number_of_inputs"].nil?
+				end
 				if opts["types"] and opts["types"].length > 0 and opts["number_of_inputs"].nil?
 					puts "yeah"
 					@number_of_inputs = opts["types"].length
