@@ -71,9 +71,9 @@ r->getModel()->lambdas((* parameter_1_converted->getData()), parameter_2);
 r->getModel()->lambdas((* parameter_1_converted->getData()), parameter_2);
 		}
 	}
-;
+
 	return self;
-;
+};
 
 
 VALUE method_rb_RNG_Dirichlet_get_lambdas (VALUE self) {

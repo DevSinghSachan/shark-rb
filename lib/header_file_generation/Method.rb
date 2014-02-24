@@ -317,7 +317,7 @@ module HeaderFileGenerator
 
 			def call_methodology_with_conversion
 """
-#{parameter_conversions};
+#{parameter_conversions}
 	return self;
 """
 			end
@@ -352,7 +352,7 @@ VALUE #{function_name} (#{input_parameters}) {
 	#{checking_methodology}
 """
 				if @requires_conversion
-					cpp += "#{call_methodology_with_conversion};\n\n"
+					cpp += "#{call_methodology_with_conversion}};\n\n"
 				else
 					cpp += "#{return_methodology(1)};\n\n"
 				end
