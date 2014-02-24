@@ -28,11 +28,11 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
 			rb_RealMatrix * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
 			rb_RealMatrixReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		}
 	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
 		rb_RealVectorReference * parameter_1_converted;
@@ -40,11 +40,11 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
 			rb_RealMatrix * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
 			rb_RealMatrixReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		}
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
 		rb_RealMatrixColumn * parameter_1_converted;
@@ -52,11 +52,11 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
 			rb_RealMatrix * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
 			rb_RealMatrixReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		}
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
 		rb_RealMatrixRow * parameter_1_converted;
@@ -64,11 +64,11 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
 			rb_RealMatrix * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
 			rb_RealMatrixReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
-			r->getModel()->lambdas((* (parameter_1_converted->getData())), parameter_2);
+			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2);
 		}
 	}
 
