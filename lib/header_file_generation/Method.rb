@@ -80,7 +80,7 @@ module HeaderFileGenerator
 				end
 
 				def converted_parameter_object
-					"(* #{converted_parameter_pointer})"
+					"(* (#{converted_parameter_pointer}))"
 				end
 
 				def converted_parameter_class
