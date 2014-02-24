@@ -17,17 +17,6 @@ VALUE rb_RNG_Bernoulli::rb_class() {
 	return rb_optimizer_rng_bernoulli_klass;
 }
 
-VALUE method_rb_RNG_Bernoulli_set_n (VALUE self, VALUE parameter_1) {
-	rb_RNG_Bernoulli *r;
-	Data_Get_Struct(self, rb_RNG_Bernoulli, r);
-
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-
-	r->getDistribution()->n(NUM2DBL(parameter_1));
-	return self;
-}
-
 VALUE method_rb_RNG_Bernoulli_set_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Bernoulli *r;
 	Data_Get_Struct(self, rb_RNG_Bernoulli, r);
@@ -37,13 +26,6 @@ VALUE method_rb_RNG_Bernoulli_set_p (VALUE self, VALUE parameter_1) {
 
 	r->getDistribution()->prob(NUM2DBL(parameter_1));
 	return self;
-}
-
-VALUE method_rb_RNG_Bernoulli_get_n (VALUE self) {
-	rb_RNG_Bernoulli *r;
-	Data_Get_Struct(self, rb_RNG_Bernoulli, r);
-
-	return rb_float_new(r->getDistribution()->n());
 }
 
 VALUE method_rb_RNG_Bernoulli_get_p (VALUE self) {
@@ -82,9 +64,7 @@ VALUE method_rb_RNG_Bernoulli_sample (VALUE self) {
 }
 
 void Init_rb_RNG_Bernoulli () {
-	rb_define_method(rb_RNG_Bernoulli::rb_class(), "n=", (rb_method) method_rb_RNG_Bernoulli_set_n, 1);
 	rb_define_method(rb_RNG_Bernoulli::rb_class(), "p=", (rb_method) method_rb_RNG_Bernoulli_set_p, 1);
-	rb_define_method(rb_RNG_Bernoulli::rb_class(), "n", (rb_method) method_rb_RNG_Bernoulli_get_n, 0);
 	rb_define_method(rb_RNG_Bernoulli::rb_class(), "p", (rb_method) method_rb_RNG_Bernoulli_get_p, 0);
 	rb_define_method(rb_RNG_Bernoulli::rb_class(), "prob", (rb_method) method_rb_RNG_Bernoulli_get_prob, 1);
 	rb_define_alloc_func(rb_RNG_Bernoulli::rb_class(), (rb_alloc_func_t) method_rb_RNG_Bernoulli_allocate);

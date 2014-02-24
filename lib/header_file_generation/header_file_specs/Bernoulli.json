@@ -12,10 +12,6 @@
 	"pointer_getter" : ["getDistribution","getModel"],
 	"getters" : [
 		{
-			"name": "n",
-			"type": "double"
-		},
-		{
 			"name": "p",
 			"accessor_name": "prob",
 			"type": "double"
@@ -29,11 +25,6 @@
 		}
 	],
 	"setters" : [
-		{
-			"name": "n",
-			"accessor_name":"n",
-			"types": ["double"]
-		},
 		{
 			"name": "p",
 			"accessor_name":"prob",
