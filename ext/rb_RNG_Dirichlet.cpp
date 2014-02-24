@@ -16,9 +16,9 @@ VALUE rb_RNG_Dirichlet::rb_class() {
 VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE parameter_2) {
 	rb_RNG_Dirichlet *r;
 	
-		if (TYPE(parameter_1) != T_ARRAY && CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class())
-			rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"RealVector\", \"RealVectorReference\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
-	
+	if (TYPE(parameter_1) != T_ARRAY && CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class())
+		rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"RealVector\", \"RealVectorReference\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
+
 
 
 	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {

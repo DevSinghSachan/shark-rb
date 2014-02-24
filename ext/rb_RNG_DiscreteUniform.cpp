@@ -28,18 +28,18 @@ VALUE method_rb_RNG_DiscreteUniform_get_high (VALUE self) {
 VALUE method_rb_RNG_DiscreteUniform_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiscreteUniform *r;
 	
-		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 
 
 VALUE method_rb_RNG_DiscreteUniform_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiscreteUniform *r;
 	
-		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 
 
@@ -57,13 +57,13 @@ VALUE method_rb_RNG_DiscreteUniform_initialize (VALUE self) {
 VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VALUE parameter_2) {
 	rb_RNG_DiscreteUniform *r;
 	
-		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 
-		if (TYPE(parameter_2) != T_FIXNUM && TYPE(parameter_2) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 2 must be a Float.");
-	
+
+	if (TYPE(parameter_2) != T_FIXNUM && TYPE(parameter_2) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 2 must be a Float.");
+
 	r->getModel()->setRange(NUM2DBL(parameter_1), NUM2DBL(parameter_2));
 	return self;
 

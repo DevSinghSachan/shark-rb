@@ -20,9 +20,9 @@ VALUE rb_RNG_Geometric::rb_class() {
 VALUE method_rb_RNG_Geometric_set_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Geometric *r;
 	
-		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+
 	r->getDistribution()->prob(NUM2DBL(parameter_1));
 	return self;
 
@@ -30,9 +30,9 @@ VALUE method_rb_RNG_Geometric_set_p (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Geometric_set_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Geometric *r;
 	
-		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+
 	r->getDistribution()->prob(NUM2DBL(parameter_1));
 	return self;
 
@@ -46,9 +46,9 @@ VALUE method_rb_RNG_Geometric_get_p (VALUE self) {
 VALUE method_rb_RNG_Geometric_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Geometric *r;
 	
-		if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-			rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+
 	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)));
 
 
