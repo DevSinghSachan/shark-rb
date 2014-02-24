@@ -67,7 +67,7 @@ task :header do
 			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
 			begin
 				g.commit_all("modified json + header files")
-			rescue Git::GitExecuteError
+			rescue Git::GitExecuteError => e
 				if e.message["nothing to commit, working directory clean"]
 					puts "No changes to commit."
 				else
