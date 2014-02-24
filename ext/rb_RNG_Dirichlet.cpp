@@ -72,6 +72,7 @@ r->getModel()->lambdas((* parameter_1_converted->getData()), parameter_2);
 		}
 	}
 ;
+	return self;
 ;
 
 

@@ -302,7 +302,7 @@ module HeaderFileGenerator
 				cpp += @parameters.first.convert_and_embed(
 					@parameters,
 					@parameters[1..(@parameters.length - 1)],
-					Proc.new {self.call_methodology},
+					->(i=0) {self.call_methodology(i)},
 					1)
 				cpp
 			end
@@ -318,29 +318,30 @@ module HeaderFileGenerator
 			def call_methodology_with_conversion
 """
 #{parameter_conversions};
+	return self;
 """
 			end
 
-			def call_methodology
+			def call_methodology indent=0
 				if @cpp_method_name =~ /operator(.+)/
 					if $1 == "()"
-						"(*#{symbol}->#{@header_file.pointer_acquirer.first}())(#{parameters})"
+						"#{"\t"*indent}(*#{symbol}->#{@header_file.pointer_acquirer.first}())(#{parameters})"
 					else
-						"(*#{symbol}->#{@header_file.pointer_acquirer.first}())#{$1}(#{parameters})"
+						"#{"\t"*indent}(*#{symbol}->#{@header_file.pointer_acquirer.first}())#{$1}(#{parameters})"
 					end
 				else
-						"#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{parameters})"
+						"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{parameters})"
 				end
 			end
 
-			def return_methodology
+			def return_methodology indent=0
 				case @return_type
 				when :double
-					"\treturn rb_float_new(#{call_methodology})"
+					"#{"\t"*indent}return rb_float_new(#{call_methodology})"
 				when :integer
-					"\treturn INT2FIX(#{call_methodology})"
+					"#{"\t"*indent}return INT2FIX(#{call_methodology})"
 				else
-					"\t#{call_methodology};\n\treturn self"
+					"#{call_methodology(indent)};\n#{"\t"*indent}return self"
 				end
 			end
 
@@ -353,7 +354,7 @@ VALUE #{function_name} (#{input_parameters}) {
 				if @requires_conversion
 					cpp += "#{call_methodology_with_conversion};\n\n"
 				else
-					cpp += "#{return_methodology};\n\n"
+					cpp += "#{return_methodology(1)};\n\n"
 				end
 				cpp
 			end
