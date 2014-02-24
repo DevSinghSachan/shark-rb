@@ -129,7 +129,7 @@ module HeaderFileGenerator
 						cpp = ""
 						compatible_classes.each_with_index do |cpp_class, k|
 							cpp += (k==0 ? "if" : " else if") + " (" + (matches_classes [cpp_class] ) + ") " + "{\n"
-							cpp += convert_into_class cpp_class
+							cpp += convert_into_class cpp_class, indent+1
 							self.input_class = cpp_class
 							if remaining_params.length > 0
 								cpp += remaining_params.first.convert_and_embed all_params, remaining_params[1..(remaining_params.length-1)], calling_methodology, indent+1
