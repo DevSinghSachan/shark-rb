@@ -1,5 +1,8 @@
 require_relative 'HeaderFile'
+require_relative 'InputClass'
+require_relative 'Input'
 require_relative 'Method'
+
 require 'json'
 module HeaderFileGenerator
 	# TODO: add shark error catching.
