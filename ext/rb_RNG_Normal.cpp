@@ -21,7 +21,7 @@ VALUE method_rb_RNG_Normal_set_mean (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->mean(NUM2DBL(parameter_1));
 	return self
-};
+}
 
 
 VALUE method_rb_RNG_Normal_set_variance (VALUE self, VALUE parameter_1) {
@@ -32,21 +32,21 @@ VALUE method_rb_RNG_Normal_set_variance (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->variance(NUM2DBL(parameter_1));
 	return self
-};
+}
 
 
 VALUE method_rb_RNG_Normal_get_mean (VALUE self) {
 	rb_RNG_Normal *r;
 	
 	return rb_float_new(r->getModel()->mean())
-};
+}
 
 
 VALUE method_rb_RNG_Normal_get_variance (VALUE self) {
 	rb_RNG_Normal *r;
 	
 	return rb_float_new(r->getModel()->variance())
-};
+}
 
 
 VALUE method_rb_RNG_Normal_get_p (VALUE self, VALUE parameter_1) {
@@ -56,7 +56,7 @@ VALUE method_rb_RNG_Normal_get_p (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)))
-};
+}
 
 
 VALUE method_rb_RNG_Normal_get_prob (VALUE self, VALUE parameter_1) {
@@ -66,7 +66,7 @@ VALUE method_rb_RNG_Normal_get_prob (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)))
-};
+}
 
 
 VALUE method_rb_RNG_Normal_get_log_prob (VALUE self, VALUE parameter_1) {
@@ -76,7 +76,7 @@ VALUE method_rb_RNG_Normal_get_log_prob (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->logP(NUM2DBL(parameter_1)))
-};
+}
 
 
 VALUE method_rb_RNG_Normal_allocate (VALUE klass) {
@@ -94,7 +94,7 @@ VALUE method_rb_RNG_Normal_sample (VALUE self) {
 	rb_RNG_Normal *r;
 	
 	return rb_float_new((*r->getModel())())
-};
+}
 
 
 void Init_rb_RNG_Normal () {
