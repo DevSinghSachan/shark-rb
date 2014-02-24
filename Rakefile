@@ -19,7 +19,7 @@ end
 
 before 'install' do
 	g = Git.open(File.dirname(__FILE__))
-	modified_files = g.status.changed.keys
+	modified_files = g.status.changed.keys + g.status.untracked.keys
 	json_modified_files = modified_files.reject {|i| !(i.match(/header_file_specs\/[^\.]+.json/))}.map {|i| i.match(/header_file_specs\/([^\.]+.json)/)[1]}
 	if json_modified_files.length > 0
 		raise RuntimeError.new "Warning: Some new headers were not added to the git, and may not be ready:\n\t- \"#{json_modified_files.join("\",\n\t- \"")}\"\nRun \"rake header\" to confirm these new additions, or delete these files.\n\n"
@@ -31,10 +31,30 @@ end
 desc 'Generate Header Files'
 task :header do
 	require './lib/header_file_generation/header_file_generation.rb'
-	HeaderFileGenerator.generate_header_files
-	`git add -A`
-	`git commit -m "new header files"`
-	`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
+	hfiles = HeaderFileGenerator.generate_header_files.map {|i| File.dirname(__FILE__) + "/ext/" + i}
+
+	json_spec_files = Dir.glob(File.dirname(__FILE__)+"/lib/header_file_generation/header_file_specs/*.json")
+	if hfiles.length > 0 or json_spec_files.length > 0
+		g = Git.open(File.dirname(__FILE__))
+		if (g.status.untracked.keys.map {|i| File.dirname(__FILE__) + "/" + i} & hfiles).length > 0
+			puts "case 1"
+			g.add(json_spec_files)
+			g.add(hfiles)
+			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
+			g.commit_all("new header files")
+			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
+			puts "new header files, rebuilding"
+			Rake::Task["clean"]
+			Rake::Task["build"]
+		elsif intersection = ((g.status.changed.keys + g.status.untracked.keys).map {|i| File.dirname(__FILE__) + "/" + i} & hfiles) and intersection.length > 0
+			puts "case 2", intersection
+			g.add(json_spec_files)
+			g.add(hfiles)
+			g.add(hfiles.map {|i| i.match(/(.+\.)h/)[1] + "cpp"})
+			g.commit_all("modified json + header files")
+			`cd #{File.dirname(__FILE__) + "/ext/"} && ruby extconf.rb && cd ..`
+		end
+	end
 	Rake::Task["gemspec:generate"].reenable
 	Rake::Task["gemspec:generate"].invoke
 end
