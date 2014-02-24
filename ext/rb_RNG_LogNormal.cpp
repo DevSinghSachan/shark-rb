@@ -20,7 +20,7 @@ VALUE method_rb_RNG_LogNormal_set_scale (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->scale(NUM2DBL(parameter_1));
-	return self;
+	return self};
 
 
 VALUE method_rb_RNG_LogNormal_set_location (VALUE self, VALUE parameter_1) {
@@ -30,19 +30,19 @@ VALUE method_rb_RNG_LogNormal_set_location (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->location(NUM2DBL(parameter_1));
-	return self;
+	return self};
 
 
 VALUE method_rb_RNG_LogNormal_get_scale (VALUE self) {
 	rb_RNG_LogNormal *r;
 	
-	return rb_float_new(r->getModel()->scale());
+	return rb_float_new(r->getModel()->scale())};
 
 
 VALUE method_rb_RNG_LogNormal_get_location (VALUE self) {
 	rb_RNG_LogNormal *r;
 	
-	return rb_float_new(r->getModel()->location());
+	return rb_float_new(r->getModel()->location())};
 
 
 VALUE method_rb_RNG_LogNormal_get_p (VALUE self, VALUE parameter_1) {
@@ -51,7 +51,7 @@ VALUE method_rb_RNG_LogNormal_get_p (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
+	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)))};
 
 
 VALUE method_rb_RNG_LogNormal_get_prob (VALUE self, VALUE parameter_1) {
@@ -60,7 +60,7 @@ VALUE method_rb_RNG_LogNormal_get_prob (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
+	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)))};
 
 
 VALUE method_rb_RNG_LogNormal_allocate (VALUE klass) {
@@ -77,7 +77,7 @@ VALUE method_rb_RNG_LogNormal_initialize (VALUE self) {
 VALUE method_rb_RNG_LogNormal_sample (VALUE self) {
 	rb_RNG_LogNormal *r;
 	
-	return rb_float_new((*r->getModel())());
+	return rb_float_new((*r->getModel())())};
 
 
 void Init_rb_RNG_LogNormal () {
