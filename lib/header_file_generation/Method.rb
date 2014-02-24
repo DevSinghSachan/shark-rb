@@ -57,7 +57,7 @@ module HeaderFileGenerator
 				cpp += @parameters.first.convert_and_embed(
 					@parameters,
 					@parameters[1..(@parameters.length - 1)],
-					->(i=0) {self.call_methodology(i)},
+					->(i=0) {self.return_methodology(i)},
 					1)
 				cpp
 			end
@@ -91,10 +91,8 @@ module HeaderFileGenerator
 
 			def return_methodology indent=0
 				case @return_type
-				when :double
-					"#{"\t"*indent}return rb_float_new(#{call_methodology})"
-				when :integer
-					"#{"\t"*indent}return INT2FIX(#{call_methodology})"
+				when *([:double] + Output::IntegerTypes + Output::ArrayTypes)
+					"\t"*indent + "return " + Output.new(call_methodology(indent), :type => @return_type).to_s
 				else
 					"#{call_methodology(indent)};\n#{"\t"*indent}return self"
 				end

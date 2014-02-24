@@ -42,14 +42,14 @@ VALUE method_rb_RNG_TruncatedExponential_set_max (VALUE self, VALUE parameter_1)
 VALUE method_rb_RNG_TruncatedExponential_get_lambda (VALUE self) {
 	rb_RNG_TruncatedExponential *r;
 	
-	return rb_float_new(r->getDistribution()->lambda())
+	return rb_float_new(	r->getDistribution()->lambda())
 }
 
 
 VALUE method_rb_RNG_TruncatedExponential_get_max (VALUE self) {
 	rb_RNG_TruncatedExponential *r;
 	
-	return rb_float_new(r->getDistribution()->max())
+	return rb_float_new(	r->getDistribution()->max())
 }
 
 
@@ -59,7 +59,7 @@ VALUE method_rb_RNG_TruncatedExponential_get_prob (VALUE self, VALUE parameter_1
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)))
+	return rb_float_new(	r->getDistribution()->p(NUM2DBL(parameter_1)))
 }
 
 
@@ -77,7 +77,7 @@ VALUE method_rb_RNG_TruncatedExponential_initialize (VALUE self) {
 VALUE method_rb_RNG_TruncatedExponential_sample (VALUE self) {
 	rb_RNG_TruncatedExponential *r;
 	
-	return rb_float_new((*r->getDistribution())())
+	return rb_float_new(	(*r->getDistribution())())
 }
 
 

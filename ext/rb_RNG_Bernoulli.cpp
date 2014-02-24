@@ -31,7 +31,7 @@ VALUE method_rb_RNG_Bernoulli_set_p (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Bernoulli_get_p (VALUE self) {
 	rb_RNG_Bernoulli *r;
 	
-	return rb_float_new(r->getDistribution()->prob())
+	return rb_float_new(	r->getDistribution()->prob())
 }
 
 
@@ -41,7 +41,7 @@ VALUE method_rb_RNG_Bernoulli_get_prob (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)))
+	return rb_float_new(	r->getDistribution()->p(NUM2DBL(parameter_1)))
 }
 
 
@@ -59,7 +59,7 @@ VALUE method_rb_RNG_Bernoulli_initialize (VALUE self) {
 VALUE method_rb_RNG_Bernoulli_sample (VALUE self) {
 	rb_RNG_Bernoulli *r;
 	
-	return rb_float_new((*r->getDistribution())())
+	return rb_float_new(	(*r->getDistribution())())
 }
 
 

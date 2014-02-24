@@ -1,6 +1,7 @@
 require_relative 'HeaderFile'
-require_relative 'InputClass'
+require_relative 'CppClass'
 require_relative 'Input'
+require_relative 'Output'
 require_relative 'Method'
 
 require 'json'

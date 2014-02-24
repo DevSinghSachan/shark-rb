@@ -38,14 +38,14 @@ VALUE method_rb_RNG_Cauchy_set_sigma (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Cauchy_get_sigma (VALUE self) {
 	rb_RNG_Cauchy *r;
 	
-	return rb_float_new(r->getModel()->sigma())
+	return rb_float_new(	r->getModel()->sigma())
 }
 
 
 VALUE method_rb_RNG_Cauchy_get_median (VALUE self) {
 	rb_RNG_Cauchy *r;
 	
-	return rb_float_new(r->getModel()->median())
+	return rb_float_new(	r->getModel()->median())
 }
 
 
@@ -55,7 +55,7 @@ VALUE method_rb_RNG_Cauchy_get_p (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)))
+	return rb_float_new(	r->getModel()->p(NUM2DBL(parameter_1)))
 }
 
 
@@ -65,7 +65,7 @@ VALUE method_rb_RNG_Cauchy_get_prob (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)))
+	return rb_float_new(	r->getModel()->p(NUM2DBL(parameter_1)))
 }
 
 
@@ -83,7 +83,7 @@ VALUE method_rb_RNG_Cauchy_initialize (VALUE self) {
 VALUE method_rb_RNG_Cauchy_sample (VALUE self) {
 	rb_RNG_Cauchy *r;
 	
-	return rb_float_new((*r->getModel())())
+	return rb_float_new(	(*r->getModel())())
 }
 
 
