@@ -41,7 +41,6 @@
 		},
 		{
 			"name": "prob",
-			"accessor_name":"p",
 			"types": ["double"]
 		}
 	],
