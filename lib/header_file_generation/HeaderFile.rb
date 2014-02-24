@@ -32,13 +32,13 @@ module HeaderFileGenerator
 
 		def initialize(opts={})
 			@setters, @methods, @getters = [], [], []
-			@wrapped_class  = opts["wrapped_class"]
-			@dependencies   = opts["dependencies"]
-			@pointer_acquirer = [(opts["pointer_getter"] || "getModel")].flatten
-			@pointer_name   = opts["pointer_name"] || "model"
+			@wrapped_class               = opts["wrapped_class"]
+			@dependencies                = opts["dependencies"]
+			@pointer_acquirer            = [(opts["pointer_getter"] || "getModel")].flatten
+			@pointer_name                = opts["pointer_name"] || "model"
 			raise StandardError.new "pointer_name: \"#{opts["pointer_name"] || "model"}\" cannot have the same name as one of the class methods (pointer_getter) : \"#{[(opts["pointer_getter"] || "getModel")].flatten.join("\", \"")}\"" if [(opts["pointer_getter"] || "getModel")].flatten.include?(opts["pointer_name"] || "model")
-			@cpp_class_name = opts["class"]
-			@rb_class_name  = opts["rb_class"]
+			@cpp_class_name                = opts["class"]
+			@rb_class_name                 = opts["rb_class"]
 			@default_constructor_arguments = opts["constructor_arguments"] || []
 			# this is to define the function that returns the class and singleton methods too
 			@methods << Allocator.new("hf" => self)

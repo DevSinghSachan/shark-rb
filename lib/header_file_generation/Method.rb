@@ -60,8 +60,8 @@ module HeaderFileGenerator
 				attr_reader :converted
 				attr_accessor :input_class
 
-				ArrayTypes = [:array, :"1darray", :vector]
-				MatrixTypes = [:matrix, :"2darray"]
+				ArrayTypes   = [:array, :"1darray", :vector]
+				MatrixTypes  = [:matrix, :"2darray"]
 				IntegerTypes = [:integer, :int]
 
 				def initialize(opts={})
@@ -154,6 +154,7 @@ module HeaderFileGenerator
 				end
 
 				def requires_conversion?
+					puts @type, ([ArrayTypes + MatrixTypes].include? @type)
 					[ArrayTypes + MatrixTypes].include? @type
 				end
 
