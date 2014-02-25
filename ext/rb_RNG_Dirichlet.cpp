@@ -81,6 +81,20 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 			r->getModel()->lambdas(*(parameter_1_converted->getData()), *(parameter_2_converted->getData()));
 			return self;
 		}
+	} else if (TYPE(parameter_1) == T_ARRAY) {
+		Array * parameter_1_converted;
+		Data_Get_Struct(parameter_1, Array, parameter_1_converted);
+		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
+			rb_RealMatrix * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1_converted, *(parameter_2_converted->getData()));
+			return self;
+		} else if (CLASS_OF(parameter_2) == rb_RealMatrixReference::rb_class()) {
+			rb_RealMatrixReference * parameter_2_converted;
+			Data_Get_Struct(parameter_2, rb_RealMatrixReference, parameter_2_converted);
+			r->getModel()->lambdas(parameter_1_converted, *(parameter_2_converted->getData()));
+			return self;
+		}
 	}
 
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
