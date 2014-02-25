@@ -136,10 +136,6 @@ VALUE #{function_name} (VALUE klass) {
 	return #{CppClass.new(className).to_rb};
 }
 """
-#wrap_pointer<#{className}>(
-		#{className}::rb_class(),
-		#new #{className}()
-		#);
 			end
 
 			def function_name
