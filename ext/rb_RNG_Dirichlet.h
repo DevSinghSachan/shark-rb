@@ -5,6 +5,7 @@
 #include <shark/Rng/Dirichlet.h>
 #include "ruby.h"
 #include "rb_conversions.h"
+#include "rb_Datatypes.h"
 
 class rb_RNG_Dirichlet {
 

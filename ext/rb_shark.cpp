@@ -2,15 +2,7 @@
 #include "rb_conversions.h"
 #include "rb_classes.h"
 // datatypes:
-#include "rb_RealVector.h"
-#include "rb_RealVectorReference.h"
-#include "rb_RealMatrix.h"
-#include "rb_RealMatrixReference.h"
-#include "rb_RealMatrixRow.h"
-#include "rb_RealMatrixColumn.h"
-#include "rb_UnlabeledData.h"
-#include "rb_RegressionDataset.h"
-#include "rb_SolutionSet.h"
+#include "rb_Datatypes.h"
 // algorithms:
 #include "rb_LinearModel.h"
 #include "rb_PCA.h"

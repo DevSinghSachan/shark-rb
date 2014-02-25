@@ -135,7 +135,7 @@ VALUE #{@cpp_class.rb_class} {
 		end
 
 		def h_file_dependencies
-			@dependencies.map {|i| "#include "+i}.join("\n")
+			@dependencies.map {|i| "#include "+(i =~ /^<|"/ ? i : "\"#{i}\"")}.join("\n")
 		end
 
 		def pointer_acquirer_return_type
