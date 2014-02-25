@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-02-24"
+  s.date = "2014-02-25"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
