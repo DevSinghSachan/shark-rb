@@ -14,7 +14,8 @@ VALUE rb_RNG_Poisson::rb_class() {
 }
 
 VALUE method_rb_RNG_Poisson_set_mean (VALUE self, VALUE parameter_1) {
-	rb_RNG_Poisson *r;
+	rb_RNG_Poisson * r;
+	Data_Get_Struct(self, rb_RNG_Poisson)
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -24,13 +25,15 @@ VALUE method_rb_RNG_Poisson_set_mean (VALUE self, VALUE parameter_1) {
 }
 
 VALUE method_rb_RNG_Poisson_get_mean (VALUE self) {
-	rb_RNG_Poisson *r;
+	rb_RNG_Poisson * r;
+	Data_Get_Struct(self, rb_RNG_Poisson)
 	
 	return rb_float_new(r->getModel()->mean());
 }
 
 VALUE method_rb_RNG_Poisson_get_p (VALUE self, VALUE parameter_1) {
-	rb_RNG_Poisson *r;
+	rb_RNG_Poisson * r;
+	Data_Get_Struct(self, rb_RNG_Poisson)
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -39,7 +42,8 @@ VALUE method_rb_RNG_Poisson_get_p (VALUE self, VALUE parameter_1) {
 }
 
 VALUE method_rb_RNG_Poisson_get_prob (VALUE self, VALUE parameter_1) {
-	rb_RNG_Poisson *r;
+	rb_RNG_Poisson * r;
+	Data_Get_Struct(self, rb_RNG_Poisson)
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -56,7 +60,8 @@ VALUE method_rb_RNG_Poisson_initialize (VALUE self) {
 }
 
 VALUE method_rb_RNG_Poisson_sample (VALUE self) {
-	rb_RNG_Poisson *r;
+	rb_RNG_Poisson * r;
+	Data_Get_Struct(self, rb_RNG_Poisson)
 	
 	return rb_float_new((*(r->getModel()))());
 }

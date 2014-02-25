@@ -20,13 +20,13 @@ module HeaderFileGenerator
 			rescue JSON::ParserError => e
 				raise StandardError.new "Error parsing JSON \"#{file}\"\n\n=>\t"+e.message+"\n\n"
 			end
-			File.open(File.dirname(__FILE__) + "/../../ext/" + hf.cpp_class_name+".h", "w") do |f|
+			File.open(File.dirname(__FILE__) + "/../../ext/" + hf.cpp_class.to_s+".h", "w") do |f|
 				f << hf.to_h_file
 			end
-			File.open(File.dirname(__FILE__) + "/../../ext/" + hf.cpp_class_name+".cpp", "w") do |f|
+			File.open(File.dirname(__FILE__) + "/../../ext/" + hf.cpp_class.to_s+".cpp", "w") do |f|
 				f << hf.to_cpp_file
 			end
-			headers << (hf.cpp_class_name+".h")
+			headers << (hf.cpp_class.to_s+".h")
 			header_init_functions << hf.init_function_name
 		end
 

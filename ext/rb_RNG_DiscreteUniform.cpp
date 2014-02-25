@@ -14,19 +14,22 @@ VALUE rb_RNG_DiscreteUniform::rb_class() {
 }
 
 VALUE method_rb_RNG_DiscreteUniform_get_low (VALUE self) {
-	rb_RNG_DiscreteUniform *r;
+	rb_RNG_DiscreteUniform * r;
+	Data_Get_Struct(self, rb_RNG_DiscreteUniform)
 	
 	return rb_float_new(r->getModel()->low());
 }
 
 VALUE method_rb_RNG_DiscreteUniform_get_high (VALUE self) {
-	rb_RNG_DiscreteUniform *r;
+	rb_RNG_DiscreteUniform * r;
+	Data_Get_Struct(self, rb_RNG_DiscreteUniform)
 	
 	return rb_float_new(r->getModel()->high());
 }
 
 VALUE method_rb_RNG_DiscreteUniform_get_p (VALUE self, VALUE parameter_1) {
-	rb_RNG_DiscreteUniform *r;
+	rb_RNG_DiscreteUniform * r;
+	Data_Get_Struct(self, rb_RNG_DiscreteUniform)
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -35,7 +38,8 @@ VALUE method_rb_RNG_DiscreteUniform_get_p (VALUE self, VALUE parameter_1) {
 }
 
 VALUE method_rb_RNG_DiscreteUniform_get_prob (VALUE self, VALUE parameter_1) {
-	rb_RNG_DiscreteUniform *r;
+	rb_RNG_DiscreteUniform * r;
+	Data_Get_Struct(self, rb_RNG_DiscreteUniform)
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -52,7 +56,8 @@ VALUE method_rb_RNG_DiscreteUniform_initialize (VALUE self) {
 }
 
 VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VALUE parameter_2) {
-	rb_RNG_DiscreteUniform *r;
+	rb_RNG_DiscreteUniform * r;
+	Data_Get_Struct(self, rb_RNG_DiscreteUniform)
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -66,7 +71,8 @@ VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VA
 }
 
 VALUE method_rb_RNG_DiscreteUniform_sample (VALUE self) {
-	rb_RNG_DiscreteUniform *r;
+	rb_RNG_DiscreteUniform * r;
+	Data_Get_Struct(self, rb_RNG_DiscreteUniform)
 	
 	return rb_float_new((*(r->getModel()))());
 }

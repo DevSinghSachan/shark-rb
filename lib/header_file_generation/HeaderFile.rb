@@ -2,7 +2,7 @@ module HeaderFileGenerator
 	class HeaderFile
 		attr_reader :getters
 		attr_reader :setters
-		attr_reader :cpp_class_name
+		attr_reader :cpp_class
 		attr_reader :pointer_acquirer
 		attr_reader :pointer_name
 
@@ -37,7 +37,7 @@ module HeaderFileGenerator
 			@pointer_acquirer              = [(opts["pointer_getter"] || "getModel")].flatten
 			@pointer_name                  = opts["pointer_name"] || "model"
 			raise StandardError.new "pointer_name: \"#{opts["pointer_name"] || "model"}\" cannot have the same name as one of the class methods (pointer_getter) : \"#{[(opts["pointer_getter"] || "getModel")].flatten.join("\", \"")}\"" if [(opts["pointer_getter"] || "getModel")].flatten.include?(opts["pointer_name"] || "model")
-			@cpp_class_name                = opts["class"]
+			@cpp_class                     = Method::CppClass.new opts["class"]
 			@rb_class_name                 = opts["rb_class"]
 			@default_constructor_arguments = opts["constructor_arguments"] || []
 			# this is to define the function that returns the class and singleton methods too
@@ -49,7 +49,7 @@ module HeaderFileGenerator
 		end
 
 		def init_function_name
-			"Init_#{@cpp_class_name}"
+			"Init_#{@cpp_class}"
 		end
 
 		def generate_init_function
@@ -71,7 +71,7 @@ void #{init_function_name} () {
 		end
 
 		def include_header_file
-			"#include \"#{@cpp_class_name}.h\""
+			"#include \"#{@cpp_class}.h\""
 		end
 
 		def include_pointer_wrapper_extras
@@ -82,7 +82,7 @@ void #{init_function_name} () {
 			cpp = ""
 			@pointer_acquirer.each do |pointer_acq|
 cpp+= """
-#{pointer_acquirer_return_type} #{@cpp_class_name}::#{pointer_acq}() {
+#{pointer_acquirer_return_type} #{@cpp_class}::#{pointer_acq}() {
 	return &#{@pointer_name};
 }
 """
@@ -93,11 +93,11 @@ cpp+= """
 		def generate_cpp_constructor_function
 			if @default_constructor_arguments
 """
-#{@cpp_class_name}::#{@cpp_class_name}() : model(#{@default_constructor_arguments.join(", ")}) {}
+#{@cpp_class}::#{@cpp_class}() : model(#{@default_constructor_arguments.join(", ")}) {}
 """	
 			else
 """
-#{@cpp_class_name}::#{@cpp_class_name}() {}
+#{@cpp_class}::#{@cpp_class}() {}
 """
 			end
 		end
@@ -106,7 +106,7 @@ cpp+= """
 """
 extern VALUE #{@rb_class_name};
 
-VALUE #{@cpp_class_name}::rb_class() {
+VALUE #{@cpp_class.rb_class} {
 	return #{@rb_class_name};
 }
 """
@@ -151,18 +151,18 @@ VALUE #{@cpp_class_name}::rb_class() {
 		end
 
 		def to_h_file
-"""#ifndef #{@cpp_class_name.upcase}_H
-#define #{@cpp_class_name.upcase}_H
+"""#ifndef #{@cpp_class.cpp_class.upcase}_H
+#define #{@cpp_class.cpp_class.upcase}_H
 
 #{h_file_dependencies}
 
-class #{@cpp_class_name} {
+class #{@cpp_class} {
 
 	public:
 		static VALUE rb_class();
 		#{@wrapped_class}   #{@pointer_name};
 #{pointer_acquirer_h_definition}
-		#{@cpp_class_name}();
+		#{@cpp_class}();
 };
 
 void #{init_function_name}();
