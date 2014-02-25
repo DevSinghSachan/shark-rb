@@ -23,7 +23,7 @@ VALUE method_rb_RNG_TruncatedExponential_set_lambda (VALUE self, VALUE parameter
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	r->getDistribution()->setLambda(NUM2DBL(parameter_1));
+	r->getDistribution()->setLambda(rb_float_new(parameter_1));
 	return self
 }
 
@@ -33,7 +33,7 @@ VALUE method_rb_RNG_TruncatedExponential_set_max (VALUE self, VALUE parameter_1)
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	r->getDistribution()->setMax(NUM2DBL(parameter_1));
+	r->getDistribution()->setMax(rb_float_new(parameter_1));
 	return self
 }
 
@@ -55,7 +55,7 @@ VALUE method_rb_RNG_TruncatedExponential_get_prob (VALUE self, VALUE parameter_1
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)));
+	return rb_float_new(r->getDistribution()->p(rb_float_new(parameter_1)));
 }
 
 VALUE method_rb_RNG_TruncatedExponential_allocate (VALUE klass) {

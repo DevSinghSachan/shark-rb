@@ -1,4 +1,5 @@
 require_relative 'HeaderFile'
+require_relative 'Converter'
 require_relative 'CppClass'
 require_relative 'Input'
 require_relative 'Output'

@@ -19,7 +19,7 @@ VALUE method_rb_RNG_DiffGeometric_set_mean (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	r->getModel()->mean(NUM2DBL(parameter_1));
+	r->getModel()->mean(rb_float_new(parameter_1));
 	return self
 }
 
@@ -35,7 +35,7 @@ VALUE method_rb_RNG_DiffGeometric_get_p (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
+	return rb_float_new(r->getModel()->p(rb_float_new(parameter_1)));
 }
 
 VALUE method_rb_RNG_DiffGeometric_get_prob (VALUE self, VALUE parameter_1) {
@@ -44,7 +44,7 @@ VALUE method_rb_RNG_DiffGeometric_get_prob (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
+	return rb_float_new(r->getModel()->p(rb_float_new(parameter_1)));
 }
 
 VALUE method_rb_RNG_DiffGeometric_allocate (VALUE klass) {
