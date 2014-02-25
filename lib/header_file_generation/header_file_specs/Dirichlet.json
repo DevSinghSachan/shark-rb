@@ -12,13 +12,13 @@
 	"constructor_arguments": ["shark::Rng::globalRng"],
 	"getters" : [
 		{
-			"name": "lambdas",
+			"name": "alphas",
 			"type": "rubyarray"
 		}
 	],
 	"setters" : [
 		{
-			"name": "lambdas",
+			"name": "alphas",
 			"types": ["array"]
 		}
 	]
