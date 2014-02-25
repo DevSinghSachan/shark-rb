@@ -48,10 +48,7 @@ VALUE method_rb_RNG_Uniform_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Uniform_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Uniform>(
-		rb_RNG_Uniform::rb_class(),
-		new rb_RNG_Uniform()
-		);
+	return wrap_pointer<rb_RNG_Uniform>(rb_RNG_Uniform::rb_class(), new rb_RNG_Uniform::rb_class()());
 }
 
 VALUE method_rb_RNG_Uniform_initialize (VALUE self) {

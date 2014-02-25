@@ -52,10 +52,7 @@ VALUE method_rb_RNG_Poisson_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Poisson_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Poisson>(
-		rb_RNG_Poisson::rb_class(),
-		new rb_RNG_Poisson()
-		);
+	return wrap_pointer<rb_RNG_Poisson>(rb_RNG_Poisson::rb_class(), new rb_RNG_Poisson::rb_class()());
 }
 
 VALUE method_rb_RNG_Poisson_initialize (VALUE self) {

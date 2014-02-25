@@ -57,10 +57,7 @@ VALUE method_rb_RNG_Geometric_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Geometric_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Geometric>(
-		rb_RNG_Geometric::rb_class(),
-		new rb_RNG_Geometric()
-		);
+	return wrap_pointer<rb_RNG_Geometric>(rb_RNG_Geometric::rb_class(), new rb_RNG_Geometric::rb_class()());
 }
 
 VALUE method_rb_RNG_Geometric_initialize (VALUE self) {

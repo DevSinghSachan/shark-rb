@@ -95,10 +95,7 @@ VALUE method_rb_RNG_Dirichlet_get_lambdas (VALUE self) {
 
 
 VALUE method_rb_RNG_Dirichlet_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Dirichlet>(
-		rb_RNG_Dirichlet::rb_class(),
-		new rb_RNG_Dirichlet()
-		);
+	return wrap_pointer<rb_RNG_Dirichlet>(rb_RNG_Dirichlet::rb_class(), new rb_RNG_Dirichlet::rb_class()());
 }
 
 VALUE method_rb_RNG_Dirichlet_initialize (VALUE self) {

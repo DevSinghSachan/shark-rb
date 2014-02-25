@@ -133,12 +133,13 @@ VALUE #{function_name} (#{input_parameters}) {
 			def to_cpp_function_definition
 """
 VALUE #{function_name} (VALUE klass) {
-	return wrap_pointer<#{className}>(
-		#{className}::rb_class(),
-		new #{className}()
-		);
+	return #{CppClass.new(className).to_rb};
 }
 """
+#wrap_pointer<#{className}>(
+		#{className}::rb_class(),
+		#new #{className}()
+		#);
 			end
 
 			def function_name

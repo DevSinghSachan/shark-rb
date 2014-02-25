@@ -70,10 +70,7 @@ VALUE method_rb_RNG_Cauchy_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Cauchy_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Cauchy>(
-		rb_RNG_Cauchy::rb_class(),
-		new rb_RNG_Cauchy()
-		);
+	return wrap_pointer<rb_RNG_Cauchy>(rb_RNG_Cauchy::rb_class(), new rb_RNG_Cauchy::rb_class()());
 }
 
 VALUE method_rb_RNG_Cauchy_initialize (VALUE self) {

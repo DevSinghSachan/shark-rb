@@ -46,10 +46,7 @@ VALUE method_rb_RNG_Bernoulli_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Bernoulli_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Bernoulli>(
-		rb_RNG_Bernoulli::rb_class(),
-		new rb_RNG_Bernoulli()
-		);
+	return wrap_pointer<rb_RNG_Bernoulli>(rb_RNG_Bernoulli::rb_class(), new rb_RNG_Bernoulli::rb_class()());
 }
 
 VALUE method_rb_RNG_Bernoulli_initialize (VALUE self) {

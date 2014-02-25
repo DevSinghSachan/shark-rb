@@ -80,10 +80,7 @@ VALUE method_rb_RNG_Normal_get_log_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Normal_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Normal>(
-		rb_RNG_Normal::rb_class(),
-		new rb_RNG_Normal()
-		);
+	return wrap_pointer<rb_RNG_Normal>(rb_RNG_Normal::rb_class(), new rb_RNG_Normal::rb_class()());
 }
 
 VALUE method_rb_RNG_Normal_initialize (VALUE self) {
