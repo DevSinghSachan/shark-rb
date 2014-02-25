@@ -90,11 +90,10 @@ module HeaderFileGenerator
 			end
 
 			def return_methodology indent=0
-				case @return_type
-				when *([:double] + Output::IntegerTypes + Output::ArrayTypes)
-					"\t"*indent + "return " + Output.new(call_methodology, :type => @return_type).to_s+";"
-				else
+				if @return_type.downcase == :nil
 					"#{call_methodology(indent)};\n#{"\t"*indent}return self"
+				else
+					"\t"*indent + "return " + Output.new(call_methodology, :type => @return_type).to_s+";"
 				end
 			end
 

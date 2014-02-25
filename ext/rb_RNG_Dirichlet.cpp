@@ -89,8 +89,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 VALUE method_rb_RNG_Dirichlet_get_lambdas (VALUE self) {
 	rb_RNG_Dirichlet *r;
 	
-	r->getModel()->lambdas();
-	return self
+	return r->getModel()->lambdas();
 }
 
 VALUE method_rb_RNG_Dirichlet_allocate (VALUE klass) {
