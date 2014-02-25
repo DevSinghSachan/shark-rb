@@ -28,7 +28,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 	if (TYPE(parameter_1) == T_ARRAY) {
 		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
 		if (TYPE(parameter_2) == T_ARRAY) {
-			RealVector parameter_2_converted = rb_ary_to_1d_realvector(parameter_2);
+			RealMatrix parameter_2_converted = rb_ary_to_realmatrix(parameter_2);
 			r->getModel()->lambdas(parameter_1_converted, parameter_2_converted);
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
@@ -46,7 +46,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
 		if (TYPE(parameter_2) == T_ARRAY) {
-			RealVector parameter_2_converted = rb_ary_to_1d_realvector(parameter_2);
+			RealMatrix parameter_2_converted = rb_ary_to_realmatrix(parameter_2);
 			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2_converted);
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
@@ -64,7 +64,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		rb_RealVectorReference * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
 		if (TYPE(parameter_2) == T_ARRAY) {
-			RealVector parameter_2_converted = rb_ary_to_1d_realvector(parameter_2);
+			RealMatrix parameter_2_converted = rb_ary_to_realmatrix(parameter_2);
 			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2_converted);
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
@@ -82,7 +82,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		rb_RealMatrixColumn * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
 		if (TYPE(parameter_2) == T_ARRAY) {
-			RealVector parameter_2_converted = rb_ary_to_1d_realvector(parameter_2);
+			RealMatrix parameter_2_converted = rb_ary_to_realmatrix(parameter_2);
 			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2_converted);
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
@@ -100,7 +100,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 		rb_RealMatrixRow * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
 		if (TYPE(parameter_2) == T_ARRAY) {
-			RealVector parameter_2_converted = rb_ary_to_1d_realvector(parameter_2);
+			RealMatrix parameter_2_converted = rb_ary_to_realmatrix(parameter_2);
 			r->getModel()->lambdas(*(parameter_1_converted->getData()), parameter_2_converted);
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
