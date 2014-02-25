@@ -22,5 +22,10 @@
 		}
 	],
 	"methods": [
+		{
+			"name": "florida",
+			"types": ["array", "double", "matrix", "matrix"],
+			"type": "matrix"
+		}
 	]
 }
