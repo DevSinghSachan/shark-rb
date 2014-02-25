@@ -21,7 +21,7 @@ VALUE method_rb_RNG_Poisson_set_mean (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->mean(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_Poisson_get_mean (VALUE self) {

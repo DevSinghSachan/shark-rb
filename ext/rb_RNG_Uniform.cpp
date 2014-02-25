@@ -67,7 +67,7 @@ VALUE method_rb_RNG_Uniform_set_range (VALUE self, VALUE parameter_1, VALUE para
 	if (TYPE(parameter_2) != T_FIXNUM && TYPE(parameter_2) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 2 must be a Float.");
 	r->getModel()->setRange(rb_float_new(parameter_1), rb_float_new(parameter_2));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_Uniform_sample (VALUE self) {

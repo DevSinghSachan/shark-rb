@@ -21,7 +21,7 @@ VALUE method_rb_RNG_LogNormal_set_scale (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->scale(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_LogNormal_set_location (VALUE self, VALUE parameter_1) {
@@ -32,7 +32,7 @@ VALUE method_rb_RNG_LogNormal_set_location (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->location(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_LogNormal_get_scale (VALUE self) {

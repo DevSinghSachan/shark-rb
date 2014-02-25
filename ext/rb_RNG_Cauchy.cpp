@@ -21,7 +21,7 @@ VALUE method_rb_RNG_Cauchy_set_median (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->median(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_Cauchy_set_sigma (VALUE self, VALUE parameter_1) {
@@ -32,7 +32,7 @@ VALUE method_rb_RNG_Cauchy_set_sigma (VALUE self, VALUE parameter_1) {
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getModel()->sigma(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_Cauchy_get_sigma (VALUE self) {

@@ -25,7 +25,7 @@ VALUE method_rb_RNG_TruncatedExponential_set_lambda (VALUE self, VALUE parameter
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getDistribution()->setLambda(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_TruncatedExponential_set_max (VALUE self, VALUE parameter_1) {
@@ -36,7 +36,7 @@ VALUE method_rb_RNG_TruncatedExponential_set_max (VALUE self, VALUE parameter_1)
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	r->getDistribution()->setMax(rb_float_new(parameter_1));
-	return self
+	return self;
 }
 
 VALUE method_rb_RNG_TruncatedExponential_get_lambda (VALUE self) {
