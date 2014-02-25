@@ -23,13 +23,11 @@ VALUE method_rb_RNG_DiffGeometric_set_mean (VALUE self, VALUE parameter_1) {
 	return self
 }
 
-
 VALUE method_rb_RNG_DiffGeometric_get_mean (VALUE self) {
 	rb_RNG_DiffGeometric *r;
 	
 	return rb_float_new(r->getModel()->mean());
 }
-
 
 VALUE method_rb_RNG_DiffGeometric_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiffGeometric *r;
@@ -40,7 +38,6 @@ VALUE method_rb_RNG_DiffGeometric_get_p (VALUE self, VALUE parameter_1) {
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
-
 VALUE method_rb_RNG_DiffGeometric_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiffGeometric *r;
 	
@@ -49,7 +46,6 @@ VALUE method_rb_RNG_DiffGeometric_get_prob (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
-
 
 VALUE method_rb_RNG_DiffGeometric_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_DiffGeometric>(rb_RNG_DiffGeometric::rb_class(), new rb_RNG_DiffGeometric());
@@ -64,7 +60,6 @@ VALUE method_rb_RNG_DiffGeometric_sample (VALUE self) {
 	
 	return rb_float_new((*r->getModel())());
 }
-
 
 void Init_rb_RNG_DiffGeometric () {
 	rb_define_method(rb_RNG_DiffGeometric::rb_class(), "mean=", (rb_method) method_rb_RNG_DiffGeometric_set_mean, 1);

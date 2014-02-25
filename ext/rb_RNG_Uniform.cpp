@@ -19,13 +19,11 @@ VALUE method_rb_RNG_Uniform_get_low (VALUE self) {
 	return rb_float_new(r->getModel()->low());
 }
 
-
 VALUE method_rb_RNG_Uniform_get_high (VALUE self) {
 	rb_RNG_Uniform *r;
 	
 	return rb_float_new(r->getModel()->high());
 }
-
 
 VALUE method_rb_RNG_Uniform_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Uniform *r;
@@ -36,7 +34,6 @@ VALUE method_rb_RNG_Uniform_get_p (VALUE self, VALUE parameter_1) {
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
-
 VALUE method_rb_RNG_Uniform_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Uniform *r;
 	
@@ -45,7 +42,6 @@ VALUE method_rb_RNG_Uniform_get_prob (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
-
 
 VALUE method_rb_RNG_Uniform_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_Uniform>(rb_RNG_Uniform::rb_class(), new rb_RNG_Uniform());
@@ -69,13 +65,11 @@ VALUE method_rb_RNG_Uniform_set_range (VALUE self, VALUE parameter_1, VALUE para
 	return self
 }
 
-
 VALUE method_rb_RNG_Uniform_sample (VALUE self) {
 	rb_RNG_Uniform *r;
 	
 	return rb_float_new((*r->getModel())());
 }
-
 
 void Init_rb_RNG_Uniform () {
 	rb_define_method(rb_RNG_Uniform::rb_class(), "low", (rb_method) method_rb_RNG_Uniform_get_low, 0);

@@ -86,13 +86,11 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
 }
 
-
 VALUE method_rb_RNG_Dirichlet_get_lambdas (VALUE self) {
 	rb_RNG_Dirichlet *r;
 	
 	return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector(r->getModel()->lambdas()));
 }
-
 
 VALUE method_rb_RNG_Dirichlet_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_Dirichlet>(rb_RNG_Dirichlet::rb_class(), new rb_RNG_Dirichlet());

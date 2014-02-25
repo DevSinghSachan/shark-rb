@@ -105,9 +105,9 @@ VALUE #{function_name} (#{input_parameters}) {
 	#{checking_methodology}
 """
 				if @requires_conversion
-					cpp += "#{call_methodology_with_conversion}}\n\n"
+					cpp += "#{call_methodology_with_conversion}}\n"
 				else
-					cpp += "#{return_methodology(1)}\n}\n\n"
+					cpp += "#{return_methodology(1)}\n}\n"
 				end
 				cpp
 			end

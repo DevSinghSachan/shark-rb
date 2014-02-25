@@ -27,13 +27,11 @@ VALUE method_rb_RNG_Bernoulli_set_p (VALUE self, VALUE parameter_1) {
 	return self
 }
 
-
 VALUE method_rb_RNG_Bernoulli_get_p (VALUE self) {
 	rb_RNG_Bernoulli *r;
 	
 	return rb_float_new(r->getDistribution()->prob());
 }
-
 
 VALUE method_rb_RNG_Bernoulli_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Bernoulli *r;
@@ -43,7 +41,6 @@ VALUE method_rb_RNG_Bernoulli_get_prob (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)));
 }
-
 
 VALUE method_rb_RNG_Bernoulli_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_Bernoulli>(rb_RNG_Bernoulli::rb_class(), new rb_RNG_Bernoulli());
@@ -58,7 +55,6 @@ VALUE method_rb_RNG_Bernoulli_sample (VALUE self) {
 	
 	return rb_float_new((*r->getDistribution())());
 }
-
 
 void Init_rb_RNG_Bernoulli () {
 	rb_define_method(rb_RNG_Bernoulli::rb_class(), "p=", (rb_method) method_rb_RNG_Bernoulli_set_p, 1);

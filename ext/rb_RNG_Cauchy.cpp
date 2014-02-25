@@ -23,7 +23,6 @@ VALUE method_rb_RNG_Cauchy_set_median (VALUE self, VALUE parameter_1) {
 	return self
 }
 
-
 VALUE method_rb_RNG_Cauchy_set_sigma (VALUE self, VALUE parameter_1) {
 	rb_RNG_Cauchy *r;
 	
@@ -34,20 +33,17 @@ VALUE method_rb_RNG_Cauchy_set_sigma (VALUE self, VALUE parameter_1) {
 	return self
 }
 
-
 VALUE method_rb_RNG_Cauchy_get_sigma (VALUE self) {
 	rb_RNG_Cauchy *r;
 	
 	return rb_float_new(r->getModel()->sigma());
 }
 
-
 VALUE method_rb_RNG_Cauchy_get_median (VALUE self) {
 	rb_RNG_Cauchy *r;
 	
 	return rb_float_new(r->getModel()->median());
 }
-
 
 VALUE method_rb_RNG_Cauchy_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Cauchy *r;
@@ -58,7 +54,6 @@ VALUE method_rb_RNG_Cauchy_get_p (VALUE self, VALUE parameter_1) {
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
-
 VALUE method_rb_RNG_Cauchy_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Cauchy *r;
 	
@@ -67,7 +62,6 @@ VALUE method_rb_RNG_Cauchy_get_prob (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
-
 
 VALUE method_rb_RNG_Cauchy_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_Cauchy>(rb_RNG_Cauchy::rb_class(), new rb_RNG_Cauchy());
@@ -82,7 +76,6 @@ VALUE method_rb_RNG_Cauchy_sample (VALUE self) {
 	
 	return rb_float_new((*r->getModel())());
 }
-
 
 void Init_rb_RNG_Cauchy () {
 	rb_define_method(rb_RNG_Cauchy::rb_class(), "median=", (rb_method) method_rb_RNG_Cauchy_set_median, 1);

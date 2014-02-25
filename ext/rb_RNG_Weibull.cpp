@@ -23,7 +23,6 @@ VALUE method_rb_RNG_Weibull_set_alpha (VALUE self, VALUE parameter_1) {
 	return self
 }
 
-
 VALUE method_rb_RNG_Weibull_set_vbeta (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
 	
@@ -33,7 +32,6 @@ VALUE method_rb_RNG_Weibull_set_vbeta (VALUE self, VALUE parameter_1) {
 	r->getModel()->vbeta(NUM2DBL(parameter_1));
 	return self
 }
-
 
 VALUE method_rb_RNG_Weibull_set_beta (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
@@ -45,20 +43,17 @@ VALUE method_rb_RNG_Weibull_set_beta (VALUE self, VALUE parameter_1) {
 	return self
 }
 
-
 VALUE method_rb_RNG_Weibull_get_beta (VALUE self) {
 	rb_RNG_Weibull *r;
 	
 	return rb_float_new(r->getModel()->beta());
 }
 
-
 VALUE method_rb_RNG_Weibull_get_alpha (VALUE self) {
 	rb_RNG_Weibull *r;
 	
 	return rb_float_new(r->getModel()->alpha());
 }
-
 
 VALUE method_rb_RNG_Weibull_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
@@ -69,7 +64,6 @@ VALUE method_rb_RNG_Weibull_get_p (VALUE self, VALUE parameter_1) {
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
-
 VALUE method_rb_RNG_Weibull_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull *r;
 	
@@ -78,7 +72,6 @@ VALUE method_rb_RNG_Weibull_get_prob (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
-
 
 VALUE method_rb_RNG_Weibull_allocate (VALUE klass) {
 	return wrap_pointer<rb_RNG_Weibull>(rb_RNG_Weibull::rb_class(), new rb_RNG_Weibull());
@@ -93,7 +86,6 @@ VALUE method_rb_RNG_Weibull_sample (VALUE self) {
 	
 	return rb_float_new((*r->getModel())());
 }
-
 
 void Init_rb_RNG_Weibull () {
 	rb_define_method(rb_RNG_Weibull::rb_class(), "alpha=", (rb_method) method_rb_RNG_Weibull_set_alpha, 1);
