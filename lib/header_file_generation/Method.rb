@@ -102,7 +102,7 @@ module HeaderFileGenerator
 				cpp = """
 VALUE #{function_name} (#{input_parameters}) {
 	#{cpp_class.pointer} #{symbol};
-	Data_Get_Struct(self, #{cpp_class})
+	Data_Get_Struct(self, #{cpp_class});
 	#{checking_methodology}
 """
 				if @requires_conversion

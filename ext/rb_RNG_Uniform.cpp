@@ -15,21 +15,21 @@ VALUE rb_RNG_Uniform::rb_class() {
 
 VALUE method_rb_RNG_Uniform_get_low (VALUE self) {
 	rb_RNG_Uniform * r;
-	Data_Get_Struct(self, rb_RNG_Uniform)
+	Data_Get_Struct(self, rb_RNG_Uniform);
 	
 	return rb_float_new(r->getModel()->low());
 }
 
 VALUE method_rb_RNG_Uniform_get_high (VALUE self) {
 	rb_RNG_Uniform * r;
-	Data_Get_Struct(self, rb_RNG_Uniform)
+	Data_Get_Struct(self, rb_RNG_Uniform);
 	
 	return rb_float_new(r->getModel()->high());
 }
 
 VALUE method_rb_RNG_Uniform_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Uniform * r;
-	Data_Get_Struct(self, rb_RNG_Uniform)
+	Data_Get_Struct(self, rb_RNG_Uniform);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -39,7 +39,7 @@ VALUE method_rb_RNG_Uniform_get_p (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Uniform_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Uniform * r;
-	Data_Get_Struct(self, rb_RNG_Uniform)
+	Data_Get_Struct(self, rb_RNG_Uniform);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -57,7 +57,7 @@ VALUE method_rb_RNG_Uniform_initialize (VALUE self) {
 
 VALUE method_rb_RNG_Uniform_set_range (VALUE self, VALUE parameter_1, VALUE parameter_2) {
 	rb_RNG_Uniform * r;
-	Data_Get_Struct(self, rb_RNG_Uniform)
+	Data_Get_Struct(self, rb_RNG_Uniform);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -72,7 +72,7 @@ VALUE method_rb_RNG_Uniform_set_range (VALUE self, VALUE parameter_1, VALUE para
 
 VALUE method_rb_RNG_Uniform_sample (VALUE self) {
 	rb_RNG_Uniform * r;
-	Data_Get_Struct(self, rb_RNG_Uniform)
+	Data_Get_Struct(self, rb_RNG_Uniform);
 	
 	return rb_float_new((*(r->getModel()))());
 }

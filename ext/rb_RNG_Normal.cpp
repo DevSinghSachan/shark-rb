@@ -15,7 +15,7 @@ VALUE rb_RNG_Normal::rb_class() {
 
 VALUE method_rb_RNG_Normal_set_mean (VALUE self, VALUE parameter_1) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -26,7 +26,7 @@ VALUE method_rb_RNG_Normal_set_mean (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Normal_set_variance (VALUE self, VALUE parameter_1) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -37,21 +37,21 @@ VALUE method_rb_RNG_Normal_set_variance (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Normal_get_mean (VALUE self) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	return rb_float_new(r->getModel()->mean());
 }
 
 VALUE method_rb_RNG_Normal_get_variance (VALUE self) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	return rb_float_new(r->getModel()->variance());
 }
 
 VALUE method_rb_RNG_Normal_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -61,7 +61,7 @@ VALUE method_rb_RNG_Normal_get_p (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Normal_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -71,7 +71,7 @@ VALUE method_rb_RNG_Normal_get_prob (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Normal_get_log_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -89,7 +89,7 @@ VALUE method_rb_RNG_Normal_initialize (VALUE self) {
 
 VALUE method_rb_RNG_Normal_sample (VALUE self) {
 	rb_RNG_Normal * r;
-	Data_Get_Struct(self, rb_RNG_Normal)
+	Data_Get_Struct(self, rb_RNG_Normal);
 	
 	return rb_float_new((*(r->getModel()))());
 }

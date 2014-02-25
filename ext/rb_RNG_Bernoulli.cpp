@@ -19,7 +19,7 @@ VALUE rb_RNG_Bernoulli::rb_class() {
 
 VALUE method_rb_RNG_Bernoulli_set_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Bernoulli * r;
-	Data_Get_Struct(self, rb_RNG_Bernoulli)
+	Data_Get_Struct(self, rb_RNG_Bernoulli);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -30,14 +30,14 @@ VALUE method_rb_RNG_Bernoulli_set_p (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Bernoulli_get_p (VALUE self) {
 	rb_RNG_Bernoulli * r;
-	Data_Get_Struct(self, rb_RNG_Bernoulli)
+	Data_Get_Struct(self, rb_RNG_Bernoulli);
 	
 	return rb_float_new(r->getDistribution()->prob());
 }
 
 VALUE method_rb_RNG_Bernoulli_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Bernoulli * r;
-	Data_Get_Struct(self, rb_RNG_Bernoulli)
+	Data_Get_Struct(self, rb_RNG_Bernoulli);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -55,7 +55,7 @@ VALUE method_rb_RNG_Bernoulli_initialize (VALUE self) {
 
 VALUE method_rb_RNG_Bernoulli_sample (VALUE self) {
 	rb_RNG_Bernoulli * r;
-	Data_Get_Struct(self, rb_RNG_Bernoulli)
+	Data_Get_Struct(self, rb_RNG_Bernoulli);
 	
 	return rb_float_new((*(r->getDistribution()))());
 }

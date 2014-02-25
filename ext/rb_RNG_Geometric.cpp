@@ -19,7 +19,7 @@ VALUE rb_RNG_Geometric::rb_class() {
 
 VALUE method_rb_RNG_Geometric_set_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Geometric * r;
-	Data_Get_Struct(self, rb_RNG_Geometric)
+	Data_Get_Struct(self, rb_RNG_Geometric);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -30,7 +30,7 @@ VALUE method_rb_RNG_Geometric_set_p (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Geometric_set_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Geometric * r;
-	Data_Get_Struct(self, rb_RNG_Geometric)
+	Data_Get_Struct(self, rb_RNG_Geometric);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -41,14 +41,14 @@ VALUE method_rb_RNG_Geometric_set_prob (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Geometric_get_p (VALUE self) {
 	rb_RNG_Geometric * r;
-	Data_Get_Struct(self, rb_RNG_Geometric)
+	Data_Get_Struct(self, rb_RNG_Geometric);
 	
 	return rb_float_new(r->getDistribution()->prob());
 }
 
 VALUE method_rb_RNG_Geometric_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Geometric * r;
-	Data_Get_Struct(self, rb_RNG_Geometric)
+	Data_Get_Struct(self, rb_RNG_Geometric);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -66,7 +66,7 @@ VALUE method_rb_RNG_Geometric_initialize (VALUE self) {
 
 VALUE method_rb_RNG_Geometric_sample (VALUE self) {
 	rb_RNG_Geometric * r;
-	Data_Get_Struct(self, rb_RNG_Geometric)
+	Data_Get_Struct(self, rb_RNG_Geometric);
 	
 	return rb_float_new((*(r->getDistribution()))());
 }

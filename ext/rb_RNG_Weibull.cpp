@@ -15,7 +15,7 @@ VALUE rb_RNG_Weibull::rb_class() {
 
 VALUE method_rb_RNG_Weibull_set_alpha (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -26,7 +26,7 @@ VALUE method_rb_RNG_Weibull_set_alpha (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Weibull_set_vbeta (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -37,7 +37,7 @@ VALUE method_rb_RNG_Weibull_set_vbeta (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Weibull_set_beta (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -48,21 +48,21 @@ VALUE method_rb_RNG_Weibull_set_beta (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Weibull_get_beta (VALUE self) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	return rb_float_new(r->getModel()->beta());
 }
 
 VALUE method_rb_RNG_Weibull_get_alpha (VALUE self) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	return rb_float_new(r->getModel()->alpha());
 }
 
 VALUE method_rb_RNG_Weibull_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -72,7 +72,7 @@ VALUE method_rb_RNG_Weibull_get_p (VALUE self, VALUE parameter_1) {
 
 VALUE method_rb_RNG_Weibull_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
@@ -90,7 +90,7 @@ VALUE method_rb_RNG_Weibull_initialize (VALUE self) {
 
 VALUE method_rb_RNG_Weibull_sample (VALUE self) {
 	rb_RNG_Weibull * r;
-	Data_Get_Struct(self, rb_RNG_Weibull)
+	Data_Get_Struct(self, rb_RNG_Weibull);
 	
 	return rb_float_new((*(r->getModel()))());
 }
