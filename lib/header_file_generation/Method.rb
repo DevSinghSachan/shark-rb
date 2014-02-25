@@ -92,7 +92,7 @@ module HeaderFileGenerator
 			def return_methodology indent=0
 				case @return_type
 				when *([:double] + Output::IntegerTypes + Output::ArrayTypes)
-					"\t"*indent + "return " + Output.new(call_methodology(indent), :type => @return_type).to_s
+					"\t"*indent + "return " + Output.new(call_methodology, :type => @return_type).to_s+";"
 				else
 					"#{call_methodology(indent)};\n#{"\t"*indent}return self"
 				end
