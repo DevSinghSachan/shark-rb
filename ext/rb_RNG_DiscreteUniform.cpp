@@ -34,7 +34,7 @@ VALUE method_rb_RNG_DiscreteUniform_get_p (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(rb_float_new(parameter_1)));
+	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
 VALUE method_rb_RNG_DiscreteUniform_get_prob (VALUE self, VALUE parameter_1) {
@@ -44,7 +44,7 @@ VALUE method_rb_RNG_DiscreteUniform_get_prob (VALUE self, VALUE parameter_1) {
 	// Checking whether parameter_1 is a "double"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	return rb_float_new(r->getModel()->p(rb_float_new(parameter_1)));
+	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
 VALUE method_rb_RNG_DiscreteUniform_allocate (VALUE klass) {
@@ -66,7 +66,7 @@ VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VA
 	// Checking whether parameter_2 is a "double"
 	if (TYPE(parameter_2) != T_FIXNUM && TYPE(parameter_2) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 2 must be a Float.");
-	r->getModel()->setRange(rb_float_new(parameter_1), rb_float_new(parameter_2));
+	r->getModel()->setRange(NUM2DBL(parameter_1), NUM2DBL(parameter_2));
 	return self;
 }
 

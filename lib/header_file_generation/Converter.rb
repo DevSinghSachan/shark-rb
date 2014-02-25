@@ -17,6 +17,10 @@ module HeaderFileGenerator
 					"double"     => "NUM2DBL",
 					"int"        => "NUM2INT"
 				},
+				"Fixnum" => {
+					"double"    => "NUM2DBL",
+					"int"        => "NUM2INT"
+				},
 				"double" => {
 					"Float"      => "rb_float_new",
 					"Fixnum"     => "INT2FIX"

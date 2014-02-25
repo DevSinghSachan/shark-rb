@@ -124,10 +124,10 @@ module HeaderFileGenerator
 				def to_converted_form
 					case @type
 					when :double
-						Converter.convert(parameter_name).to(Float).from("double").to_s
+						Converter.convert(parameter_name).from(Float).to("double").to_s
 						#convert_from_double parameter_name
 					when *IntegerTypes
-						Converter.convert(parameter_name).to(Fixnum).from("int").to_s
+						Converter.convert(parameter_name).from(Fixnum).to("int").to_s
 						#convert_from_int parameter_name
 					when *(MatrixTypes+ArrayTypes)
 						if @input_class.nil? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used before an input class was determined." end
