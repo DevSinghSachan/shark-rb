@@ -70,7 +70,7 @@ task :header do
 			begin
 				g.commit_all("modified json + header files")
 			rescue Git::GitExecuteError => e
-				if e.message["nothing to commit, working directory clean"]
+				if e.message["nothing to commit, working directory clean"] or e.message["nothing added to commit"]
 					puts "No changes to commit."
 				else
 					raise e
