@@ -145,8 +145,7 @@ VALUE #{@cpp_class_name}::rb_class() {
 		def pointer_acquirer_h_definition
 			cpp = ""
 			@pointer_acquirer.each do |pointer_acq|
-cpp+="""		#{pointer_acquirer_return_type} #{pointer_acq}();
-"""
+				cpp+="\t\t#{pointer_acquirer_return_type} #{pointer_acq}();\n"
 			end
 			cpp
 		end

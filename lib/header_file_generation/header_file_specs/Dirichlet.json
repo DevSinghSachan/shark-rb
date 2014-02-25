@@ -18,14 +18,7 @@
 	"setters" : [
 		{
 			"name": "lambdas",
-			"types": ["array", "matrix"]
-		}
-	],
-	"methods": [
-		{
-			"name": "florida",
-			"types": ["array", "double", "matrix", "matrix"],
-			"type": "matrix"
+			"types": ["array"]
 		}
 	]
 }
