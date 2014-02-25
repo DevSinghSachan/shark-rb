@@ -84,7 +84,7 @@ VALUE method_rb_RNG_Weibull_initialize (VALUE self) {
 VALUE method_rb_RNG_Weibull_sample (VALUE self) {
 	rb_RNG_Weibull *r;
 	
-	return rb_float_new((*r->getModel())());
+	return rb_float_new((*(r->getModel()))());
 }
 
 void Init_rb_RNG_Weibull () {

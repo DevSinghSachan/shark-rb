@@ -63,7 +63,7 @@ VALUE method_rb_RNG_Geometric_initialize (VALUE self) {
 VALUE method_rb_RNG_Geometric_sample (VALUE self) {
 	rb_RNG_Geometric *r;
 	
-	return rb_float_new((*r->getDistribution())());
+	return rb_float_new((*(r->getDistribution()))());
 }
 
 void Init_rb_RNG_Geometric () {

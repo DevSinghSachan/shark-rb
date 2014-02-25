@@ -53,7 +53,7 @@ VALUE method_rb_RNG_Bernoulli_initialize (VALUE self) {
 VALUE method_rb_RNG_Bernoulli_sample (VALUE self) {
 	rb_RNG_Bernoulli *r;
 	
-	return rb_float_new((*r->getDistribution())());
+	return rb_float_new((*(r->getDistribution()))());
 }
 
 void Init_rb_RNG_Bernoulli () {

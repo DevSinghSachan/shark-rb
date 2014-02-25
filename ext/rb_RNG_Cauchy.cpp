@@ -74,7 +74,7 @@ VALUE method_rb_RNG_Cauchy_initialize (VALUE self) {
 VALUE method_rb_RNG_Cauchy_sample (VALUE self) {
 	rb_RNG_Cauchy *r;
 	
-	return rb_float_new((*r->getModel())());
+	return rb_float_new((*(r->getModel()))());
 }
 
 void Init_rb_RNG_Cauchy () {

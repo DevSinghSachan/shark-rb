@@ -83,7 +83,7 @@ VALUE method_rb_RNG_Normal_initialize (VALUE self) {
 VALUE method_rb_RNG_Normal_sample (VALUE self) {
 	rb_RNG_Normal *r;
 	
-	return rb_float_new((*r->getModel())());
+	return rb_float_new((*(r->getModel()))());
 }
 
 void Init_rb_RNG_Normal () {

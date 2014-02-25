@@ -12,7 +12,7 @@
 	"getters" : [
 		{
 			"name": "lambdas",
-			"type": "array"
+			"type": "RealVectorReference"
 		}
 	],
 	"setters" : [

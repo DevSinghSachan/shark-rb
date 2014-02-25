@@ -68,7 +68,7 @@ VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VA
 VALUE method_rb_RNG_DiscreteUniform_sample (VALUE self) {
 	rb_RNG_DiscreteUniform *r;
 	
-	return rb_float_new((*r->getModel())());
+	return rb_float_new((*(r->getModel()))());
 }
 
 void Init_rb_RNG_DiscreteUniform () {

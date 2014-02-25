@@ -68,7 +68,7 @@ VALUE method_rb_RNG_Uniform_set_range (VALUE self, VALUE parameter_1, VALUE para
 VALUE method_rb_RNG_Uniform_sample (VALUE self) {
 	rb_RNG_Uniform *r;
 	
-	return rb_float_new((*r->getModel())());
+	return rb_float_new((*(r->getModel()))());
 }
 
 void Init_rb_RNG_Uniform () {

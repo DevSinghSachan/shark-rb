@@ -69,7 +69,7 @@ VALUE method_rb_RNG_Binomial_initialize (VALUE self) {
 VALUE method_rb_RNG_Binomial_sample (VALUE self) {
 	rb_RNG_Binomial *r;
 	
-	return rb_float_new((*r->getDistribution())());
+	return rb_float_new((*(r->getDistribution()))());
 }
 
 void Init_rb_RNG_Binomial () {
