@@ -104,7 +104,7 @@ module HeaderFileGenerator
 					when *IntegerTypes
 """
 	#{comment_about_check}
-	if (TYPE(#{parameter_name}) != T_FIXNUM)
+	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
 		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");"""
 					when *ArrayTypes
 """
