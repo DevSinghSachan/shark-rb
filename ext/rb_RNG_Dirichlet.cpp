@@ -82,8 +82,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1, VALUE 
 			return self;
 		}
 	} else if (TYPE(parameter_1) == T_ARRAY) {
-		Array * parameter_1_converted;
-		Data_Get_Struct(parameter_1, Array, parameter_1_converted);
+		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
 		if (CLASS_OF(parameter_2) == rb_RealMatrix::rb_class()) {
 			rb_RealMatrix * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrix, parameter_2_converted);
