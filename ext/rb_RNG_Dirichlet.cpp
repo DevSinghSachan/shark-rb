@@ -53,7 +53,7 @@ VALUE method_rb_RNG_Dirichlet_set_lambdas (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Dirichlet_get_lambdas (VALUE self) {
 	rb_RNG_Dirichlet *r;
 	
-	return wrap_pointer<rb_RealVectorReference>(rb_RealVectorReference::rb_class(), new rb_RealVectorReference(&(r->getModel()->lambdas())));
+	return realvector_to_rb_ary(r->getModel()->lambdas());
 }
 
 VALUE method_rb_RNG_Dirichlet_allocate (VALUE klass) {

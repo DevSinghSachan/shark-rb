@@ -12,7 +12,7 @@
 	"getters" : [
 		{
 			"name": "lambdas",
-			"type": "RealVectorReference"
+			"type": "rubyarray"
 		}
 	],
 	"setters" : [
