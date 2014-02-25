@@ -48,7 +48,7 @@ VALUE method_rb_RNG_DiscreteUniform_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_DiscreteUniform_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_DiscreteUniform>(rb_RNG_DiscreteUniform::rb_class(), new rb_RNG_DiscreteUniform::rb_class()());
+	return wrap_pointer<rb_RNG_DiscreteUniform>(rb_RNG_DiscreteUniform::rb_class(), new rb_RNG_DiscreteUniform());
 }
 
 VALUE method_rb_RNG_DiscreteUniform_initialize (VALUE self) {

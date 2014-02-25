@@ -70,7 +70,7 @@ VALUE method_rb_RNG_Erlang_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Erlang_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Erlang>(rb_RNG_Erlang::rb_class(), new rb_RNG_Erlang::rb_class()());
+	return wrap_pointer<rb_RNG_Erlang>(rb_RNG_Erlang::rb_class(), new rb_RNG_Erlang());
 }
 
 VALUE method_rb_RNG_Erlang_initialize (VALUE self) {

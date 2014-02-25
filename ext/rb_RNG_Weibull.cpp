@@ -81,7 +81,7 @@ VALUE method_rb_RNG_Weibull_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Weibull_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Weibull>(rb_RNG_Weibull::rb_class(), new rb_RNG_Weibull::rb_class()());
+	return wrap_pointer<rb_RNG_Weibull>(rb_RNG_Weibull::rb_class(), new rb_RNG_Weibull());
 }
 
 VALUE method_rb_RNG_Weibull_initialize (VALUE self) {

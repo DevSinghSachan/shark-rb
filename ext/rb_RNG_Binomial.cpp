@@ -64,7 +64,7 @@ VALUE method_rb_RNG_Binomial_get_prob (VALUE self, VALUE parameter_1) {
 
 
 VALUE method_rb_RNG_Binomial_allocate (VALUE klass) {
-	return wrap_pointer<rb_RNG_Binomial>(rb_RNG_Binomial::rb_class(), new rb_RNG_Binomial::rb_class()());
+	return wrap_pointer<rb_RNG_Binomial>(rb_RNG_Binomial::rb_class(), new rb_RNG_Binomial());
 }
 
 VALUE method_rb_RNG_Binomial_initialize (VALUE self) {
