@@ -67,8 +67,10 @@ module HeaderFileGenerator
 
 			def to_s
 				if @origin.nil? || @destination.nil? then raise ArgumentError.new "Converter needs an origin and destination type: call #from and #to." end
-				if @origin == @destination then @name end
-				Conversions.fetch(@origin).fetch(@destination) + "(#{@name})"
+				if @origin == @destination then @name
+				else
+					Conversions.fetch(@origin).fetch(@destination) + "(#{@name})"
+				end
 			rescue KeyError
 				raise NotImplementedError.new "No conversion from #{@origin} to #{@destination}."
 			end
