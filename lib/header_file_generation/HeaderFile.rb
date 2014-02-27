@@ -194,7 +194,7 @@ VALUE #{@cpp_class.rb_class} {
 			root_directory = File.join(File.dirname(@filename),"/../../..")
 			puts File.expand_path('../..', __FILE__)
 			g = Git.open(root_directory)
-			puts g.status.changed.keys.map {|i| File.join(root_directory, i).to_s}
+			#puts g.status.changed.keys.map {|i| File.join(root_directory, i).to_s}
 			g.status.changed.keys.map {|i| File.join(root_directory, i)}.include? @filename
 		rescue ArgumentError
 			raise ArgumentError.new "Cannot evaluate changes because there is no git repository in #{root_directory}."
