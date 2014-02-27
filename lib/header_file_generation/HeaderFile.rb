@@ -68,9 +68,19 @@ module HeaderFileGenerator
 					print " \e[0;32;49mOK\e[0m\n"
 
 					if File.exists? logfile
-						puts logfile
-						File.open(File.dirname(__FILE__) + "/../../mkmf.log")
-					end
+						logcontents = File.open(File.dirname(__FILE__) + "/../../mkmf.log").read
+						relevant_lines = []
+						logcontents.split("\n").reverse.each do |line|
+							if line =~ Regexp.new(opts)
+								relevant_lines << ("\e[0;97;49m" + line + "\e[0m")
+								break
+							elsif line =~ /\/*/
+								relevant_lines << ("\e[0;97;49m" + line + "\e[0m")
+							else
+								relevant_lines << line
+							end
+						end
+						puts relevant_lines.reverse
 					end
 
 				else
