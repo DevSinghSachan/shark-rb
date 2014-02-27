@@ -12,7 +12,7 @@
 	"constructor_arguments": ["shark::Rng::globalRng"],
 	"getters" : [
 		{
-			"name": "alphas",
+			"name": "alphass",
 			"type": "rubyarray"
 		}
 	],
