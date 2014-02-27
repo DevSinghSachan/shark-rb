@@ -6,6 +6,7 @@ module HeaderFileGenerator
 				attr_reader :type
 				attr_reader :converted
 				attr_accessor :input_class
+				attr_reader :position
 
 				ArrayTypes   = [:array, :"1darray", :vector]
 				MatrixTypes  = [:matrix, :"2darray"]
