@@ -19,7 +19,7 @@
 	"setters" : [
 		{
 			"name": "alphass",
-			"types": ["integer", "integer"]
+			"types": ["integer", "double"]
 		}
 	]
 }

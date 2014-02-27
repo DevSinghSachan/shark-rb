@@ -21,10 +21,10 @@ VALUE method_rb_RNG_Dirichlet_set_alphass (VALUE self, VALUE parameter_1, VALUE 
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be an Integer.");
 
-	// Checking whether parameter_2 is an "integer"
+	// Checking whether parameter_2 is a "double"
 	if (TYPE(parameter_2) != T_FIXNUM && TYPE(parameter_2) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 2 must be an Integer.");
-	r->getModel()->alphass(NUM2INT(parameter_1), NUM2INT(parameter_2));
+		rb_raise(rb_eArgError, "Argument 2 must be a Float.");
+	r->getModel()->alphass(NUM2INT(parameter_1), NUM2DBL(parameter_2));
 	return self;
 }
 
