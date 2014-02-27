@@ -28,7 +28,10 @@ module HeaderFileGenerator
 				f << hf.to_cpp_file
 			end
 			headers << (hf.cpp_class.to_s+".h")
-			puts "hf.changed? #{hf.changed?}"
+			
+			if hf.changed?
+				hf.test_cpp_methods
+			end
 
 			header_init_functions << hf.init_function_name
 		end

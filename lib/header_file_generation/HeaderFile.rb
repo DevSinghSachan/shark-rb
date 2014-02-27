@@ -50,43 +50,6 @@ module HeaderFileGenerator
 			define_methods opts["methods"]
 		end
 
-		def confirm_existence_of_header_class_methods
-			require 'mkmf'
-			opts = ""
-			logfile = File.join(File.dirname(__FILE__) + "/../../mkmf.log")
-			File.open(File.dirname(__FILE__) +"/../../ext/Makefile").each_line do |line|
-				if line =~ /^LIBS = (.+)/
-					opts = $1
-					break
-				end
-			end
-
-			opts += " -x c++ -I./ext"
-
-			(@methods + @setters + @getters).select {|i| i.class != HeaderFile::Allocator and i.class != HeaderFile::Initializer}.each_with_index do |method,k|
-				print "\e[0;95;49mTesting\e[0m #{method.cpp_class}##{method.cpp_method_name} "
-				if try_cpp(test_existence_of_method(method), opts)
-					print " \e[0;32;49mOK\e[0m\n"
-				else
-					print " \e[0;31;49mFAIL\e[0m\n"
-					if File.exists? logfile
-						logcontents = File.open(File.dirname(__FILE__) + "/../../mkmf.log").read
-						relevant_lines = []
-						logcontents.split("\n").reverse.each do |line|
-							if line =~ Regexp.new(opts)
-								break
-							elsif line =~ /\/\*/
-								relevant_lines << ("\e[0;97;49m" + line + "\e[0m")
-							else
-								relevant_lines << line
-							end
-						end
-						puts relevant_lines.reverse
-					end
-				end
-			end
-		end
-
 		def init_function_name
 			"Init_#{@cpp_class}"
 		end
