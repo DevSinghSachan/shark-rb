@@ -1,6 +1,6 @@
 module HeaderFileGenerator
 	class HeaderFile
-		include CppChecker
+		# include CppChecker
 		attr_reader :getters
 		attr_reader :setters
 		attr_reader :cpp_class
