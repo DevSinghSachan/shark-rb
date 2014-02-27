@@ -96,6 +96,13 @@ std::vector<shark::RealVector> realvector_to_stdvector(RealVector vector) {
 	vectors.push_back(vector);
 	return vectors;
 }
+std::vector<double> realvector_to_stdvectordouble(RealVector vector) {
+	std::vector<double> vectors(vector.size());
+	for (size_t i=0;i<vector.size();i++) {
+		vectors[i] = vector[i];
+	}
+	return vectors;
+}
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
 	int width = RARRAY_LEN(ary);

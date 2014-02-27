@@ -14,6 +14,7 @@ VALUE method_is_a_directory(VALUE);
 
 // STD and Shark helpers:
 std::vector<shark::RealVector>          realvector_to_stdvector(RealVector);
+std::vector<double>                     realvector_to_stdvectordouble(RealVector);
 
 // From Ruby
 shark::RealVector                       rb_ary_to_1d_realvector(VALUE);
