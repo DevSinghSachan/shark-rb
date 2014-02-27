@@ -17,7 +17,7 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 	rb_RNG_Dirichlet * r;
 	Data_Get_Struct(self, rb_RNG_Dirichlet, r);
 	
-	// Checking whether parameter_1 is an "int"
+	// Checking whether parameter_1 is an "integer"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be an Integer.");
 
