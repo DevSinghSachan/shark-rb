@@ -33,8 +33,7 @@ module HeaderFileGenerator
 				end
 
 				def converted_parameter_object
-					print @input_class.wrapped_class, @type, "\n"
-					@input_class.converted_parameter_pointer converted_parameter_name
+					Converter.convert(@input_class.converted_parameter_pointer converted_parameter_name).from(@input_class.wrapped_class).to(@type)
 				end
 
 				def differs_from_classes classes
