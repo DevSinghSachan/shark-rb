@@ -191,8 +191,8 @@ VALUE #{@cpp_class.rb_class} {
 
 		def changed?
 			if @filename.nil? then raise RuntimeError.new "No filename for this header file. Cannot inspect git under these conditions.\n(This will not stand, this aggression!)" end
-			root_directory = File.join(File.dirname(@filename),"/../../..")
-			puts File.expand_path('../../..', __FILE__)
+			root_directory = File.expand_path('../../../..', @filename)
+			puts root_directory
 			g = Git.open(root_directory)
 			#puts g.status.changed.keys.map {|i| File.join(root_directory, i).to_s}
 			g.status.changed.keys.map {|i| File.join(root_directory, i)}.include? @filename
