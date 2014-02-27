@@ -19,7 +19,7 @@
 	"setters" : [
 		{
 			"name": "alphas",
-			"types": ["array"]
+			"types": ["vector"]
 		}
 	]
 }
