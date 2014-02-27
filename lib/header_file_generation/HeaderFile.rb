@@ -71,6 +71,7 @@ module HeaderFileGenerator
 						logcontents = File.open(File.dirname(__FILE__) + "/../../mkmf.log").read
 						relevant_lines = []
 						logcontents.split("\n").reverse.each do |line|
+							puts  Regexp.new(opts)
 							if line =~ Regexp.new(opts)
 								relevant_lines << ("\e[0;97;49m" + line + "\e[0m")
 								break
