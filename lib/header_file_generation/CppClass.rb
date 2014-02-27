@@ -2,6 +2,8 @@ module HeaderFileGenerator
 	class HeaderFile
 		class Method
 			class CppClass
+				attr_reader :type
+				
 				class ClassTest
 					def initialize opts={}
 						@success = opts[:success].nil? ? true : opts[:success]
@@ -39,16 +41,21 @@ module HeaderFileGenerator
 					CppClass.new("rb_RealMatrixRow")
 				]
 
+				def ===(other)
+					@type == other.type
+				end
+
 				def self.sample typeName
-					case typeName.downcase
+					cpp_class = CppClass.new(typeName)
+					case cpp_class
 					when *IntegerClasses
-						"#{typeName}(#{Random.rand(11)})"
+						"#{cpp_class}(#{Random.rand(11)})"
 					when *DoubleClasses
-						"#{typeName}(#{Random.rand(5.0)})"
+						"#{cpp_class}(#{Random.rand(5.0)})"
 					when *(ArrayClasses.map {|i| i.wrapped_class})
-						"new #{ArrayClasses.select {|i| i.wrapped_class == typeName.downcase}.first.wrapped_class}()"
+						"new #{cpp_class}()"
 					when *(MatrixClasses.map {|i| i.wrapped_class})
-						"new #{MatrixClasses.select {|i| i.wrapped_class == typeName.downcase}.first.wrapped_class}()"
+						"new #{cpp_class}()"
 					else
 						raise NotImplementedError.new "#{typeName} does not have a sample element (yet)."
 					end
