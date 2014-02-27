@@ -39,6 +39,21 @@ module HeaderFileGenerator
 					CppClass.new("rb_RealMatrixRow")
 				]
 
+				def self.sample typeName
+					case typeName.downcase
+					when *IntegerClasses
+						"#{typeName}(#{Random.rand(11)})"
+					when *DoubleClasses
+						"#{typeName}(#{Random.rand(5.0)})"
+					when *(ArrayClasses.map {|i| i.wrapped_class})
+						"new #{ArrayClasses.select {|i| i.wrapped_class == typeName.downcase}.first.wrapped_class}()"
+					when *(MatrixClasses.map {|i| i.wrapped_class})
+						"new #{MatrixClasses.select {|i| i.wrapped_class == typeName.downcase}.first.wrapped_class}()"
+					else
+						raise NotImplementedError.new "#{typeName} does not have a sample element (yet)."
+					end
+				end
+
 				def rb_class
 					raise NotImplementedError.new "#{@type} does not have a Ruby class (yet)." if !(@type.to_s =~ /^rb_/)
 					@type + "::rb_class()"
