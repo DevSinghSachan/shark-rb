@@ -5,9 +5,11 @@ module HeaderFileGenerator
 			Conversions = {
 				"Array" => {
 					"RealVector" => "rb_ary_to_1d_realvector",
-					"RealMatrix" => "rb_ary_to_realmatrix"
+					"RealMatrix" => "rb_ary_to_realmatrix",
+					"std::vector<double>" => "rb_ary_to_stdvector"
 				},
 				"RealVector" => {
+					"std::vector<double>" => "realvector_to_stdvectordouble",
 					"Array" => "realvector_to_rb_ary"
 				},
 				"RealMatrix" => {

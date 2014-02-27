@@ -99,9 +99,18 @@ std::vector<shark::RealVector> realvector_to_stdvector(RealVector vector) {
 std::vector<double> realvector_to_stdvectordouble(RealVector vector) {
 	std::vector<double> vectors(vector.size());
 	for (size_t i=0;i<vector.size();i++) {
-		vectors[i] = vector[i];
+		vectors(i) = vector[i];
 	}
 	return vectors;
+}
+
+std::vector<double> rb_ary_to_stdvector(VALUE ary) {
+	int length = RARRAY_LEN(ary);
+	std::vector<double> vector(length);
+	for (int i=0; i < length;i++) {
+		vector(i) = NUM2DBL(rb_ary_entry(ary, i));
+	}
+	return vector;
 }
 
 std::vector<shark::RealVector> rb_ary_to_realvector(VALUE ary) {
