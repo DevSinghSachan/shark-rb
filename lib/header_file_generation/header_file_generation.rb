@@ -28,8 +28,7 @@ module HeaderFileGenerator
 				f << hf.to_cpp_file
 			end
 			headers << (hf.cpp_class.to_s+".h")
-
-
+			hf.changed?
 
 			header_init_functions << hf.init_function_name
 		end
