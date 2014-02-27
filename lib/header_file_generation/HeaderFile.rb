@@ -62,7 +62,12 @@ module HeaderFileGenerator
 			opts += " -x c++ -I./../../ext"
 
 			@methods.select {|i| i.class == HeaderFile::Method}.each do |method|
-				try_cpp(test_existence_of_method(method), opts)
+				print method
+				if try_cpp(test_existence_of_method(method), opts)
+					print "\e[0;32;49mOK\e[0m\n"
+				else
+					print "\e[0;31;49mFAIL\e[0m\n"
+				end
 			end
 		end
 
