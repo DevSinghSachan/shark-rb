@@ -17,6 +17,9 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 	rb_RNG_Dirichlet * r;
 	Data_Get_Struct(self, rb_RNG_Dirichlet, r);
 	
+	// Checking whether parameter_1 is an "int"
+	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
+		rb_raise(rb_eArgError, "Argument 1 must be an Integer.");
 
 	// Checking whether parameter_2 is an "array"
 	if (TYPE(parameter_2) != T_ARRAY || (RARRAY_LEN(parameter_2) > 0 && TYPE(rb_ary_entry(parameter_2, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_2, 0)) != T_FIXNUM) && CLASS_OF(parameter_2) != rb_RealVector::rb_class() && CLASS_OF(parameter_2) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_2) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_2) != rb_RealMatrixRow::rb_class())
@@ -25,27 +28,27 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 	// Converting parameters "parameter_2" before they can be used.
 	if (TYPE(parameter_2) == T_ARRAY) {
 		RealVector parameter_2_converted = rb_ary_to_1d_realvector(parameter_2);
-		r->getModel()->alphas(parameter_1, parameter_2_converted);
+		r->getModel()->alphas(NUM2INT(parameter_1), parameter_2_converted);
 		return self;
 	} else if (CLASS_OF(parameter_2) == rb_RealVector::rb_class()) {
 		rb_RealVector * parameter_2_converted;
 		Data_Get_Struct(parameter_2, rb_RealVector, parameter_2_converted);
-		r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()));
+		r->getModel()->alphas(NUM2INT(parameter_1), *(parameter_2_converted->getData()));
 		return self;
 	} else if (CLASS_OF(parameter_2) == rb_RealVectorReference::rb_class()) {
 		rb_RealVectorReference * parameter_2_converted;
 		Data_Get_Struct(parameter_2, rb_RealVectorReference, parameter_2_converted);
-		r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()));
+		r->getModel()->alphas(NUM2INT(parameter_1), *(parameter_2_converted->getData()));
 		return self;
 	} else if (CLASS_OF(parameter_2) == rb_RealMatrixColumn::rb_class()) {
 		rb_RealMatrixColumn * parameter_2_converted;
 		Data_Get_Struct(parameter_2, rb_RealMatrixColumn, parameter_2_converted);
-		r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()));
+		r->getModel()->alphas(NUM2INT(parameter_1), *(parameter_2_converted->getData()));
 		return self;
 	} else if (CLASS_OF(parameter_2) == rb_RealMatrixRow::rb_class()) {
 		rb_RealMatrixRow * parameter_2_converted;
 		Data_Get_Struct(parameter_2, rb_RealMatrixRow, parameter_2_converted);
-		r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()));
+		r->getModel()->alphas(NUM2INT(parameter_1), *(parameter_2_converted->getData()));
 		return self;
 	}
 
