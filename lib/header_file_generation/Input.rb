@@ -33,6 +33,7 @@ module HeaderFileGenerator
 				end
 
 				def converted_parameter_object
+					print @input_class, @type, "\n"
 					@input_class.converted_parameter_pointer converted_parameter_name
 				end
 
