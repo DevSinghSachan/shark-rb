@@ -52,6 +52,7 @@ module HeaderFileGenerator
 		def confirm_existence_of_header_class_methods
 			require 'mkmf'
 			opts = ""
+			logfile = File.join(File.dirname(__FILE__) + "/../../mkmf.log")
 			File.open(File.dirname(__FILE__) +"/../../ext/Makefile").each_line do |line|
 				if line =~ /^LIBS = (.+)/
 					opts = $1
@@ -65,6 +66,13 @@ module HeaderFileGenerator
 				print "\e[0;95;49mTesting\e[0m #{method.cpp_class}##{method.cpp_method_name} "
 				if try_cpp(test_existence_of_method(method), opts)
 					print " \e[0;32;49mOK\e[0m\n"
+
+					if File.exists? logfile
+						puts logfile
+						File.open(File.dirname(__FILE__) + "/../../mkmf.log")
+					end
+					end
+
 				else
 					print " \e[0;31;49mFAIL\e[0m\n"
 				end
