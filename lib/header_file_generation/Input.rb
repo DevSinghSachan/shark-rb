@@ -33,6 +33,7 @@ module HeaderFileGenerator
 				end
 
 				def conversion_to_correct_type param
+					return param unless !@input_class.nil?
 					Converter.convert(param).from(@input_class.wrapped_class).to(@type)
 				end
 
