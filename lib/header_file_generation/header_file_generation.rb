@@ -7,7 +7,6 @@ require_relative 'Output'
 require_relative 'Method'
 
 require 'json'
-require 'mkmf'
 module HeaderFileGenerator
 	# TODO: add shark error catching.
 

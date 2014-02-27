@@ -50,8 +50,19 @@ module HeaderFileGenerator
 		end
 
 		def confirm_existence_of_header_class_methods
+			require 'mkmf'
+			opts = ""
+			File.open(File.dirname(__FILE__) +"/../../ext/Makefile").each_line do |line|
+				if line =~ /^LIBS = (.+)/
+					opts = $1
+					break
+				end
+			end
+
+			opts += " -x c++ -I./../../ext"
+
 			@methods.select {|i| i.class == HeaderFile::Method}.each do |method|
-				puts test_existence_of_method(method)
+				try_cpp(test_existence_of_method(method), opts)
 			end
 		end
 
