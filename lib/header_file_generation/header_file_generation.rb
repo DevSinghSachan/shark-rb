@@ -17,7 +17,7 @@ module HeaderFileGenerator
 
 		Dir.glob(File.dirname(__FILE__) + "/header_file_specs/*.json") do |file|
 			begin
-				hf = HeaderFile.new JSON.parse(File.read(file))
+				hf = HeaderFile.new JSON.parse(File.read(file)).merge("filename" => file)
 			rescue JSON::ParserError => e
 				raise StandardError.new "Error parsing JSON \"#{file}\"\n\n=>\t"+e.message+"\n\n"
 			end
@@ -28,7 +28,9 @@ module HeaderFileGenerator
 				f << hf.to_cpp_file
 			end
 			headers << (hf.cpp_class.to_s+".h")
-			hf.confirm_existence_of_header_class_methods
+
+
+
 			header_init_functions << hf.init_function_name
 		end
 

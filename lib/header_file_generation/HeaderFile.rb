@@ -33,6 +33,7 @@ module HeaderFileGenerator
 
 		def initialize(opts={})
 			@setters, @methods, @getters   = [], [], []
+			@filename                      = opts["filename"]
 			@wrapped_class                 = opts["wrapped_class"]
 			@dependencies                  = opts["dependencies"]
 			@pointer_acquirer              = [(opts["pointer_getter"] || "getModel")].flatten
@@ -62,7 +63,7 @@ module HeaderFileGenerator
 
 			opts += " -x c++ -I./ext"
 
-			@methods.select {|i| i.class == HeaderFile::Method}.each_with_index do |method,k|
+			(@methods + @setters + @getters).select {|i| i.class != HeaderFile::Allocator and i.class != HeaderFile::Initializer}.each_with_index do |method,k|
 				print "\e[0;95;49mTesting\e[0m #{method.cpp_class}##{method.cpp_method_name} "
 				if try_cpp(test_existence_of_method(method), opts)
 					print " \e[0;32;49mOK\e[0m\n"
@@ -186,6 +187,13 @@ VALUE #{@cpp_class.rb_class} {
 				cpp+="\t\t#{pointer_acquirer_return_type} #{pointer_acq}();\n"
 			end
 			cpp
+		end
+
+		def changed?
+			if @filename.nil? then raise RuntimeError.new "No filename for this header file. Cannot inspect git under these conditions.\n(This will not stand, this aggression!)" end
+			g = Git.open(File.join(File.dirname(@filename),"/../../"))
+			puts g.status.changed.keys, @filename
+			g.status.changed.keys.include? @filename
 		end
 
 		def inspect
