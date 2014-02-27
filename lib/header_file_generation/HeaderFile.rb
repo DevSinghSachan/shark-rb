@@ -72,14 +72,10 @@ module HeaderFileGenerator
 						relevant_lines = []
 						logcontents.split("\n").reverse.each do |line|
 							if line =~ Regexp.new(opts)
-								puts "matches opts"
-								relevant_lines << ("\e[0;97;49m" + line + "\e[0m")
 								break
 							elsif line =~ /\/\*/
-								puts "matches comments"
 								relevant_lines << ("\e[0;97;49m" + line + "\e[0m")
 							else
-								puts "matches nothing"
 								relevant_lines << line
 							end
 						end
