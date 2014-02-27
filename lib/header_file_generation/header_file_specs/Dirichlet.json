@@ -18,8 +18,8 @@
 	],
 	"setters" : [
 		{
-			"name": "alphass",
-			"types": ["integer", "integer"]
+			"name": "alphas",
+			"types": ["integer", "array"]
 		}
 	]
 }

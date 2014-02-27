@@ -52,9 +52,9 @@ module HeaderFileGenerator
 						"#{cpp_class}(#{Random.rand(11)})"
 					when *DoubleClasses
 						"#{cpp_class}(#{Random.rand(5.0)})"
-					when *(ArrayClasses.map {|i| i.wrapped_class})
+					when *(ArrayClasses.map {|i| CppClass.new(i.wrapped_class)})
 						"new #{cpp_class}()"
-					when *(MatrixClasses.map {|i| i.wrapped_class})
+					when *(MatrixClasses.map {|i| CppClass.new(i.wrapped_class)})
 						"new #{cpp_class}()"
 					else
 						raise NotImplementedError.new "#{typeName} does not have a sample element (yet)."
