@@ -21,7 +21,7 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
 		rb_raise(rb_eArgError, "Argument 1 must be an Integer.");
 
-	// Checking whether parameter_2 is an "array"
+	// Checking whether parameter_2 is a "stdvector"
 	if (TYPE(parameter_2) != T_ARRAY || (RARRAY_LEN(parameter_2) > 0 && TYPE(rb_ary_entry(parameter_2, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_2, 0)) != T_FIXNUM) && CLASS_OF(parameter_2) != rb_RealVector::rb_class() && CLASS_OF(parameter_2) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_2) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_2) != rb_RealMatrixRow::rb_class())
 		rb_raise(rb_eArgError, "Argument 2 must be an ArrayType (\"RealVector\", \"RealVectorReference\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
 
