@@ -71,8 +71,10 @@ module HeaderFileGenerator
 				end
 
 				def wrapped_class
-					if @type =~ /rb_(.+)/
+					if @type =~ /rb_(.+)/ and @type != "rb_RealVectorReference"
 						$1
+					elsif @type == "rb_RealVectorReference"
+						"RealVector"
 					else
 						cpp_class
 					end

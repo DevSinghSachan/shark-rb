@@ -12,6 +12,14 @@ module HeaderFileGenerator
 					"std::vector<double>" => "realvector_to_stdvectordouble",
 					"Array" => "realvector_to_rb_ary"
 				},
+				"RealMatrixRow" => {
+					"std::vector<double>" => "realvector_to_stdvectordouble",
+					"Array" => "realvector_to_rb_ary"
+				},
+				"RealMatrixColumn" => {
+					"std::vector<double>" => "realvector_to_stdvectordouble",
+					"Array" => "realvector_to_rb_ary"
+				},
 				"RealMatrix" => {
 					"Array" => "realmatrix_to_rb_ary"
 				},
