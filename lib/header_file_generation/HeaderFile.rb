@@ -59,7 +59,7 @@ module HeaderFileGenerator
 				end
 			end
 
-			opts += " -x c++ -I./../../ext"
+			opts += " -x c++ -I./ext"
 
 			@methods.select {|i| i.class == HeaderFile::Method}.each_with_index do |method,k|
 				print "\e[0;95;49mTesting\e[0m #{method.cpp_class}##{method.cpp_method_name} "
