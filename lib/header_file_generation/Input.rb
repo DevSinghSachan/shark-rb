@@ -8,7 +8,7 @@ module HeaderFileGenerator
 				attr_accessor :input_class
 				attr_reader :position
 
-				ArrayTypes   = [:array, :"1darray", :vector, :"std::vector<double>"]
+				ArrayTypes   = [:array, :"1darray", :vector]
 				MatrixTypes  = [:matrix, :"2darray"]
 				IntegerTypes = [:integer, :int]
 
@@ -32,13 +32,8 @@ module HeaderFileGenerator
 					converted_parameter_name + "->#{@input_class.wrapped_class_pointer}"
 				end
 
-				def conversion_to_correct_type param
-					return param unless !@input_class.nil?
-					Converter.convert(param).from(@input_class.wrapped_class).to(@type)
-				end
-
 				def converted_parameter_object
-					conversion_to_correct_type(@input_class.converted_parameter_pointer converted_parameter_name)
+					@input_class.converted_parameter_pointer converted_parameter_name
 				end
 
 				def differs_from_classes classes
