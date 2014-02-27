@@ -19,7 +19,7 @@
 	"setters" : [
 		{
 			"name": "alphas",
-			"types": ["integer", "std::vector<double>"]
+			"types": ["std::vector<double>"]
 		}
 	]
 }
