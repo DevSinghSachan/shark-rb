@@ -1,3 +1,4 @@
+require_relative 'CppChecker'
 require_relative 'HeaderFile'
 require_relative 'Converter'
 require_relative 'CppClass'
@@ -6,6 +7,7 @@ require_relative 'Output'
 require_relative 'Method'
 
 require 'json'
+require 'mkmf'
 module HeaderFileGenerator
 	# TODO: add shark error catching.
 
@@ -27,6 +29,7 @@ module HeaderFileGenerator
 				f << hf.to_cpp_file
 			end
 			headers << (hf.cpp_class.to_s+".h")
+			hf.confirm_existence_of_header_class_methods
 			header_init_functions << hf.init_function_name
 		end
 

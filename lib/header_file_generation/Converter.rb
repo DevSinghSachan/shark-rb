@@ -31,6 +31,12 @@ module HeaderFileGenerator
 				}
 			}
 
+			def self.converts_to(typeName)
+				Conversions.fetch(typeName).keys
+			rescue KeyError
+				raise NotImplementedError.new "No compatible classes for #{typeName}."
+			end
+
 			def initialize(variable_name="")
 				@name = variable_name
 			end

@@ -1,5 +1,6 @@
 module HeaderFileGenerator
 	class HeaderFile
+		include CppChecker
 		attr_reader :getters
 		attr_reader :setters
 		attr_reader :cpp_class
@@ -46,6 +47,12 @@ module HeaderFileGenerator
 			define_setters opts["setters"]
 			define_getters opts["getters"]
 			define_methods opts["methods"]
+		end
+
+		def confirm_existence_of_header_class_methods
+			@methods.select {|i| i.class == HeaderFile::Method}.each do |method|
+				puts test_existence_of_method(method)
+			end
 		end
 
 		def init_function_name
@@ -148,6 +155,14 @@ VALUE #{@cpp_class.rb_class} {
 				cpp+="\t\t#{pointer_acquirer_return_type} #{pointer_acq}();\n"
 			end
 			cpp
+		end
+
+		def inspect
+			"<HeaderFileGenerator::HeaderFile " + [
+				"@wrapped_class = \"#{@wrapped_class}\"",
+				"@cpp_class = \"#{@cpp_class}\"",
+				"@rb_class_name = \"#{@rb_class_name}\""
+				].join(" ") + ">"
 		end
 
 		def to_h_file

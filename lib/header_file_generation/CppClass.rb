@@ -24,6 +24,14 @@ module HeaderFileGenerator
 					CppClass.new("rb_RealMatrixReference")
 				]
 
+				DoubleClasses = [
+					CppClass.new("double")
+				]
+
+				IntegerClasses = [
+					CppClass.new("int")
+				]
+
 				ArrayClasses = [
 					CppClass.new("rb_RealVector"),
 					CppClass.new("rb_RealVectorReference"),

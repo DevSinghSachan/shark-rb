@@ -3,6 +3,13 @@ module HeaderFileGenerator
 
 		class Method
 
+			attr_reader :method_name
+			attr_reader :input_type
+			attr_reader :cpp_method_name
+			attr_reader :header_file
+			attr_reader :return_type
+			attr_reader :parameters
+
 			def initialize(opts={})
 				raise StandardError.new "\"name\" cannot contain any non a-Z 0-9 _ characters" if (opts["name"] and opts["name"].match(/[^a-zA-Z0-9_]/))
 				@header_file      = opts["hf"]
@@ -12,12 +19,11 @@ module HeaderFileGenerator
 				@input_type       = opts["types"] || ["nil"]
 				@number_of_inputs = opts["number_of_inputs"] || 0
 				if opts["types"] and opts["types"].length > 0 and (opts["number_of_inputs"].nil? || opts["number_of_inputs"] < opts["types"].length)
-					#puts "cpp_class_name = #{cpp_class_name}\n@method_name  = #{@method_name}\nopts[\"types\"] = #{opts["types"]}\n\n"
 					@number_of_inputs = opts["types"].length
 				end
 				@parameters       = []
 				@number_of_inputs.times do |i|
-					@parameters << Input.new(:type => (@input_type[i] || @input_type[0]), :position => i)
+					@parameters << Input.new(:type => (@input_type[i] || @input_type[0]), :position => i, :method => self)
 				end
 				@requires_conversion = @parameters.select {|i| i.requires_conversion?}.length > 0
 				@return_type      = (opts["type"] || "nil").to_sym
@@ -44,6 +50,10 @@ module HeaderFileGenerator
 			end
 
 			def parameters
+				@parameters
+			end
+
+			def params
 				params = []
 				@parameters.each do |param|
 					params << param.to_s
@@ -81,12 +91,12 @@ module HeaderFileGenerator
 			def call_methodology indent=0
 				if @cpp_method_name =~ /operator\s*(.+)/
 					if $1 == "()"
-						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))(#{parameters})"
+						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))(#{params})"
 					else
-						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))#{$1} #{parameters}"
+						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))#{$1} #{params}"
 					end
 				else
-					"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{parameters})"
+					"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{params})"
 				end
 			end
 

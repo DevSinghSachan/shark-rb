@@ -15,6 +15,7 @@ module HeaderFileGenerator
 					@type = (opts[:type].is_a? Array) ? opts[:type] : opts[:type].to_sym
 					@position = opts[:position]
 					@converted = false
+					@method = opts[:method]
 				end
 
 				def parameter_name
@@ -40,6 +41,10 @@ module HeaderFileGenerator
 
 				def compatible_classes
 					case @type.downcase
+					when :double
+						CppClass::DoubleClasses
+					when *IntegerTypes
+						CppClass::IntegerClasses
 					when *ArrayTypes
 						[CppClass::RubyArray] + CppClass::ArrayClasses
 					when *MatrixTypes
@@ -130,7 +135,7 @@ module HeaderFileGenerator
 						Converter.convert(parameter_name).from(Fixnum).to("int").to_s
 						#convert_from_int parameter_name
 					when *(MatrixTypes+ArrayTypes)
-						if @input_class.nil? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used before an input class was determined." end
+						if @input_class.nil? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" before an input class was determined. (#{@method.header_file.inspect})" end
 						converted_parameter_object
 					else # must've been converted beforehand...
 						parameter_name
