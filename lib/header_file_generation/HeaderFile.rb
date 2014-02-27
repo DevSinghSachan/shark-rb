@@ -191,11 +191,11 @@ VALUE #{@cpp_class.rb_class} {
 
 		def changed?
 			if @filename.nil? then raise RuntimeError.new "No filename for this header file. Cannot inspect git under these conditions.\n(This will not stand, this aggression!)" end
-			g = Git.open(File.join(File.dirname(@filename),"/../../.."))
-			puts g.status.changed.keys, @filename
-			g.status.changed.keys.include? @filename
+			root_directory = File.join(File.dirname(@filename),"/../../..")
+			g = Git.open(root_directory)
+			g.status.changed.keys.map {|i| File.join(root_directory, i)}.include? @filename
 		rescue ArgumentError
-			raise ArgumentError.new "Cannot evaluate changes because there is no git repository in #{File.join(File.dirname(@filename),"/../../")}."
+			raise ArgumentError.new "Cannot evaluate changes because there is no git repository in #{root_directory}."
 		end
 
 		def inspect
