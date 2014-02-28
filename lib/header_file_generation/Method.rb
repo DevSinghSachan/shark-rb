@@ -23,10 +23,16 @@ module HeaderFileGenerator
 				end
 				@parameters       = []
 				@number_of_inputs.times do |i|
-					@parameters << Input.new(:type => (@input_type[i] || @input_type[0]), :position => i, :method => self)
+					input_type = @input_type[i] || @input_type[0]
+					@parameters << Input.new(
+						:type         => input_type,
+						:position     => i,
+						:method       => self,
+						:output_class => CppClass.guess_from_type(input_type.to_sym)
+						)
 				end
-				@requires_conversion = @parameters.select {|i| i.requires_conversion?}.length > 0
-				@return_type      = (opts["type"] || "nil").to_sym
+				@requires_conversion = @parameters.any? {|i| i.requires_conversion?}
+				@return_type         = (opts["type"] || "nil").to_sym # switch this to classes.
 			end
 
 			def cpp_class
@@ -104,7 +110,7 @@ module HeaderFileGenerator
 				if @return_type.downcase == :nil
 					"#{call_methodology(indent)};\n#{"\t"*indent}return self;"
 				else
-					"\t"*indent + "return " + Output.new(call_methodology, :type => @return_type).to_s+";"
+					("\t"*indent) + "return " + Output.new(call_methodology, :type => @return_type).to_s + ";"
 				end
 			end
 

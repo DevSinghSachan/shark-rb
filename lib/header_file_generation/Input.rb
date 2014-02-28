@@ -6,6 +6,7 @@ module HeaderFileGenerator
 				attr_reader :type
 				attr_reader :converted
 				attr_accessor :input_class
+				attr_accessor :output_class
 				attr_reader :position
 
 				ArrayTypes   = [:array, :"1darray", :vector, :"std::vector<double>"]
@@ -17,6 +18,7 @@ module HeaderFileGenerator
 					@position = opts[:position]
 					@converted = false
 					@method = opts[:method]
+					@output_class = opts[:output_class]
 				end
 
 				def parameter_name
@@ -33,11 +35,11 @@ module HeaderFileGenerator
 				end
 
 				def conversion_to_correct_type param
-					Converter.convert(param).from(@input_class.wrapped_class).to(@type)
+					Converter.convert(param).from(@input_class.wrapped_class).to(@output_class.wrapped_class)
 				end
 
 				def converted_parameter_object
-					conversion_to_correct_type(@input_class.converted_parameter_pointer converted_parameter_name)
+					conversion_to_correct_type @input_class.converted_parameter_pointer(converted_parameter_name)
 				end
 
 				def differs_from_classes classes
@@ -45,18 +47,19 @@ module HeaderFileGenerator
 				end
 
 				def compatible_classes
-					case @type.downcase
-					when :double
-						CppClass::DoubleClasses
-					when *IntegerTypes
-						CppClass::IntegerClasses
-					when *ArrayTypes
-						[CppClass::RubyArray] + CppClass::ArrayClasses
-					when *MatrixTypes
-						[CppClass::Ruby2DArray] + CppClass::MatrixClasses
-					else
-						[]
-					end
+					CppClass.can_convert_to @output_class
+					# case @type.downcase
+					# when :double
+					# 	CppClass::DoubleClasses
+					# when *IntegerTypes
+					# 	CppClass::IntegerClasses
+					# when *ArrayTypes
+					# 	[CppClass::RubyArray] + CppClass::ArrayClasses
+					# when *MatrixTypes
+					# 	[CppClass::Ruby2DArray] + CppClass::MatrixClasses
+					# else
+					# 	[]
+					# end
 				end
 
 				def convert_and_embed(all_params, remaining_params, calling_methodology, indent=0)
@@ -141,7 +144,10 @@ module HeaderFileGenerator
 						#convert_from_int parameter_name
 					when *(MatrixTypes+ArrayTypes)
 						if @input_class.nil? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" before an input class was determined. (#{@method.header_file.inspect})" end
-						converted_parameter_object
+						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name))
+								 .from(@input_class.wrapped_class)
+								 .to(@output_class.wrapped_class)
+						#converted_parameter_object
 					else # must've been converted beforehand...
 						parameter_name
 					end

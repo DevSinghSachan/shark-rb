@@ -16,6 +16,31 @@ module HeaderFileGenerator
 					end
 				end
 
+				ArrayTypes   = [:array, :"1darray", :vector, :"std::vector<double>"]
+				MatrixTypes  = [:matrix, :"2darray"]
+				IntegerTypes = [:integer, :int]
+
+				def self.guess_from_type type
+					case type.downcase
+					when *MatrixTypes
+						CppClass.new("RealMatrix")
+					when *ArrayTypes
+						CppClass.new("RealVector")
+					when *IntegerTypes
+						CppClass.new("int")
+					when :double
+						CppClass.new("double")
+					when :"std::vector<double>"
+						CppClass.new("std::vector<double>")
+					else
+						raise NotImplementedError.new "The type \"#{type}\" has no equivalent C++ class yet."
+					end
+				end
+
+				def self.can_convert_to cpp_class
+					AllClasses.select {|i| Converter.can_convert(i).to cpp_class}
+				end
+
 				def initialize(typeName, opts={})
 					@pointer = opts[:pointer].nil? ? false : opts[:pointer]
 					@type = typeName
@@ -41,6 +66,8 @@ module HeaderFileGenerator
 					CppClass.new("rb_RealMatrixRow")
 				]
 
+				AllClasses = (ArrayClasses + IntegerClasses + DoubleClasses + MatrixClasses)
+
 				def ===(other)
 					@type == other.type
 				end
@@ -62,7 +89,7 @@ module HeaderFileGenerator
 				end
 
 				def rb_class
-					raise NotImplementedError.new "#{@type} does not have a Ruby class (yet)." if !(@type.to_s =~ /^rb_/)
+					check_ruby!
 					@type + "::rb_class()"
 				end
 
@@ -70,8 +97,16 @@ module HeaderFileGenerator
 					@type + " *"
 				end
 
+				def ruby?
+					@type =~ /rb_(.+)/
+				end
+
+				def check_ruby!
+					if !ruby? then raise NotImplementedError.new "#{@type} does not have a Ruby class (yet)." end
+				end
+
 				def wrapped_class
-					if @type =~ /rb_(.+)/ and @type != "rb_RealVectorReference"
+					if ruby? and @type != "rb_RealVectorReference"
 						$1
 					elsif @type == "rb_RealVectorReference"
 						"RealVector"
@@ -81,6 +116,7 @@ module HeaderFileGenerator
 				end
 
 				def to_rb varName=""
+					check_ruby!
 					if @pointer
 						"wrap_pointer<#{cpp_class}>(#{rb_class}, new #{cpp_class}(&(#{varName})))"
 					else
@@ -102,6 +138,7 @@ module HeaderFileGenerator
 				end
 
 				def class_tester
+					check_ruby!
 					"CLASS_OF"
 				end
 
@@ -122,10 +159,18 @@ module HeaderFileGenerator
 				end
 
 				def convert_into_class input, indent=0
+					if ruby?
 """
 #{"\t"*indent}#{pointer} #{input.converted_parameter_name};
 #{"\t"*indent}Data_Get_Struct(#{input.parameter_name}, #{self}, #{input.converted_parameter_name});
 """
+					else
+						(
+							"\n#{"\t"*indent}#{pointer} #{input.converted_parameter_name} = " +
+							Converter.convert(input.parameter_name).from(input).to(input.output_class) +
+							";\n"
+						)
+					end
 				end
 			end
 			class RubyArray < CppClass
@@ -164,7 +209,7 @@ module HeaderFileGenerator
 					raise NotImplementedError.new "#{@type} is a Ruby C Object and has no class methods."
 				end
 			end
-			CppClass::RubyArray = RubyArray.new
+			CppClass::RubyArray  = RubyArray.new
 			CppClass::Ruby2DArray = RubyArray.new "RealMatrix"
 		end
 	end

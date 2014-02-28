@@ -47,8 +47,18 @@ module HeaderFileGenerator
 				raise NotImplementedError.new "No compatible classes for #{typeName}."
 			end
 
-			def initialize(variable_name="")
-				@name = variable_name
+			def initialize(variable_name="", converter=true)
+				if !converter
+					@origin = variable_name
+					@converter = converter
+				else
+					@name = variable_name
+					@converter = converter
+				end
+			end
+
+			def self.can_convert(a)
+				self.new a, false
 			end
 
 			def self.convert(variable_name="")
@@ -61,6 +71,7 @@ module HeaderFileGenerator
 			end
 
 			def from(type)
+				if !@converter then raise ArgumentError.new "Can't since it already has an origin type defined, #{@origin.cpp_class}." end
 				@origin = type.to_s
 				to_s_if_ready!
 			end
@@ -76,8 +87,22 @@ module HeaderFileGenerator
 			end
 
 			def to(type)
-				@destination = type.to_s
-				to_s_if_ready!
+				if !@converter
+					@destination = type
+					origin_type = Conversions[@origin.to_s]
+					if origin_type
+						if origin_type[@destination.to_s]
+							true
+						else
+							false
+						end
+					else
+						false
+					end
+				else
+					@destination = type.to_s
+					to_s_if_ready!
+				end
 			end
 		end
 	end
