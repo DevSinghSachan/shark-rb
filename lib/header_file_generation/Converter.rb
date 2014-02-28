@@ -91,6 +91,8 @@ module HeaderFileGenerator
 					@destination = type
 					origin_type = Conversions[@origin.to_s]
 					if origin_type
+						puts origin_type
+						puts @destination.to_s
 						if origin_type[@destination.to_s]
 							true
 						else

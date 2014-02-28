@@ -47,7 +47,9 @@ module HeaderFileGenerator
 				end
 
 				def compatible_classes
-					CppClass.can_convert_to @output_class
+					classes = CppClass.can_convert_to(@output_class)
+					if classes.empty? then raise NotImplementedError.new "No compatible conversion classes for #{@output_class}."
+					else classes end
 					# case @type.downcase
 					# when :double
 					# 	CppClass::DoubleClasses

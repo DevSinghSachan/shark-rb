@@ -22,7 +22,12 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1) {
 		rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"\", \"RealVector\", \"\", \"\", \"Array\").");
 
 	// Converting parameters "parameter_1" before they can be used.
-
+	if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
+		rb_RealVectorReference * parameter_1_converted;
+		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
+		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
+		return self;
+	}
 
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
 }
