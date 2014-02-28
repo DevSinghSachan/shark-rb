@@ -31,6 +31,7 @@ module HeaderFileGenerator
 					when :double
 						CppClass.new("double")
 					when :"std::vector<double>"
+						puts "okay"
 						CppClass.new("std::vector<double>")
 					else
 						raise NotImplementedError.new "The type \"#{type}\" has no equivalent C++ class yet."
