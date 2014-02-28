@@ -60,11 +60,11 @@ module HeaderFileGenerator
 					CppClass.new("int")
 				]
 
-				IntegerClasses = [
+				RubyIntegerClasses = [
 					CppClass.new("Fixnum")
 				]
 
-				IntegerClasses = [
+				RubyDoubleClasses = [
 					CppClass.new("Float")
 				]
 
@@ -75,7 +75,7 @@ module HeaderFileGenerator
 					CppClass.new("rb_RealMatrixRow")
 				]
 
-				AllClasses = (ArrayClasses + IntegerClasses + DoubleClasses + MatrixClasses)
+				AllClasses = (ArrayClasses + IntegerClasses + DoubleClasses + MatrixClasses + RubyIntegerClasses + RubyDoubleClasses)
 
 				def ===(other)
 					@type == other.type and @pointer == other.pointer?
