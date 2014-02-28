@@ -38,6 +38,7 @@ module HeaderFileGenerator
 				end
 
 				def self.can_convert_to cpp_class
+					puts cpp_class
 					AllClasses.select {|i| Converter.can_convert(i).to cpp_class}
 				end
 
