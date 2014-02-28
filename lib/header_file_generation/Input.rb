@@ -150,12 +150,13 @@ module HeaderFileGenerator
 						#convert_from_int parameter_name
 					when *(MatrixTypes+ArrayTypes)
 						has_input_class!
-						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name))
-								 .from(@input_class.wrapped_class)
-								 .to(@output_class.wrapped_class)
+						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(@output_class.to_s)
+						# Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name))
+						# 		 .from(@input_class)
+						# 		 .to(@output_class)
 						#converted_parameter_object
 					else # must've been converted beforehand...
-						if requires_conversion? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" with no conversion." end
+						#if requires_conversion? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" with no conversion." end
 						parameter_name
 					end
 				end

@@ -6,9 +6,20 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0) {
 					if out_param_name
-						"#{cpp_class.cpp_class} #{out_param_name} = #{conversion_function}(#{input_param_name})"
+						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{conversion_function}(#{input_param_name})"
 					else
 						"#{conversion_function}(#{input_param_name})"
+					end
+				}
+			end
+
+			def self.create_cast_conversion type
+				cpp_class = Method::CppClass.new(type)
+				->(input_param_name, out_param_name=nil, indent=0) {
+					if out_param_name
+						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name}"
+					else
+						"#{input_param_name}"
 					end
 				}
 			end
@@ -17,7 +28,7 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0) {
 					if out_param_name
-						"#{cpp_class.pointer} #{out_param_name} = #{input_param_name}->#{conversion_function}()"
+						"#{"\t"*indent}#{cpp_class.pointer} #{out_param_name} = #{input_param_name}->#{conversion_function}()"
 					else
 						"#{input_param_name}->#{conversion_function}()"
 					end
@@ -82,18 +93,18 @@ module HeaderFileGenerator
 					"Float"      => create_type_conversion("rb_float_new", "VALUE"),
 					"Fixnum"     => create_type_conversion("INT2FIX", "VALUE")
 				}
-			Conversions["rb_RealVector"] = {
-					"RealVector" => create_ruby_conversion("rb_RealVector"),
-					"std::vector<double>" => create_combined_conversion(
-						create_ruby_conversion("rb_RealVector"),
-						Conversions["RealVector"]["std::vector<double>"])
-				}
 			Conversions["VALUE"] = {
 				"rb_RealVectorReference" => create_ruby_conversion("rb_RealVectorReference"),
 				"rb_RealVector"          => create_ruby_conversion("rb_RealVector"),
 				"rb_RealMatrixColumn"    => create_ruby_conversion("rb_RealMatrixColumn"),
 				"rb_RealMatrixRow"       => create_ruby_conversion("rb_RealMatrixRow")
 			}
+			Conversions["rb_RealVector"] = {
+					"RealVector" => create_ruby_conversion("rb_RealVector"),
+					"std::vector<double>" => create_combined_conversion(
+						create_ruby_conversion("rb_RealVector"),
+						Conversions["RealVector"]["std::vector<double>"])
+				}
 			Conversions["rb_RealVectorReference"] = {
 					"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
 					"std::vector<double>" => create_combined_conversion(
@@ -112,6 +123,16 @@ module HeaderFileGenerator
 						create_ruby_conversion("rb_RealMatrixColumn"),
 						Conversions["RealVector"]["std::vector<double>"])
 				}
+
+			def self.create_castable_equivalences *equivs
+				equivs.each do |equiv|
+					equivs.each do |equiv_other|
+						Conversions[equiv][equiv_other] = create_cast_conversion(equiv_other)
+					end
+				end
+			end
+
+			create_castable_equivalences "RealVector", "RealMatrix", "RealMatrixColumn", "RealMatrixRow"
 
 			def self.converts_to(typeName)
 				Conversions.fetch(typeName).keys
