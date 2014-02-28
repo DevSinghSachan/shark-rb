@@ -7,8 +7,16 @@ class String
 		"\e[0;32;49m#{self}\e[0m\n"
 	end
 
-	def grey
+	def yellow
+		"\e[0;33;49m#{self}\e[0m\n"
+	end
+
+	def white
 		"\e[0;97;49m#{self}\e[0m"
+	end
+
+	def grey
+		"\e[37m#{self}\e[39;49;00m"
 	end
 end
 
@@ -55,7 +63,7 @@ module HeaderFileGenerator
 									elsif line =~ /(.+)(\d+:\d+): (error:)( .+)/
 										relevant_lines << ($1.grey+ " " + $2 + " " + $3.red + " " + $4)
 									elsif line =~ /(.+ )(warning:)( .+)/
-										relevant_lines << "\e[0;97;49m#{$1}\e[0m\e[0;33;49m#{$2}\e[0m#{$3}"
+										relevant_lines << ($1.grey + $2.yellow + $3)
 									elsif line =~ /(\s*\d+: )(.*)/
 										relevant_lines << ($1.grey + Pygments.highlight($2, :formatter => 'terminal', :lexer => "c++"))
 									else
