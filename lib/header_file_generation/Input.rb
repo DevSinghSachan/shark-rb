@@ -141,6 +141,7 @@ module HeaderFileGenerator
 				end
 
 				def to_converted_form
+					puts @type
 					case @type
 					when :double
 						Converter.convert(parameter_name).from(Float).to("double").to_s
@@ -150,7 +151,6 @@ module HeaderFileGenerator
 						#convert_from_int parameter_name
 					when *(MatrixTypes+ArrayTypes)
 						has_input_class!
-						puts @type
 						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(@output_class.to_s)
 						# Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name))
 						# 		 .from(@input_class)
