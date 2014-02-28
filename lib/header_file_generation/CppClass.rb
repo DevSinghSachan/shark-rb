@@ -90,8 +90,12 @@ module HeaderFileGenerator
 					case cpp_class
 					when *IntegerClasses
 						"#{cpp_class}(#{Random.rand(11)})"
+					when *RubyIntegerClasses
+						"INT2FIX(#{Random.rand(11)})"
+					when *RubyDoubleClasses
+						"rb_float_new(#{Random.rand(5.0).round 3})"
 					when *DoubleClasses
-						"#{cpp_class}(#{Random.rand(5.0)})"
+						"#{cpp_class}(#{Random.rand(5.0).round 3})"
 					when *(ArrayClasses.map {|i| CppClass.new(i.wrapped_class)})
 						"new #{cpp_class}()"
 					when *(MatrixClasses.map {|i| CppClass.new(i.wrapped_class)})
