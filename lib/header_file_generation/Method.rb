@@ -22,7 +22,6 @@ module HeaderFileGenerator
 					@number_of_inputs = opts["types"].length
 				end
 				@parameters       = []
-				puts CppClass.guess_from_type(:"std::vector<double>")
 
 				@number_of_inputs.times do |i|
 					input_type = @input_type[i] || @input_type[0]
