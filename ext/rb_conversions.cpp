@@ -18,7 +18,7 @@ shark::RealVector rb_ary_to_1d_realvector(VALUE ary) {
 	return vector;
 }
 
-RealMatrix rb_ary_to_realmatrix(VALUE ary) {
+shark::RealMatrix rb_ary_to_realmatrix(VALUE ary) {
 
 	int rows = RARRAY_LEN(ary);
 	int cols = rows > 0 ? RARRAY_LEN(rb_ary_entry(ary, 0)) : 0;
@@ -32,7 +32,7 @@ RealMatrix rb_ary_to_realmatrix(VALUE ary) {
 	return matrix;
 }
 
-RealMatrix rb_1d_ary_to_realmatrix(VALUE ary) {
+shark::RealMatrix rb_1d_ary_to_realmatrix(VALUE ary) {
 	int height = RARRAY_LEN(ary);
 	shark::RealMatrix matrix(1, height);
 	for (int i=0;i<height;i++)
@@ -56,7 +56,7 @@ std::vector<shark::RealMatrix> rb_ary_to_realmatrices(VALUE ary) {
 }
 
 
-VALUE realmatrix_to_rb_ary(const RealMatrix& W) {
+VALUE realmatrix_to_rb_ary(const shark::RealMatrix& W) {
 	VALUE matrix = rb_ary_new2((int)W.size1());
 	for (size_t i = 0; i < W.size1(); ++i)
 	{
@@ -69,7 +69,7 @@ VALUE realmatrix_to_rb_ary(const RealMatrix& W) {
 	return matrix;
 }
 
-VALUE realmatrix_to_rb_ary(const RealMatrix& W, bool two_d_array) {
+VALUE realmatrix_to_rb_ary(const shark::RealMatrix& W, bool two_d_array) {
 	if (two_d_array == 1 && (W.size1() == 1 || W.size2() == 1)) {
 		VALUE matrix = rb_ary_new2((int)W.size1()*W.size2());
 		bool tall = W.size1() > W.size2() ? 1 : 0;
@@ -83,7 +83,7 @@ VALUE realmatrix_to_rb_ary(const RealMatrix& W, bool two_d_array) {
 	
 }
 
-VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
+VALUE stdvector_realmatrix_to_rb_ary(const std::vector<shark::RealMatrix> W) {
 	VALUE ary = rb_ary_new2((int)W.size());
 	for (size_t i = 0; i < W.size(); ++i) {
 		rb_ary_store(ary, (int)i,realmatrix_to_rb_ary(W[i]));
@@ -91,12 +91,12 @@ VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix> W) {
 	return ary;
 }
 
-std::vector<shark::RealVector> realvector_to_stdvector(RealVector vector) {
+std::vector<shark::RealVector> realvector_to_stdvector(shark::RealVector vector) {
 	std::vector<shark::RealVector> vectors;
 	vectors.push_back(vector);
 	return vectors;
 }
-std::vector<double> realvector_to_stdvectordouble(RealVector vector) {
+std::vector<double> realvector_to_stdvectordouble(shark::RealVector vector) {
 	std::vector<double> vectors(vector.size());
 	for (size_t i=0;i<vector.size();i++) {
 		vectors[i] = vector[i];
@@ -144,7 +144,7 @@ shark::UnlabeledData<shark::RealVector> rb_ary_to_unlabeleddata(VALUE ary) {
 	return samples;
 }
 
-VALUE realvector_to_rb_ary(const RealVector& W) {
+VALUE realvector_to_rb_ary(const shark::RealVector& W) {
 	VALUE matrix = rb_ary_new2((int)W.size());
 	for (size_t i = 0; i < W.size(); ++i)
 	{
@@ -153,7 +153,7 @@ VALUE realvector_to_rb_ary(const RealVector& W) {
 	return matrix;
 }
 
-VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector> W) {
+VALUE stdvector_realvector_to_rb_ary(const std::vector<shark::RealVector> W) {
 	VALUE ary = rb_ary_new2((int)W.size());
 	for (size_t i = 0; i < W.size(); ++i) {
 		rb_ary_store(ary, (int)i,realvector_to_rb_ary(W[i]));
