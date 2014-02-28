@@ -57,13 +57,12 @@ module HeaderFileGenerator
 									elsif line =~ /(.+ )(warning:)( .+)/
 										relevant_lines << "\e[0;97;49m#{$1}\e[0m\e[0;33;49m#{$2}\e[0m#{$3}"
 									elsif line =~ /(\s*\d+: )(.+)/
-										relevant_lines << ($1 + Pygments.highlight($2, :formatter => 'terminal', :lexer => "c++"))
+										relevant_lines << ($1.grey + Pygments.highlight($2, :formatter => 'terminal', :lexer => "c++"))
 									else
 										relevant_lines << line
 									end
 								end
 								puts relevant_lines.reverse
-								`pygmentize -g #{}`
 							end
 						end
 					rescue NoMethodError => e
