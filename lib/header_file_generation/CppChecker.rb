@@ -56,7 +56,7 @@ module HeaderFileGenerator
 										relevant_lines << ($1.grey+ " " + $2 + " " + $3.red + " " + $4)
 									elsif line =~ /(.+ )(warning:)( .+)/
 										relevant_lines << "\e[0;97;49m#{$1}\e[0m\e[0;33;49m#{$2}\e[0m#{$3}"
-									elsif line =~ /(\s*\d+: )(.+)/
+									elsif line =~ /(\s*\d+: )(.*)/
 										relevant_lines << ($1.grey + Pygments.highlight($2, :formatter => 'terminal', :lexer => "c++"))
 									else
 										relevant_lines << line
