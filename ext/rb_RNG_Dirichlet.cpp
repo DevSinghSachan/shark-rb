@@ -17,7 +17,7 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1) {
 	rb_RNG_Dirichlet * r;
 	Data_Get_Struct(self, rb_RNG_Dirichlet, r);
 	
-	// Checking whether parameter_1 is an "array"
+	// Checking whether parameter_1 is a "std::vector<double>"
 	if (TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM) && CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class())
 		rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"RealVector\", \"RealVector\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
 
@@ -25,22 +25,22 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1) {
 	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
-		r->getModel()->alphas(*(parameter_1_converted->getData()));
+		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
 		rb_RealVectorReference * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
-		r->getModel()->alphas(*(parameter_1_converted->getData()));
+		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
 		rb_RealMatrixColumn * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
-		r->getModel()->alphas(*(parameter_1_converted->getData()));
+		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
 		rb_RealMatrixRow * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
-		r->getModel()->alphas(*(parameter_1_converted->getData()));
+		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	}
 
