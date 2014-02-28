@@ -149,7 +149,7 @@ module HeaderFileGenerator
 					when *IntegerTypes
 						Converter.convert(parameter_name).from(Fixnum).to("int").to_s
 						#convert_from_int parameter_name
-					when *(MatrixTypes+ArrayTypes)
+					when *(MatrixTypes+ArrayTypes + (MatrixTypes+ArrayTypes).map {|i| (i.to_s + "*").to_sym})
 						has_input_class!
 						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(@output_class.to_s)
 						# Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name))

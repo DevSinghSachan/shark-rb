@@ -33,22 +33,22 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 		if (CLASS_OF(parameter_2) == rb_RealVector::rb_class()) {
 			rb_RealVector * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVector, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVectorReference, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixColumn, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixRow, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		}
 	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
@@ -57,22 +57,22 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 		if (CLASS_OF(parameter_2) == rb_RealVector::rb_class()) {
 			rb_RealVector * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVector, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVectorReference, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixColumn, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixRow, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		}
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
@@ -81,22 +81,22 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 		if (CLASS_OF(parameter_2) == rb_RealVector::rb_class()) {
 			rb_RealVector * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVector, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVectorReference, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixColumn, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixRow, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		}
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
@@ -105,22 +105,22 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1, VALUE p
 		if (CLASS_OF(parameter_2) == rb_RealVector::rb_class()) {
 			rb_RealVector * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVector, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealVectorReference::rb_class()) {
 			rb_RealVectorReference * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealVectorReference, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixColumn::rb_class()) {
 			rb_RealMatrixColumn * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixColumn, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		} else if (CLASS_OF(parameter_2) == rb_RealMatrixRow::rb_class()) {
 			rb_RealMatrixRow * parameter_2_converted;
 			Data_Get_Struct(parameter_2, rb_RealMatrixRow, parameter_2_converted);
-			r->getModel()->alphas(parameter_1, *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
+			r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())), *(parameter_2_converted->getData()), NUM2DBL(parameter_3));
 			return self;
 		}
 	}
