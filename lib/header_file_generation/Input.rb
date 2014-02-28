@@ -43,7 +43,7 @@ module HeaderFileGenerator
 				# end
 
 				def differs_from_classes classes
-					classes.map {|i| i.fail_class_test parameter_name}.join(" && ")
+					classes.map {|i| i.test_class parameter_name, false}.join(" && ")
 				end
 
 				def compatible_classes

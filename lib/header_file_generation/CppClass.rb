@@ -143,12 +143,8 @@ module HeaderFileGenerator
 					"CLASS_OF"
 				end
 
-				def test_class variableName
-					ClassTest.new(:name => variableName, :comparator => self, :tester => class_tester)
-				end
-
-				def fail_class_test variableName
-					ClassTest.new(:name => variableName, :success => false, :comparator => self, :tester => class_tester)
+				def test_class variable_name, success=true
+					ClassTest.new(:name => variable_name, :success => success, :comparator => self, :tester => class_tester)
 				end
 
 				def converted_parameter_pointer variableName
