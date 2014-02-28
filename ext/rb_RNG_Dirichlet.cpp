@@ -51,7 +51,7 @@ VALUE method_rb_RNG_Dirichlet_get_alphas (VALUE self) {
 	rb_RNG_Dirichlet * r;
 	Data_Get_Struct(self, rb_RNG_Dirichlet, r);
 	
-	return realvector_to_rb_ary(r->getModel()->alphas());
+	return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector(r->getModel()->alphas()));
 }
 
 VALUE method_rb_RNG_Dirichlet_allocate (VALUE klass) {

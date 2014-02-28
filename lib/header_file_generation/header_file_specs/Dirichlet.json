@@ -13,7 +13,7 @@
 	"getters" : [
 		{
 			"name": "alphas",
-			"type": "rubyarray"
+			"type": "array"
 		}
 	],
 	"setters" : [
