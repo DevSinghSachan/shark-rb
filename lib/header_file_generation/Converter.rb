@@ -47,6 +47,7 @@ module HeaderFileGenerator
 
 			def self.create_combined_conversion conversion_a, conversion_b
 				->(input_param_name, out_param_name, indent=0) {
+					puts "using combined conversion"
 					(
 						conversion_a.call(input_param_name, out_param_name+"_temp", indent) +
 						conversion_b.call(out_param_name+"_temp", out_param_name, indent)
@@ -100,29 +101,29 @@ module HeaderFileGenerator
 				"rb_RealMatrixRow"       => create_ruby_conversion("rb_RealMatrixRow")
 			}
 			Conversions["rb_RealVector"] = {
-					"RealVector" => create_ruby_conversion("rb_RealVector"),
-					"std::vector<double>" => create_combined_conversion(
-						create_ruby_conversion("rb_RealVector"),
-						Conversions["RealVector"]["std::vector<double>"])
-				}
+				"RealVector" => create_ruby_conversion("rb_RealVector"),
+				"std::vector<double>" => create_combined_conversion(
+					create_ruby_conversion("rb_RealVector"),
+					Conversions["RealVector"]["std::vector<double>"])
+			}
 			Conversions["rb_RealVectorReference"] = {
-					"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
-					"std::vector<double>" => create_combined_conversion(
-						create_ruby_conversion("rb_RealVectorReference"),
-						Conversions["RealVector"]["std::vector<double>"])
-				}
+				"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
+				"std::vector<double>" => create_combined_conversion(
+					create_ruby_conversion("rb_RealVectorReference"),
+					Conversions["RealVector"]["std::vector<double>"])
+			}
 			Conversions["rb_RealMatrixRow"] = {
-					"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
-					"std::vector<double>" => create_combined_conversion(
-						create_ruby_conversion("rb_RealMatrixRow"),
-						Conversions["RealVector"]["std::vector<double>"])
-				}
+				"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
+				"std::vector<double>" => create_combined_conversion(
+					create_ruby_conversion("rb_RealMatrixRow"),
+					Conversions["RealVector"]["std::vector<double>"])
+			}
 			Conversions["rb_RealMatrixColumn"] = {
-					"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
-					"std::vector<double>" => create_combined_conversion(
-						create_ruby_conversion("rb_RealMatrixColumn"),
-						Conversions["RealVector"]["std::vector<double>"])
-				}
+				"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
+				"std::vector<double>" => create_combined_conversion(
+					create_ruby_conversion("rb_RealMatrixColumn"),
+					Conversions["RealVector"]["std::vector<double>"])
+			}
 
 			def self.create_castable_equivalences *equivs
 				equivs.each do |equiv|
