@@ -6,7 +6,7 @@
 		"<shark/Rng/Dirichlet.h>",
 		"ruby.h",
 		"rb_conversions.h",
-		"rb_RealVector.h"
+		"rb_Datatypes.h"
 	],
 	"rb_class" : "rb_optimizer_rng_dirichlet_klass",
 	"constructor_arguments": ["shark::Rng::globalRng"],
@@ -19,7 +19,7 @@
 	"setters" : [
 		{
 			"name": "alphas",
-			"types": ["std::vector<double>"]
+			"types": ["array"]
 		}
 	]
 }
