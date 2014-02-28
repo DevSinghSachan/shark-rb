@@ -140,6 +140,7 @@ Gem::Specification.new do |s|
     "lib/header_file_generation/header_file_specs/Binomial.json",
     "lib/header_file_generation/header_file_specs/Cauchy.json",
     "lib/header_file_generation/header_file_specs/DiffGeometric.json",
+    "lib/header_file_generation/header_file_specs/Dirichlet.json",
     "lib/header_file_generation/header_file_specs/DiscreteUniform.json",
     "lib/header_file_generation/header_file_specs/Erlang.json",
     "lib/header_file_generation/header_file_specs/Geometric.json",
