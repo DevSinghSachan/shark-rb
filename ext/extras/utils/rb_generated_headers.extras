@@ -2,7 +2,6 @@
 #include "rb_RNG_Binomial.h"
 #include "rb_RNG_Cauchy.h"
 #include "rb_RNG_DiffGeometric.h"
-#include "rb_RNG_Dirichlet.h"
 #include "rb_RNG_DiscreteUniform.h"
 #include "rb_RNG_Erlang.h"
 #include "rb_RNG_Geometric.h"
@@ -18,7 +17,6 @@ void Init_Generated_Headers() {
 	Init_rb_RNG_Binomial();
 	Init_rb_RNG_Cauchy();
 	Init_rb_RNG_DiffGeometric();
-	Init_rb_RNG_Dirichlet();
 	Init_rb_RNG_DiscreteUniform();
 	Init_rb_RNG_Erlang();
 	Init_rb_RNG_Geometric();

@@ -1,7 +1,7 @@
 require_relative 'CppChecker'
 require_relative 'HeaderFile'
-require_relative 'Converter'
 require_relative 'CppClass'
+require_relative 'Converter'
 require_relative 'Input'
 require_relative 'Output'
 require_relative 'Method'

@@ -48,7 +48,7 @@ module HeaderFileGenerator
 
 				def compatible_classes
 					classes = CppClass.can_convert_to(@output_class)
-					if classes.empty? then raise NotImplementedError.new "No compatible conversion classes for #{@output_class}."
+					if classes.empty? then raise NotImplementedError.new "No compatible C++ conversion classes for #{@output_class}."
 					else classes end
 					# case @type.downcase
 					# when :double
@@ -90,7 +90,7 @@ module HeaderFileGenerator
 				end
 
 				def requires_conversion?
-					(ArrayTypes + MatrixTypes).include? @type
+					!((IntegerTypes + [:double]).include? @type)
 				end
 
 				def matches_classes classes
@@ -141,7 +141,6 @@ module HeaderFileGenerator
 				end
 
 				def to_converted_form
-					puts @type.class
 					case @type
 					when :double
 						Converter.convert(parameter_name).from(Float).to("double").to_s

@@ -31,6 +31,10 @@ module HeaderFileGenerator
 			end
 		end
 
+		def cpp_methods
+			@methods
+		end
+
 		def initialize(opts={})
 			@setters, @methods, @getters   = [], [], []
 			@filename                      = opts["filename"]

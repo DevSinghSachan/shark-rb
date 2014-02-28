@@ -39,7 +39,7 @@ module HeaderFileGenerator
 				end
 
 				def self.can_convert_to cpp_class
-					AllClasses.select {|i| Converter.can_convert(i.wrapped_class).to cpp_class}
+					AllClasses.select {|i| Converter.can_convert(i).to cpp_class}
 				end
 
 				def initialize(typeName, opts={})
@@ -70,7 +70,11 @@ module HeaderFileGenerator
 				AllClasses = (ArrayClasses + IntegerClasses + DoubleClasses + MatrixClasses)
 
 				def ===(other)
-					@type == other.type
+					@type == other.type and @pointer == other.pointer?
+				end
+
+				def ==(other)
+					@type == other.type and @pointer == other.pointer?
 				end
 
 				def self.sample typeName
@@ -92,6 +96,10 @@ module HeaderFileGenerator
 				def rb_class
 					check_ruby!
 					@type + "::rb_class()"
+				end
+
+				def pointer?
+					@pointer
 				end
 
 				def pointer
@@ -157,10 +165,15 @@ module HeaderFileGenerator
 
 				def convert_into_class input, indent=0
 					if ruby?
-"""
-#{"\t"*indent}#{pointer} #{input.converted_parameter_name};
-#{"\t"*indent}Data_Get_Struct(#{input.parameter_name}, #{self}, #{input.converted_parameter_name});
-"""
+						begin
+							Converter::Conversions["VALUE"].fetch(self.to_s).call(input.parameter_name,input.converted_parameter_name,indent)
+						rescue KeyError
+							raise NotImplementedError.new "No conversion from VALUE to #{self}."
+						end
+# """
+# #{"\t"*indent}#{pointer} #{input.converted_parameter_name};
+# #{"\t"*indent}Data_Get_Struct(#{input.parameter_name}, #{self}, #{input.converted_parameter_name});
+# """
 					else
 						(
 							"\n#{"\t"*indent}#{pointer} #{input.converted_parameter_name} = " +
@@ -185,9 +198,14 @@ module HeaderFileGenerator
 				end
 
 				def convert_into_class input, indent=0
-"""
-#{"\t"*indent}#{cpp_class} #{input.converted_parameter_name} = #{Converter.convert(input.parameter_name).from(Array).to cpp_class };
-"""
+					begin
+						Converter::Conversions["Array"].fetch(cpp_class).call(input.parameter_name,input.converted_parameter_name,indent)
+					rescue KeyError
+						raise NotImplementedError.new "No conversion from Array to #{cpp_class}."
+					end
+# """
+# #{"\t"*indent}#{cpp_class} #{input.converted_parameter_name} = #{Converter.convert(input.parameter_name).from(Array).to cpp_class };
+# """
 				end
 
 				def rb_class
