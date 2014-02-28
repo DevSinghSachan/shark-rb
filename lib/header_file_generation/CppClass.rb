@@ -60,6 +60,14 @@ module HeaderFileGenerator
 					CppClass.new("int")
 				]
 
+				IntegerClasses = [
+					CppClass.new("Fixnum")
+				]
+
+				IntegerClasses = [
+					CppClass.new("Float")
+				]
+
 				ArrayClasses = [
 					CppClass.new("rb_RealVector"),
 					CppClass.new("rb_RealVectorReference"),

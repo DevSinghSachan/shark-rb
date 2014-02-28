@@ -37,12 +37,20 @@ module HeaderFileGenerator
 				end
 
 				old_cpp_config = RbConfig::CONFIG["CPP"]
-
+				
+				# -E        will only preprocess file, running without -E means actually
+				#           compiling (and thus error-checking)
+				# -x <type> specifies whether file is c, c++, objective-c
+				#
+				# -c        specifies whether to perform linking or not on compiled
+				#           objects
+				#
 				if old_cpp_config =~ /(.+)-E$/
 					RbConfig::CONFIG["CPP"] = $1
 				end
 
-				opts += " -x c++ -I./ext"
+
+				opts += " -x c++ -I./ext -c"
 
 				(@methods + @setters + @getters).select {|i| i.class != HeaderFile::Allocator and i.class != HeaderFile::Initializer}.each_with_index do |method,k|
 					begin

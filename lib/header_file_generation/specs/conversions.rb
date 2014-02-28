@@ -2,15 +2,27 @@ require_relative '../header_file_generation'
 
 describe 'C++ HeaderFiles' do
 	before(:all) do
-		@header_file = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil"
-		@header_file_array = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil"
+		
+		@header_file_vector = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
+		@header_file_array  = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
+		@header_file_getter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
+		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
+		
 		@vector_definition = {
 				"name" => "test",
 				"types" => ["std::vector<double>*"]
 			}
-		@regular_definition = {
+		@array_definition = {
 				"name" => "test",
 				"types" => ["array"]
+			}
+		@getter_definition = {
+				"name" => "test",
+				"type" => "double"
+			}
+		@setter_definition = {
+				"name" => "test",
+				"types" => ["double"]
 			}
 		@std_vector    = HeaderFileGenerator::HeaderFile::Method::CppClass.new("std::vector<double>", :pointer => true)
 		@rb_RealVector = HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealVector")
@@ -19,46 +31,60 @@ describe 'C++ HeaderFiles' do
 
 	describe 'should create & own methods' do
 		before(:all) do
-			@header_file.define_methods [@vector_definition]
-			@method = @header_file.cpp_methods.select {|i| i.method_name == @vector_definition["name"]}.first
-			@header_file_array.define_methods [@regular_definition]
-			@regular_method = @header_file_array.cpp_methods.select {|i| i.method_name == @regular_definition["name"]}.first
+			@header_file_getter.define_methods [@getter_definition]
+			@header_file_setter.define_methods [@setter_definition]
+			@header_file_vector.define_methods [@vector_definition]
+			@header_file_array.define_methods  [@array_definition]
+
+			@getter_method  = @header_file_getter.cpp_methods.select {|i| i.method_name == @getter_definition["name"]}.first
+			@vector_method  = @header_file_vector.cpp_methods.select {|i| i.method_name == @vector_definition["name"]}.first
+			@array_method   = @header_file_array.cpp_methods.select  {|i| i.method_name == @array_definition["name"] }.first
+			@setter_method  = @header_file_setter.cpp_methods.select {|i| i.method_name == @setter_definition["name"]}.first
 		end
 
 		it 'should add methods to method list' do
-			@regular_method.should_not be_nil
+			@array_method.should_not be_nil
 		end
 
 		it 'should add methods w/. pointers to method list' do
-			@method.should_not be_nil
+			@vector_method.should_not be_nil
+		end
+
+		it 'should add methods with no parameters to method list' do
+			@getter_method.should_not be_nil
 		end
 
 		describe 'whose parameters' do
 			before(:all) do
-				@parameter = @method.parameters.first
-				@parameter_regular = @regular_method.parameters.first
-			end	
+				@vector_parameter = @vector_method.parameters.first
+				@array_parameter = @array_method.parameters.first
+				@getter_parameter = @getter_method.parameters.first
+			end
 
 			it 'should exist' do
-				@parameter_regular.should_not be_nil
-				@parameter_regular.class.should == HeaderFileGenerator::HeaderFile::Method::Input
+				@array_parameter.should_not be_nil
+				@array_parameter.class.should == HeaderFileGenerator::HeaderFile::Method::Input
 			end
 
 			it 'should exist w/. pointers' do
-				@parameter.should_not be_nil
-				@parameter.class.should == HeaderFileGenerator::HeaderFile::Method::Input
+				@vector_parameter.should_not be_nil
+				@vector_parameter.class.should == HeaderFileGenerator::HeaderFile::Method::Input
+			end
+
+			it 'are empty when none are needed' do
+				@getter_parameter.should be_nil
 			end
 
 			describe 'have output classes that' do
 
 				it 'should have guessed output classes' do
-					@parameter_regular.output_class.should_not be_nil
-					@parameter_regular.output_class.should === @RealVector
+					@array_parameter.output_class.should_not be_nil
+					@array_parameter.output_class.should === @RealVector
 				end
 
 				it 'should have guessed output classes w/. pointers' do
-					@parameter.output_class.should_not be_nil
-					@parameter.output_class.should === @std_vector
+					@vector_parameter.output_class.should_not be_nil
+					@vector_parameter.output_class.should === @std_vector
 				end
 
 			end
@@ -82,8 +108,8 @@ describe 'C++ HeaderFiles' do
 				end
 
 				it 'should have some input compatible classes' do
-					@parameter_regular.compatible_classes.should_not be_empty
-					@parameter_regular.compatible_classes.should include *[
+					@array_parameter.compatible_classes.should_not be_empty
+					@array_parameter.compatible_classes.should include *[
 						@rb_RealVector,
 						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealVectorReference"),
 						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealMatrixRow"),
@@ -92,8 +118,8 @@ describe 'C++ HeaderFiles' do
 				end				
 
 				it 'should have some input compatible classes w/. pointers' do
-					@parameter.compatible_classes.should_not be_empty
-					@parameter.compatible_classes.should include *[
+					@vector_parameter.compatible_classes.should_not be_empty
+					@vector_parameter.compatible_classes.should include *[
 						@rb_RealVector,
 						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealVectorReference"),
 						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealMatrixRow"),
@@ -102,17 +128,44 @@ describe 'C++ HeaderFiles' do
 				end
 
 				it 'should provide a converted format for a variable' do
-					@parameter_regular.input_class = @parameter_regular.compatible_classes.first
-					@parameter_regular.to_converted_form.should match /\*.+#{@parameter_regular.parameter_name}/
+					@array_parameter.input_class = @array_parameter.compatible_classes.first
+					@array_parameter.to_converted_form.should match /\*.+#{@array_parameter.parameter_name}/
 				end
 
 				it 'should provide a converted format for a variable w/. pointer' do
-					@parameter.input_class = @parameter_regular.compatible_classes.first
-					@parameter.to_converted_form.should match /&.+#{@parameter_regular.parameter_name}/
+					@vector_parameter.input_class = @array_parameter.compatible_classes.first
+					@vector_parameter.to_converted_form.should match /&.+#{@array_parameter.parameter_name}/
 				end
 				
 			end
 
+		end
+
+		describe 'whose output' do
+			before(:all) do
+				@getter_output = @getter_method.return_methodology
+				@setter_output = @setter_method.return_methodology
+			end
+
+			it 'should not be nil' do
+				@getter_output.should_not be_nil
+				@setter_output.should_not be_nil
+			end
+
+			it 'should be converted to Ruby values' do
+				@getter_output.should_not match /return self/
+			end
+
+			it 'should return self when no return type is provided' do
+				@setter_output.should match /return self/
+			end
+		end
+
+		it 'that can output a C++ function definition' do
+			->(){ @getter_method.to_cpp_function_definition }.should_not raise_error
+			->(){ @setter_method.to_cpp_function_definition }.should_not raise_error
+			->(){ @vector_method.to_cpp_function_definition }.should_not raise_error
+			->(){ @array_method.to_cpp_function_definition  }.should_not raise_error
 		end
 	end
 end
