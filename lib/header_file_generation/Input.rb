@@ -34,13 +34,13 @@ module HeaderFileGenerator
 					converted_parameter_name + "->#{@input_class.wrapped_class_pointer}"
 				end
 
-				def conversion_to_correct_type param
-					Converter.convert(param).from(@input_class.wrapped_class).to(@output_class.wrapped_class)
-				end
+				# def conversion_to_correct_type param
+				# 	Converter.convert(param).from(@input_class.wrapped_class).to(@output_class.wrapped_class)
+				# end
 
-				def converted_parameter_object
-					conversion_to_correct_type @input_class.converted_parameter_pointer(converted_parameter_name)
-				end
+				# def converted_parameter_object
+				# 	conversion_to_correct_type @input_class.converted_parameter_pointer(converted_parameter_name)
+				# end
 
 				def differs_from_classes classes
 					classes.map {|i| i.fail_class_test parameter_name}.join(" && ")

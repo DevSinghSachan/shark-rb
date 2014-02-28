@@ -29,7 +29,7 @@ module HeaderFileGenerator
 						:type         => input_type,
 						:position     => i,
 						:method       => self,
-						:output_class => CppClass.guess_from_type(input_type.to_sym)
+						:output_class => CppClass.guess_from_type(input_type)
 						)
 				end
 				@requires_conversion = @parameters.any? {|i| i.requires_conversion?}

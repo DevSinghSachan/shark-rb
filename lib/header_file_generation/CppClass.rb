@@ -21,19 +21,20 @@ module HeaderFileGenerator
 				IntegerTypes = [:integer, :int]
 
 				def self.guess_from_type type
-					case type.downcase
+					type.match(/([^\*]+)(\*)?/)
+					case $1.downcase.to_sym
 					when *MatrixTypes
-						CppClass.new("RealMatrix")
+						CppClass.new("RealMatrix", :pointer => !$2.nil?)
 					when *ArrayTypes
-						CppClass.new("RealVector")
+						CppClass.new("RealVector", :pointer => !$2.nil?)
 					when *IntegerTypes
-						CppClass.new("int")
+						CppClass.new("int", :pointer => !$2.nil?)
 					when :double
-						CppClass.new("double")
+						CppClass.new("double", :pointer => !$2.nil?)
 					when :"std::vector<double>"
-						CppClass.new("std::vector<double>")
+						CppClass.new("std::vector<double>", :pointer => !$2.nil?)
 					else
-						raise NotImplementedError.new "The type \"#{type}\" has no equivalent C++ class yet."
+						raise NotImplementedError.new "The type \"#{$1}\"#{!$2.nil? ? " (pointer)" : ""} has no equivalent C++ class yet."
 					end
 				end
 
@@ -73,7 +74,7 @@ module HeaderFileGenerator
 				end
 
 				def self.sample typeName
-					cpp_class = CppClass.new(typeName)
+					cpp_class = typeName.is_a?(CppClass) ? typeName : CppClass.new(typeName)
 					case cpp_class
 					when *IntegerClasses
 						"#{cpp_class}(#{Random.rand(11)})"
