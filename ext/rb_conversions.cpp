@@ -1,6 +1,8 @@
 #include "rb_conversions.h"
 #define StringValueCStr(v) rb_string_value_cstr(&(v))
 
+typedef shark::blas::vector<double> shark::RealVector;
+
 VALUE rb_sym_new(const char *s) {
 	return ID2SYM(rb_intern(s));
 }
