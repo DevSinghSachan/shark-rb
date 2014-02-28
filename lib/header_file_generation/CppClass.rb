@@ -16,7 +16,7 @@ module HeaderFileGenerator
 					end
 				end
 
-				ArrayTypes   = [:array, :"1darray", :vector, :"std::vector<double>"]
+				ArrayTypes   = [:array, :"1darray", :vector]
 				MatrixTypes  = [:matrix, :"2darray"]
 				IntegerTypes = [:integer, :int]
 
@@ -31,7 +31,6 @@ module HeaderFileGenerator
 					when :double
 						CppClass.new("double")
 					when :"std::vector<double>"
-						puts "okay"
 						CppClass.new("std::vector<double>")
 					else
 						raise NotImplementedError.new "The type \"#{type}\" has no equivalent C++ class yet."
