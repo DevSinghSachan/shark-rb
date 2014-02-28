@@ -13,7 +13,7 @@ VALUE rb_RNG_Dirichlet::rb_class() {
 	return rb_optimizer_rng_dirichlet_klass;
 }
 
-VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1) {
+VALUE method_rb_RNG_Dirichlet_set_alphass (VALUE self, VALUE parameter_1) {
 	rb_RNG_Dirichlet * r;
 	Data_Get_Struct(self, rb_RNG_Dirichlet, r);
 	
@@ -25,22 +25,22 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1) {
 	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
-		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
+		r->getModel()->alphass(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
 		rb_RealVectorReference * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
-		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
+		r->getModel()->alphass(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
 		rb_RealMatrixColumn * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
-		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
+		r->getModel()->alphass(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
 		rb_RealMatrixRow * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
-		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
+		r->getModel()->alphass(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
 	}
 
@@ -63,7 +63,7 @@ VALUE method_rb_RNG_Dirichlet_initialize (VALUE self) {
 }
 
 void Init_rb_RNG_Dirichlet () {
-	rb_define_method(rb_RNG_Dirichlet::rb_class(), "alphas=", (rb_method) method_rb_RNG_Dirichlet_set_alphas, 1);
+	rb_define_method(rb_RNG_Dirichlet::rb_class(), "alphass=", (rb_method) method_rb_RNG_Dirichlet_set_alphass, 1);
 	rb_define_method(rb_RNG_Dirichlet::rb_class(), "alphas", (rb_method) method_rb_RNG_Dirichlet_get_alphas, 0);
 	rb_define_alloc_func(rb_RNG_Dirichlet::rb_class(), (rb_alloc_func_t) method_rb_RNG_Dirichlet_allocate);
 	rb_define_method(rb_RNG_Dirichlet::rb_class(), "initialize", (rb_method) method_rb_RNG_Dirichlet_initialize, 0);
