@@ -141,7 +141,7 @@ module HeaderFileGenerator
 				end
 
 				def to_converted_form
-					puts @type
+					puts @type.class
 					case @type
 					when :double
 						Converter.convert(parameter_name).from(Float).to("double").to_s
