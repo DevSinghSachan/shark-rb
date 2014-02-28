@@ -27,7 +27,7 @@ shark::UnlabeledData<shark::RealVector> rb_ary_to_unlabeleddata(VALUE);
 VALUE realmatrix_to_rb_ary(const shark::RealMatrix&);
 VALUE realmatrix_to_rb_ary(const shark::RealMatrix&, bool);
 VALUE realvector_to_rb_ary(const shark::RealVector&);
-VALUE stdvector_realmatrix_to_rb_ary(const std::vector<RealMatrix>);
-VALUE stdvector_realvector_to_rb_ary(const std::vector<RealVector>);
+VALUE stdvector_realmatrix_to_rb_ary(const std::vector<shark::RealMatrix>);
+VALUE stdvector_realvector_to_rb_ary(const std::vector<shark::RealVector>);
 
 #endif
