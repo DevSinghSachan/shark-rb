@@ -11,23 +11,23 @@ VALUE rb_sym_new(const char *);
 VALUE method_is_a_directory(VALUE);
 
 // STD and Shark helpers:
-std::vector<shark::blas::vector<double> >realvector_to_stdvector(shark::blas::vector<double>);
-std::vector<double>                     realvector_to_stdvectordouble(shark::blas::vector<double>);
+std::vector<shark::RealVector>          realvector_to_stdvector(shark::RealVector);
+std::vector<double>                     realvector_to_stdvectordouble(shark::RealVector);
 std::vector<double>						rb_ary_to_stdvector(VALUE);
 
 // From Ruby
-shark::blas::vector<double>                       rb_ary_to_1d_realvector(VALUE);
+shark::RealVector                       rb_ary_to_1d_realvector(VALUE);
 shark::RealMatrix                       rb_ary_to_realmatrix(VALUE);
 shark::RealMatrix                       rb_1d_ary_to_realmatrix(VALUE);
-std::vector<shark::blas::vector<double> >          rb_ary_to_realvector(VALUE);
+std::vector<shark::RealVector>          rb_ary_to_realvector(VALUE);
 std::vector<shark::RealMatrix>          rb_ary_to_realmatrices(VALUE);
-shark::UnlabeledData<shark::blas::vector<double> > rb_ary_to_unlabeleddata(VALUE);
+shark::UnlabeledData<shark::RealVector> rb_ary_to_unlabeleddata(VALUE);
 
 // To Ruby
 VALUE realmatrix_to_rb_ary(const shark::RealMatrix&);
 VALUE realmatrix_to_rb_ary(const shark::RealMatrix&, bool);
-VALUE realvector_to_rb_ary(const shark::blas::vector<double>&);
+VALUE realvector_to_rb_ary(const shark::RealVector&);
 VALUE stdvector_realmatrix_to_rb_ary(const std::vector<shark::RealMatrix>);
-VALUE stdvector_realvector_to_rb_ary(const std::vector<shark::blas::vector<double> >);
+VALUE stdvector_realvector_to_rb_ary(const std::vector<shark::RealVector>);
 
 #endif

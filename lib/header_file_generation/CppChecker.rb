@@ -84,11 +84,9 @@ module HeaderFileGenerator
 					end
 				end
 				RbConfig::CONFIG["CPP"] = old_cpp_config
-			
 			end
 
 			def test_existence_of_method method
-
 				parameters = method.parameters
 				method.parameters.each do |p|
 					p.input_class = Method::CppClass.new(p.compatible_classes.first.wrapped_class)
