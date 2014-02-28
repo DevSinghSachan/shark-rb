@@ -83,6 +83,7 @@ module HeaderFileGenerator
 					p.input_class = Method::CppClass.new(p.compatible_classes.first.wrapped_class)
 				end
 """
+#{h_file_dependencies}
 #{include_header_file}
 #{include_pointer_wrapper_extras}
 #{method.to_cpp_function_definition}"""
