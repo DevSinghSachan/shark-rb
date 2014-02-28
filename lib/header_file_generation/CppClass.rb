@@ -106,7 +106,7 @@ module HeaderFileGenerator
 				end
 
 				def wrapped_class
-					if ruby? and @type != "rb_RealVectorReference"
+					if @type =~ /rb_(.+)/ and @type != "rb_RealVectorReference"
 						$1
 					elsif @type == "rb_RealVectorReference"
 						"RealVector"
