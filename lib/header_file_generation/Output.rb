@@ -8,6 +8,7 @@ module HeaderFileGenerator
 				attr_accessor :output_class
 				attr_reader :output_name
 
+				# centralize these types...
 				ArrayTypes   = [:array, :"1darray", :vector, :realvector]
 				MatrixTypes  = [:matrix, :"2darray", :realmatrix]
 				IntegerTypes = [:integer, :int]
@@ -38,17 +39,9 @@ module HeaderFileGenerator
 					when *([:nil, :double, :rubyarray, :ruby2darray] + IntegerTypes)
 						nil
 					else
-						raise NotImplementedError.new "No compatible class found for #{@type}."
+						raise CppError.new "No compatible class found for #{@type}."
 						nil
 					end
-				end
-
-				def convert_into_double val
-					"rb_float_new(#{val})"
-				end
-
-				def convert_into_int val
-					"NUM2FIX(#{val})"
 				end
 
 				def convert_into_rb_object val
@@ -59,10 +52,8 @@ module HeaderFileGenerator
 					case @type.downcase
 					when :double
 						Converter.convert(output_name).from("double").to Float
-						#convert_into_double output_name
 					when *IntegerTypes
 						Converter.convert(output_name).from("int").to Fixnum
-						#convert_into_int output_name
 					when :rubyarray
 						Converter.convert(output_name).from("RealVector").to Array
 					when :ruby2darray

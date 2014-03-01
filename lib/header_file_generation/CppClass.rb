@@ -34,7 +34,7 @@ module HeaderFileGenerator
 					when :"std::vector<double>"
 						CppClass.new("std::vector<double>", :pointer => !$2.nil?)
 					else
-						raise NotImplementedError.new "The type \"#{$1}\"#{!$2.nil? ? " (pointer)" : ""} has no equivalent C++ class yet."
+						raise CppError.new "The type \"#{$1}\"#{!$2.nil? ? " (pointer)" : ""} has no equivalent C++ class yet."
 					end
 				end
 
@@ -101,7 +101,7 @@ module HeaderFileGenerator
 					when *(MatrixClasses.map {|i| CppClass.new(i.wrapped_class)})
 						"new #{cpp_class}()"
 					else
-						raise NotImplementedError.new "#{typeName} does not have a sample element (yet)."
+						raise CppError.new "#{typeName} does not have a sample element (yet)."
 					end
 				end
 
@@ -123,7 +123,7 @@ module HeaderFileGenerator
 				end
 
 				def check_ruby!
-					if !ruby? then raise NotImplementedError.new "#{@type} does not have a Ruby class (yet)." end
+					if !ruby? then raise CppError.new "#{@type} does not have a Ruby class (yet)." end
 				end
 
 				def wrapped_class
@@ -180,7 +180,7 @@ module HeaderFileGenerator
 						begin
 							Converter::Conversions["VALUE"].fetch(self.to_s).call(input.parameter_name,input.converted_parameter_name,indent)
 						rescue KeyError
-							raise NotImplementedError.new "No conversion from VALUE to #{self}."
+							raise CppError.new "No conversion from VALUE to #{self}."
 						end
 					else
 						# use other methodology here.
@@ -210,7 +210,7 @@ module HeaderFileGenerator
 					begin
 						Converter::Conversions["Array"].fetch(cpp_class).call(input.parameter_name,input.converted_parameter_name,indent)
 					rescue KeyError
-						raise NotImplementedError.new "No conversion from Array to #{cpp_class}."
+						raise CppError.new "No conversion from Array to #{cpp_class}."
 					end
 				end
 
@@ -219,7 +219,7 @@ module HeaderFileGenerator
 				end
 
 				def pointer
-					raise NotImplementedError.new "#{@type} does not use pointers (often)."
+					raise CppError.new "#{@type} does not use pointers (often)."
 				end
 
 				def converted_parameter_pointer variableName
@@ -227,7 +227,7 @@ module HeaderFileGenerator
 				end
 
 				def wrapped_class_pointer
-					raise NotImplementedError.new "#{@type} is a Ruby C Object and has no class methods."
+					raise CppError.new "#{@type} is a Ruby C Object and has no class methods."
 				end
 			end
 			CppClass::RubyArray  = RubyArray.new

@@ -152,7 +152,7 @@ module HeaderFileGenerator
 			def self.converts_to(typeName)
 				Conversions.fetch(typeName).keys
 			rescue KeyError
-				raise NotImplementedError.new "No compatible classes for #{typeName}."
+				raise CppError.new "No compatible classes for #{typeName}."
 			end
 
 			def initialize(variable_name="", converter=true)
@@ -191,7 +191,7 @@ module HeaderFileGenerator
 					Conversions.fetch(@origin.to_s).fetch(@destination.to_s).call(@name,nil,0,(@destination.is_a? Method::CppClass) ? @destination.pointer? : nil)
 				end
 			rescue KeyError
-				raise NotImplementedError.new "No conversion from #{@origin} to #{@destination}."
+				raise CppError.new "No conversion from #{@origin} to #{@destination}."
 			end
 
 			def to(type)

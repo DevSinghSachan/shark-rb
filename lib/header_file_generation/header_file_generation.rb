@@ -1,3 +1,4 @@
+require_relative 'CppError'
 require_relative 'CppChecker'
 require_relative 'HeaderFile'
 require_relative 'CppClass'

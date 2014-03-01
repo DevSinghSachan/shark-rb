@@ -2,7 +2,6 @@ module HeaderFileGenerator
 	class HeaderFile
 		class Method
 			class Input
-
 				attr_reader :type
 				attr_reader :converted
 				attr_accessor :input_class
@@ -25,14 +24,10 @@ module HeaderFileGenerator
 					"parameter_#{@position+1}"
 				end
 
+				# could also test whether the detected class requires a pointer...
 				def converted_parameter_name
-					# could also test whether the detected class requires a pointer...
 					"parameter_#{@position+1}_converted"
 				end
-
-				# def converted_parameter_pointer
-				# 	converted_parameter_name + "->#{@input_class.wrapped_class_pointer}"
-				# end
 
 				def differs_from_classes classes
 					classes.map {|i| i.test_class parameter_name, false}.join(" && ")
@@ -40,7 +35,7 @@ module HeaderFileGenerator
 
 				def compatible_classes
 					classes = CppClass.can_convert_to(@output_class)
-					if classes.empty? then raise NotImplementedError.new "No compatible C++ conversion classes for #{@output_class}."
+					if classes.empty? then raise CppError.new "No compatible C++ conversion classes for #{@output_class}."
 					else classes end
 				end
 
