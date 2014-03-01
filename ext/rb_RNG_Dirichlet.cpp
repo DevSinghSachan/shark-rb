@@ -74,7 +74,7 @@ VALUE method_rb_RNG_Dirichlet_sample (VALUE self) {
 	rb_RNG_Dirichlet * r;
 	Data_Get_Struct(self, rb_RNG_Dirichlet, r);
 	
-	return rb_float_new((*(r->getModel()))());
+	return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))()));
 }
 
 void Init_rb_RNG_Dirichlet () {

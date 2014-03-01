@@ -21,8 +21,6 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
-    "conftest.i.dSYM/Contents/Info.plist",
-    "conftest.i.dSYM/Contents/Resources/DWARF/conftest.i",
     "ext/Makefile",
     "ext/Optimizer.cpp",
     "ext/Optimizer.h",
