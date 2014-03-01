@@ -182,11 +182,8 @@ module HeaderFileGenerator
 						rescue KeyError
 							raise NotImplementedError.new "No conversion from VALUE to #{self}."
 						end
-# """
-# #{"\t"*indent}#{pointer} #{input.converted_parameter_name};
-# #{"\t"*indent}Data_Get_Struct(#{input.parameter_name}, #{self}, #{input.converted_parameter_name});
-# """
 					else
+						# use other methodology here.
 						(
 							"\n#{"\t"*indent}#{pointer} #{input.converted_parameter_name} = " +
 							Converter.convert(input.parameter_name).from(input).to(input.output_class) +
@@ -215,9 +212,6 @@ module HeaderFileGenerator
 					rescue KeyError
 						raise NotImplementedError.new "No conversion from Array to #{cpp_class}."
 					end
-# """
-# #{"\t"*indent}#{cpp_class} #{input.converted_parameter_name} = #{Converter.convert(input.parameter_name).from(Array).to cpp_class };
-# """
 				end
 
 				def rb_class

@@ -6,7 +6,6 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					if out_param_name
-						puts "1"
 						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{conversion_function}(#{input_param_name});\n"
 					else
 						if pointer

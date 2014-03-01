@@ -30,16 +30,8 @@ module HeaderFileGenerator
 					"parameter_#{@position+1}_converted"
 				end
 
-				def converted_parameter_pointer
-					converted_parameter_name + "->#{@input_class.wrapped_class_pointer}"
-				end
-
-				# def conversion_to_correct_type param
-				# 	Converter.convert(param).from(@input_class.wrapped_class).to(@output_class.wrapped_class)
-				# end
-
-				# def converted_parameter_object
-				# 	conversion_to_correct_type @input_class.converted_parameter_pointer(converted_parameter_name)
+				# def converted_parameter_pointer
+				# 	converted_parameter_name + "->#{@input_class.wrapped_class_pointer}"
 				# end
 
 				def differs_from_classes classes
@@ -50,18 +42,6 @@ module HeaderFileGenerator
 					classes = CppClass.can_convert_to(@output_class)
 					if classes.empty? then raise NotImplementedError.new "No compatible C++ conversion classes for #{@output_class}."
 					else classes end
-					# case @type.downcase
-					# when :double
-					# 	CppClass::DoubleClasses
-					# when *IntegerTypes
-					# 	CppClass::IntegerClasses
-					# when *ArrayTypes
-					# 	[CppClass::RubyArray] + CppClass::ArrayClasses
-					# when *MatrixTypes
-					# 	[CppClass::Ruby2DArray] + CppClass::MatrixClasses
-					# else
-					# 	[]
-					# end
 				end
 
 				def convert_and_embed(all_params, remaining_params, calling_methodology, indent=0)
@@ -144,17 +124,11 @@ module HeaderFileGenerator
 					case @type
 					when :double
 						Converter.convert(parameter_name).from(Float).to("double").to_s
-						#convert_from_double parameter_name
 					when *IntegerTypes
 						Converter.convert(parameter_name).from(Fixnum).to("int").to_s
-						#convert_from_int parameter_name
 					when *(MatrixTypes+ArrayTypes + (MatrixTypes+ArrayTypes).map {|i| (i.to_s + "*").to_sym})
 						has_input_class!
 						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(@output_class)
-						# Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name))
-						# 		 .from(@input_class)
-						# 		 .to(@output_class)
-						#converted_parameter_object
 					else # must've been converted beforehand...
 						#if requires_conversion? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" with no conversion." end
 						parameter_name
