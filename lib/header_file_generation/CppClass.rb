@@ -238,6 +238,8 @@ module HeaderFileGenerator
 			end
 			CppClass::RubyArray  = RubyArray.new
 			CppClass::Ruby2DArray = RubyArray.new "RealMatrix"
+			CppClass::AllClasses << CppClass::RubyArray
+			CppClass::AllClasses << CppClass::Ruby2DArray
 		end
 	end
 end

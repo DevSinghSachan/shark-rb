@@ -42,6 +42,8 @@ VALUE method_rb_RNG_Dirichlet_set_alphas (VALUE self, VALUE parameter_1) {
 		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
 		r->getModel()->alphas(realvector_to_stdvectordouble(*(parameter_1_converted->getData())));
 		return self;
+	} else if (TYPE(parameter_1) == T_ARRAY) {		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1)		r->getModel()->alphas(realvector_to_stdvectordouble(parameter_1_converted));
+		return self;
 	}
 
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
