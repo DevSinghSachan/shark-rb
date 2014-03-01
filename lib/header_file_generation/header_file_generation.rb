@@ -9,7 +9,6 @@ require_relative 'Method'
 
 require 'json'
 module HeaderFileGenerator
-	# TODO: add shark error catching.
 
 	def self.generate_header_files
 
