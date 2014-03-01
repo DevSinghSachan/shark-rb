@@ -59,6 +59,7 @@ module HeaderFileGenerator
 
 			def self.create_combined_conversion conversion_a, conversion_b
 				->(input_param_name, out_param_name, indent=0, pointer=false) {
+					puts "using combined conversion"
 					(
 						conversion_a.call(input_param_name, out_param_name+"_temp", indent) +
 						conversion_b.call(out_param_name+"_temp", out_param_name, indent)
