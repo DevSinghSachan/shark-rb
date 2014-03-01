@@ -1,6 +1,7 @@
 module HeaderFileGenerator
 	class HeaderFile
 		class Converter
+			Conversions = {}
 
 			def self.create_type_conversion conversion_function, type
 				cpp_class = Method::CppClass.new(type)
@@ -21,7 +22,6 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					if out_param_name
-						puts "3"
 						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};"
 					else
 						if pointer
@@ -37,7 +37,6 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					if out_param_name
-						puts "2"
 						"#{"\t"*indent}#{cpp_class.pointer} #{out_param_name} = #{input_param_name}->#{conversion_function}();"
 					else
 						if pointer
@@ -69,75 +68,77 @@ module HeaderFileGenerator
 				}
 			end
 
-			Conversions = {}
+			def self.add_conversion_from type_name
+				ac = ->(other_type, conversion){
+					if Conversions[type_name].nil? then Conversions[type_name] = {} end
+					Conversions[type_name][other_type] = conversion
+				}
+				def ac.to location
+					expr = self
+					act = ->(conversion){
+						expr.call(location, conversion)
+					}
+					def act.using conversion_type
+						if !conversion_type.is_a?(Proc) || conversion_type.parameters.length != 4 then raise ArgumentError.new "A conversion must be a Proc with 4 arguments." end
+						self.call(conversion_type)
+						true
+					end
+					act
+				end
+				ac
+			end
 
-			Conversions["Array"] = {
-					"RealVector"          => create_type_conversion("rb_ary_to_1d_realvector", "RealVector"),#rb_ary_to_1d_realvector"
-					"RealMatrix"          => create_type_conversion("rb_ary_to_realmatrix", "RealMatrix"),#rb_ary_to_realmatrix"
-					"std::vector<double>" => create_type_conversion("rb_ary_to_stdvector", "std::vector<double>") #rb_ary_to_stdvector"
-				}
-			Conversions["RealVector"] = {
-					"std::vector<double>" => create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>"),# "realvector_to_stdvectordouble"
-					"Array"               => create_type_conversion("realvector_to_rb_ary", "VALUE")#"realvector_to_rb_ary"
-				}
-			
-			Conversions["RealMatrixRow"] = {
-					"std::vector<double>" => create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>"),#"realvector_to_stdvectordouble",
-					"Array"      => create_type_conversion("realvector_to_rb_ary", "VALUE") #"realvector_to_rb_ary"
-				}
-			Conversions["RealMatrixColumn"] = {
-					"std::vector<double>" => create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>"),#"realvector_to_stdvectordouble",
-					"Array"      => create_type_conversion("realvector_to_rb_ary", "VALUE") #"realvector_to_rb_ary"
-				}
-			Conversions["RealMatrix"] = {
-					"Array"      => create_type_conversion("realvector_to_rb_ary", "VALUE") #"realmatrix_to_rb_ary"
-				}
-			Conversions["Float"] = {
-					"double"     => create_type_conversion("NUM2DBL","double"),
-					"int"        => create_type_conversion("NUM2INT","int")
-				}
-			Conversions["Fixnum"] = {
-					"double"     => create_type_conversion("NUM2DBL","double"),
-					"int"        => create_type_conversion("NUM2INT","int")
-				}
-			Conversions["double"] = {
-					"Float"      => create_type_conversion("rb_float_new", "VALUE"),
-					"Fixnum"     => create_type_conversion("INT2FIX", "VALUE")
-				}
-			Conversions["int"] = {
-					"Float"      => create_type_conversion("rb_float_new", "VALUE"),
-					"Fixnum"     => create_type_conversion("INT2FIX", "VALUE")
-				}
-			Conversions["VALUE"] = {
-				"rb_RealVectorReference" => create_ruby_conversion("rb_RealVectorReference"),
-				"rb_RealVector"          => create_ruby_conversion("rb_RealVector"),
-				"rb_RealMatrixColumn"    => create_ruby_conversion("rb_RealMatrixColumn"),
-				"rb_RealMatrixRow"       => create_ruby_conversion("rb_RealMatrixRow")
-			}
-			Conversions["rb_RealVector"] = {
-				"RealVector" => create_ruby_conversion("rb_RealVector"),
-				"std::vector<double>" => create_combined_conversion(
+			add_conversion_from("Array").to("RealVector").using create_type_conversion("rb_ary_to_1d_realvector", "RealVector")
+			add_conversion_from("Array").to("RealMatrix").using create_type_conversion("rb_ary_to_realmatrix", "RealMatrix")
+			add_conversion_from("Array").to("std::vector<double>").using create_type_conversion("rb_ary_to_stdvector", "std::vector<double>")
+
+			add_conversion_from("RealVector").to("std::vector<double>").using create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>")
+			add_conversion_from("RealVector").to("Array").using create_type_conversion("realvector_to_rb_ary", "VALUE")
+
+			add_conversion_from("RealMatrixRow").to("std::vector<double>").using create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>")
+			add_conversion_from("RealMatrixRow").to("Array").using create_type_conversion("realvector_to_rb_ary", "VALUE")
+
+			add_conversion_from("RealMatrixColumn").to("std::vector<double>").using create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>")
+			add_conversion_from("RealMatrixColumn").to("Array").using create_type_conversion("realvector_to_rb_ary", "VALUE")
+	
+			add_conversion_from("RealMatrix").to("Array").using create_type_conversion("realvector_to_rb_ary", "VALUE")
+
+			add_conversion_from("Float").to("double").using create_type_conversion("NUM2DBL","double")
+			add_conversion_from("Float").to("int").using create_type_conversion("NUM2INT","int")
+
+			add_conversion_from("Fixnum").to("double").using create_type_conversion("NUM2DBL","double")
+			add_conversion_from("Fixnum").to("int").using create_type_conversion("NUM2INT","int")
+
+			add_conversion_from("double").to("Float").using create_type_conversion("rb_float_new", "VALUE")
+			add_conversion_from("double").to("Fixnum").using create_type_conversion("INT2FIX", "VALUE")
+
+			add_conversion_from("int").to("Float").using create_type_conversion("rb_float_new", "VALUE")
+			add_conversion_from("int").to("Fixnum").using create_type_conversion("INT2FIX", "VALUE")
+
+			add_conversion_from("VALUE").to("rb_RealVectorReference").using create_ruby_conversion("rb_RealVectorReference")
+			add_conversion_from("VALUE").to("rb_RealVector").using create_ruby_conversion("rb_RealVector")
+			add_conversion_from("VALUE").to("rb_RealMatrixColumn").using create_ruby_conversion("rb_RealMatrixColumn")
+			add_conversion_from("VALUE").to("rb_RealMatrixRow").using create_ruby_conversion("rb_RealMatrixRow")
+
+			add_conversion_from("rb_RealVector").to("RealVector").using create_ruby_conversion("rb_RealVector")
+			add_conversion_from("rb_RealVector").to("std::vector<double>").using create_combined_conversion(
 					create_ruby_conversion("rb_RealVector"),
 					Conversions["RealVector"]["std::vector<double>"])
-			}
-			Conversions["rb_RealVectorReference"] = {
-				"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
-				"std::vector<double>" => create_combined_conversion(
+
+			add_conversion_from("rb_RealVectorReference").to("RealVector").using create_ruby_conversion("rb_RealVectorReference")
+			add_conversion_from("rb_RealVectorReference").to("std::vector<double>").using create_combined_conversion(
 					create_ruby_conversion("rb_RealVectorReference"),
 					Conversions["RealVector"]["std::vector<double>"])
-			}
-			Conversions["rb_RealMatrixRow"] = {
-				"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
-				"std::vector<double>" => create_combined_conversion(
+
+			add_conversion_from("rb_RealMatrixRow").to("RealVector").using create_ruby_conversion("rb_RealMatrixRow")
+			add_conversion_from("rb_RealMatrixRow").to("std::vector<double>").using create_combined_conversion(
 					create_ruby_conversion("rb_RealMatrixRow"),
 					Conversions["RealVector"]["std::vector<double>"])
-			}
-			Conversions["rb_RealMatrixColumn"] = {
-				"RealVector" => create_wrapped_class_conversion("getData","RealVector"),
-				"std::vector<double>" => create_combined_conversion(
+
+			add_conversion_from("rb_RealMatrixColumn").to("RealVector").using create_ruby_conversion("rb_RealMatrixColumn")
+			add_conversion_from("rb_RealMatrixColumn").to("std::vector<double>").using create_combined_conversion(
 					create_ruby_conversion("rb_RealMatrixColumn"),
 					Conversions["RealVector"]["std::vector<double>"])
-			}
 
 			def self.create_castable_equivalences *equivs
 				equivs.each do |equiv|
