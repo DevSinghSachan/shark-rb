@@ -21,5 +21,12 @@
 			"name": "alphas",
 			"types": ["std::vector<double>"]
 		}
+	],
+	"methods": [
+		{
+			"name": "sample",
+			"accessor_name": "operator()",
+			"type": "double"
+		}
 	]
 }
