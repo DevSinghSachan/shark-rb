@@ -211,7 +211,7 @@ module HeaderFileGenerator
 
 				def convert_into_class input, indent=0
 					begin
-						Converter::Conversions["Array"].fetch(cpp_class).call(input.parameter_name,input.converted_parameter_name,indent)+"!!!"
+						Converter::Conversions["Array"].fetch(cpp_class).call(input.parameter_name,input.converted_parameter_name,indent)
 					rescue KeyError
 						raise NotImplementedError.new "No conversion from Array to #{cpp_class}."
 					end

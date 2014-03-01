@@ -6,7 +6,8 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					if out_param_name
-						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{conversion_function}(#{input_param_name})"
+						puts "1"
+						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{conversion_function}(#{input_param_name});\n"
 					else
 						if pointer
 							"&(#{conversion_function}(#{input_param_name}))"
@@ -21,7 +22,8 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					if out_param_name
-						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name}"
+						puts "3"
+						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};"
 					else
 						if pointer
 							"&(#{input_param_name})"
@@ -36,7 +38,8 @@ module HeaderFileGenerator
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					if out_param_name
-						"#{"\t"*indent}#{cpp_class.pointer} #{out_param_name} = #{input_param_name}->#{conversion_function}()"
+						puts "2"
+						"#{"\t"*indent}#{cpp_class.pointer} #{out_param_name} = #{input_param_name}->#{conversion_function}();"
 					else
 						if pointer
 							"&(#{input_param_name}->#{conversion_function}())"
