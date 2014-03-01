@@ -95,39 +95,14 @@ module HeaderFileGenerator
 			end
 
 			def test_existence_of_method method
-				parameters = method.parameters
-				method.parameters.each do |p|
-					p.input_class = Method::CppClass.new(p.compatible_classes.first.wrapped_class)
-				end
+				# method.parameters.each do |p|
+				# 	p.input_class = Method::CppClass.new(p.compatible_classes.first.wrapped_class)
+				# end
 """
 #{h_file_dependencies}
 #{include_header_file}
 #{include_pointer_wrapper_extras}
 #{method.to_cpp_function_definition}"""
-
-# 				cpp = """
-# #{h_file_dependencies}
-
-# int checker (#{parameters.map {|i| i.input_class.cpp_class + " "+ i.parameter_name}.join(", ")}) {
-# 	#{@wrapped_class} #{method.symbol}(#{@default_constructor_arguments.join(", ")});
-# """
-# 				# define parameters
-# 				if method.cpp_method_name =~ /operator(?:\s*)(.+)/
-# 					if $1 == "()"
-# 						cpp += "\t#{method.symbol}(#{parameters.map {|i| Converter.convert(i.parameter_name).from(i.input_class).to(i.output_class)}.join(", ")});\n"
-# 					else
-# 						cpp += "\t#{method.symbol}#{$1} #{parameters.map {|i| Converter.convert(i.parameter_name).from(i.input_class).to(i.output_class)}.join(", ")};\n"
-# 					end
-# 				else
-# 					cpp += "\t#{method.symbol}.#{method.cpp_method_name}(#{parameters.map {|i| Converter.convert(i.parameter_name).from(i.input_class).to(i.output_class)}.join(", ")});\n"
-# 				end
-# 				cpp += "\treturn 1;\n}\n"
-# 				cpp += """
-# int main () {
-# 	return checker(#{parameters.map {|i| HeaderFileGenerator::HeaderFile::Method::CppClass.sample(i.input_class)}.join(", ")});
-# }
-# """
-# 				cpp
 
 			end
 		end
