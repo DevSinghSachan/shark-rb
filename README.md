@@ -387,7 +387,7 @@ and the result will read something like:
 PS: there's a missing step we find the in the tutorial file:
 
 	def initializeWeights rbm
-		weights = Shark::RealVector.new(Array.new(rbm.number_of_parameters){ Random.rand(0.2) - 0.1})
+		weights = Shark::RealVector.new(rbm.number_of_parameters) {|i| Random.rand(0.2) - 0.1}
 		rbm.parameter_vector = weights
 	end
 
