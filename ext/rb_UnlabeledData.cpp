@@ -103,9 +103,9 @@ VALUE method_unlabeleddata_batchlength (VALUE self) {
 VALUE method_unlabeleddata_empty (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
-	if ((s->data).empty())
-		return Qtrue;
-	return Qfalse;
+	// if ((s->data).empty())
+	// 	return Qtrue;
+	return (s->data).empty() ? Qtrue : Qfalse;
 }
 VALUE method_unlabeleddata_fill (VALUE self, VALUE filling) {
 	if (TYPE(filling) != T_FLOAT && TYPE(filling) != T_FIXNUM)
@@ -120,18 +120,18 @@ VALUE method_unlabeleddata_query (VALUE self, VALUE position) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	if (NUM2INT(position) < 0) {
-		if (NUM2INT(position) < (int)-(s->data).numberOfElements())
+		if (NUM2INT(position) < int(-(s->getData()->numberOfElements())))
 			rb_raise(rb_eArgError, "Out of range.");
 		return wrap_pointer<rb_RealVector>(
 			rb_RealVector::rb_class(),
-			new rb_RealVector((s->data).element((s->data).numberOfElements() + NUM2INT(position)))
+			new rb_RealVector(s->getData()->element(s->getData()->numberOfElements() + NUM2INT(position)))
 		);
 	} else {
-		if (NUM2INT(position) >= (int)(s->data).numberOfElements())
+		if (NUM2INT(position) >= int(s->getData()->numberOfElements()))
 			rb_raise(rb_eArgError, "Out of range.");
 		return wrap_pointer<rb_RealVector>(
 			rb_RealVector::rb_class(),
-			new rb_RealVector((s->data).element(NUM2INT(position)))
+			new rb_RealVector(s->getData()->element(NUM2INT(position)))
 		);
 	}
 }
@@ -265,7 +265,7 @@ void Init_UnlabeledData () {
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "number_of_batches", (rb_method)method_unlabeleddata_batchlength, 0);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "empty?",     (rb_method)method_unlabeleddata_empty, 0);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "element",    (rb_method)method_unlabeleddata_query, 1);
-	rb_define_method(rb_optimizer_unlabeleddata_klass, "[]",         (rb_method)method_unlabeleddata_query, 1);
+	rb_define_alias(rb_optimizer_unlabeleddata_klass, "[]", "element");
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "[]=",        (rb_method)method_unlabeleddata_insert, 2);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "fill",        (rb_method)method_unlabeleddata_fill, 1);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "remove_NaN", (rb_method)method_unlabeleddata_remove_NaN, -1);

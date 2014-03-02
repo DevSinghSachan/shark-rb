@@ -1,5 +1,5 @@
 template<class Obtype>
-VALUE method_neuronlayer_get_bias(VALUE self) {
+VALUE method_neuronlayer_get_bias(VALUE self) {
 	Obtype *n;
 	Data_Get_Struct(self, Obtype, n);
 
@@ -10,7 +10,7 @@ VALUE method_neuronlayer_get_bias(VALUE self) {
 }
 
 template<class Obtype>
-VALUE method_neuronlayer_set_bias(VALUE self, VALUE assignment) {
+VALUE method_neuronlayer_set_bias(VALUE self, VALUE assignment) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 

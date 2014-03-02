@@ -11,10 +11,8 @@ class Optimizer
 				hidden_layer_array.each_with_index do |layer_size, k|
 					input_size         = k == 0 ? @input_size : hidden_layer_array[k-1]
 					# construct sigmoid_layer
-					@sigmoid_layers[k] = HiddenLayer.new :input_size => @input_size,
-						:output_size => layer_size,
-						:activation => :sigmoid,
-						:input => (k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v)
+					puts ({input_size: @input_size, output_size: layer_size, activation: :sigmoid, input: (k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v)})
+					@sigmoid_layers[k] = HiddenLayer.new({input_size: @input_size, output_size: layer_size, activation: :sigmoid, input: (k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v)})
 					# construct rbm_layer
 					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
 					@rbm_layers[k].set_structure hidden: layer_size,
@@ -58,7 +56,7 @@ class Optimizer
 
 							# optimize this layer:
 							optimizer = Shark::Algorithms::SteepestDescent.new
-							optimizer.momentum      = opts[:momentum]
+							optimizer.momentum      = opts[:momentum] || 0.0
 							optimizer.learning_rate = opts[:learning_rate]
 							optimizer.init cd
 							optimizer.step cd
@@ -67,13 +65,52 @@ class Optimizer
 				end
 			end
 
-			def predict
+			def predict samples
+				""
 				# TODO: write this (Feb 13th 2014)
 			end
 
-			def finetune
+			def finetune opts={}
 				# requires supervised labels and log layer for logistic regression (Feb 13th 2014)
 			end
 		end
 	end
+end
+
+def test_dbn pretrain_lr=0.1, pretraining_epochs=1000, k=1, finetune_lr=0.1, finetune_epochs=200
+
+	x = Shark::RealMatrix.new [
+		[1,1,1,0,0,0],
+        [1,0,1,0,0,0],
+        [1,1,1,0,0,0],
+        [0,0,1,1,1,0],
+        [0,0,1,1,0,0],
+        [0,0,1,1,1,0]
+    ]
+    y = Shark::RealMatrix.new [
+    	[1, 0],
+        [1, 0],
+        [1, 0],
+        [0, 1],
+        [0, 1],
+        [0, 1]
+    ]
+
+    dbn = Shark::RBM::DBN.new samples: x, labels: y, input_size:  6, hidden_layers:  [3, 3], output_size: 2
+    # so support for RNG inputs yet
+
+    # pre-training (TrainUnsupervisedDBN)
+    dbn.pretrain learning_rate: pretrain_lr, k: 1, epochs: pretraining_epochs
+    
+    # fine-tuning (DBNSupervisedFineTuning)
+    dbn.finetune learning_rate: finetune_lr, epochs: finetune_epochs
+
+    # test
+    x = Shark::RealMatrix.new [
+    	[1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0],
+        [1, 1, 1, 1, 1, 0]
+    ]
+
+    puts da.predict(x)
 end

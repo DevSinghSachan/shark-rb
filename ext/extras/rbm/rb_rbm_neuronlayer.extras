@@ -1,5 +1,5 @@
 template<class Obtype, class NeuronType>
-VALUE method_rbm_get_visible_neurons(VALUE self) {
+VALUE method_rbm_get_visible_neurons(VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	return wrap_pointer<NeuronType>(
@@ -9,7 +9,7 @@ VALUE method_rbm_get_visible_neurons(VALUE self) {
 }
 
 template<class Obtype, class NeuronType>
-VALUE method_rbm_get_hidden_neurons(VALUE self) {
+VALUE method_rbm_get_hidden_neurons(VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	return wrap_pointer<NeuronType>(

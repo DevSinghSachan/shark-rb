@@ -46,6 +46,11 @@ VALUE method_realvector_initialize (int number_of_arguments, VALUE* ruby_argumen
 		v->data = rb_ary_to_1d_realvector(dataset);
 	} else if (TYPE(dataset) == T_FIXNUM) {
 		method_vector_resize<rb_RealVector>(self, dataset);
+		if (rb_block_given_p()) {
+			for (size_t i = 0; i< v->getData()->size();i++) {
+				(*(v->getData()))(i) = NUM2DBL(rb_yield(INT2FIX(i)));
+			}
+		}
 	}
 	return self;
 }

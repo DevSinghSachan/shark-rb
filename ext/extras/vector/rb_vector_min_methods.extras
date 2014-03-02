@@ -3,6 +3,66 @@
 
 extern void exportPGM( const char *, const RealVector &, int, int, bool);
 
+
+template<class Obtype>
+VALUE method_vector_get_sqrt (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(sqrt(*(m->getData())))
+			);
+}
+
+template<class Obtype>
+VALUE method_vector_get_exp (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(exp(*(m->getData())))
+			);
+}
+
+template<class Obtype>
+static double mean(Obtype& m) {
+	double total = 0.0;
+	for (size_t i=0;i < m.size();i++)
+		total += m[i];
+	if (m.size() > 0)
+		total /= m.size();
+	return total;
+}
+
+template<class Obtype>
+VALUE method_vector_get_mean (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return rb_float_new(mean(*(m->getData())));
+}
+
+template<class Obtype>
+VALUE method_vector_get_inverse (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(shark::blas::pow(*(m->getData()), -1))
+			);
+}
+
+template<class Obtype>
+VALUE method_vector_get_pow (VALUE self, VALUE rb_pow) {
+	if (TYPE(rb_pow) != T_FLOAT && TYPE(rb_pow) != T_FIXNUM)
+		rb_raise(rb_eArgError, "This vector can only be raised to a power by a scalar.");
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(shark::blas::pow(*(m->getData()), NUM2DBL(rb_pow)))
+			);
+}
+
 template<class Obtype>
 VALUE method_vector_remove_NaN (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE rb_replacement;
@@ -113,6 +173,14 @@ VALUE method_vector_multiply_equals (VALUE self, VALUE multiplier) {
 			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
 
 		self = rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
+	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_RealVectorReference::rb_class()) {
+		rb_RealVectorReference *o;
+		Data_Get_Struct(multiplier, rb_RealVectorReference, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+
+		self = rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
 
 	} else if (TYPE(multiplier) == T_ARRAY) {
 		if (RARRAY_LEN(multiplier) != (int)s->getData()->size())
@@ -124,17 +192,6 @@ VALUE method_vector_multiply_equals (VALUE self, VALUE multiplier) {
 		rb_raise(rb_eArgError, "Can only multiply RealVector by a scalar, RealVector, or Array.");
 	}
 	return self;
-}
-
-
-template<class Obtype>
-VALUE method_vector_get_sqrt (VALUE self) {
-	Obtype *s;
-	Data_Get_Struct(self, Obtype, s);
-	return wrap_pointer<rb_RealVector>(
-		rb_RealVector::rb_class(),
-		new rb_RealVector(sqrt(*(s->getData())))
-		);
 }
 
 
@@ -204,8 +261,14 @@ VALUE method_vector_add (VALUE self, VALUE rb_vector) {
 			rb_RealVector::rb_class(),
 			new rb_RealVector(*(s->getData()) + *(o->getData()))
 			);
+	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) + shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size()))
+			);
 	} else {
-		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
+		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays, other RealVectors, or numbers.");
 	}
 	return self;
 }
@@ -239,6 +302,8 @@ VALUE method_vector_add_equals (VALUE self, VALUE rb_vector) {
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
 
 		*(s->getData()) += *(o->getData());
+	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
+		*(s->getData()) += shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size());
 	} else {
 		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
 	}
@@ -272,6 +337,12 @@ VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
 			rb_RealVector::rb_class(),
 			new rb_RealVector(*(s->getData()) - *(o->getData()))
 			);
+	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) - shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size()))
+			);
 	} else {
 		rb_raise(rb_eArgError, "RealVectors can be substract only with Arrays and other RealVectors");
 	}
@@ -298,6 +369,8 @@ VALUE method_vector_remove_equals (VALUE self, VALUE rb_vector) {
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
 
 		*(s->getData()) -= *(o->getData());
+	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
+		*(s->getData()) -= shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size());
 	} else {
 		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
 	}
@@ -482,12 +555,18 @@ void Init_VectorMinMethods () {
 	Init_DatatypeDeepCopy<Obtype, rb_RealVector>();
 	rb_define_method(Obtype::rb_class(), "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_vector_get_mean<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_vector_get_inverse<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_vector_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "==", (rb_method) method_vector_soft_eql<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "eql?", (rb_method) method_vector_eql<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "to_matrix", (rb_method)method_vector_to_matrix<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "*", (rb_method)method_vector_multiply<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "**", (rb_method)method_vector_get_pow<Obtype>, 1);
+	rb_define_alias(Obtype::rb_class(), "power", "**");
+	rb_define_alias(Obtype::rb_class(), "pow", "**");
 	rb_define_method(Obtype::rb_class(), "*=", (rb_method)method_vector_multiply_equals<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "/", (rb_method)method_vector_divide<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "/=", (rb_method)method_vector_divide_equals<Obtype>,1);

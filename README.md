@@ -205,6 +205,88 @@ Check for stricter equality:
 	mat.row(0).to_a.to_realvector.eql? mat[0]
 	# => false
 
+#### Matrix and Vector Initialization ###
+
+Okay, so **numpy** has beautiful syntax like this:
+
+	binomial_matrix = numpy.random.binomial(size=shape,
+	                                           n=1,
+	                                           p=probabilities)
+
+
+If you are curious the line above returns a matrix or vector of the dimensions specified by `shape`
+and the probabilities given in `probabilities`. Of course this means that initializing random
+vectors is easy and readable.
+
+In our case, while we may one day incorporate Numpy syntax, we have the following strategy. We first obtain a random number generator with a binomial distribution:
+
+
+	bin = Shark::RNG::Binomial.new
+	bin.p = 0.7
+	bin.n = 1
+
+Then we sample from it during the initialization of our matrix:
+
+	Shark::RealMatrix.new(10, 10) do |i,j|
+		bin.sample
+	end
+
+Of course to duplicate the numpy functionality we need to vary the probability according to where we
+are in the matrix. We can do this as follows:
+
+	bin = Shark::RNG::Binomial.new
+	bin.n = 1
+
+	probabilities = [
+		[0.1, 0.2, 0.3],
+		[0.2, 0.9, 0.4]
+	]
+
+	mat = Shark::RealMatrix.new(2, 3) do |i,j|
+		bin.p = probabilites[i][j]
+		bin.sample
+	end
+
+Of course the same is valid for a vector:
+
+	vec = Shark::RealVector.new(10) {|i| bin.p=probabilites[i][0]; bin.sample }
+
+
+Random Number Generators
+------------------------
+
+
+Shark has many Random Number Generator distributions. You can access most of them as follows:
+
+
+	Shark::RNG::Bernoulli
+	Shark::RNG::Binomial
+	Shark::RNG::Cauchy
+	Shark::RNG::DiffGeometric
+	Shark::RNG::DiscreteUniform
+	Shark::RNG::Dirichlet
+	Shark::RNG::DiscreteUniform
+	Shark::RNG::Erlang
+	Shark::RNG::Geometric
+	Shark::RNG::LogNormal
+	Shark::RNG::NegExponential
+	Shark::RNG::Normal
+	Shark::RNG::Poisson
+	Shark::RNG::TruncatedExponential
+	Shark::RNG::Uniform
+	Shark::RNG::Weibull
+
+Each has a `sample` method that replaces the `operator()` method from C++. Their methods can be found on the Shark site:
+
+
+	* [Bernoulli](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_bernoulli.html)
+	* [Binomial](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_binomial.html)
+	* etc...
+
+
+
+
+
 
 Binary Restricted Boltzmann Machines
 ------------------------------------

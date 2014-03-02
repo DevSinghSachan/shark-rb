@@ -29,7 +29,7 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 	rb_scan_args(
 		number_of_arguments,
 		ruby_arguments,
-		"01",
+		"03",
 		&dataset,
 		&rb_columns);
 	rb_RealMatrix *m;
@@ -40,6 +40,13 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 						rb_1d_ary_to_realmatrix(dataset);
 	} else if (TYPE(rb_columns) == T_FIXNUM && TYPE(dataset) == T_FIXNUM) {
 		method_matrix_resize<rb_RealMatrix>(self, dataset, rb_columns);
+		if (rb_block_given_p()) {
+			for (size_t i = 0; i < m->getData()->size1();i++) {
+				for (size_t j = 0; j< m->getData()->size2();j++) {
+					(*(m->getData()))(i, j) = NUM2DBL(rb_yield_values(2, INT2FIX(i), INT2FIX(j)));
+				}
+			}
+		}
 	}
 	return self;
 }

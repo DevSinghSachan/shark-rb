@@ -19,6 +19,7 @@ class rb_UnlabeledData {
 		rb_UnlabeledData();
 		rb_UnlabeledData(UnlabeledData<RealVector>);
 		UnlabeledData<RealVector> data;
+		UnlabeledData<RealVector>* getData();
 		vector<RealVector> input ();
 		void fill(double);
 		void remove_NaN(double);
