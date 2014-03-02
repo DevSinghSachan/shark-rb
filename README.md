@@ -279,9 +279,9 @@ Shark has many Random Number Generator distributions. You can access most of the
 Each has a `sample` method that replaces the `operator()` method from C++. Their methods can be found on the Shark site:
 
 
-	* [Bernoulli](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_bernoulli.html)
-	* [Binomial](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_binomial.html)
-	* etc...
+* [Bernoulli](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_bernoulli.html)
+* [Binomial](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_binomial.html)
+* etc...
 
 
 
