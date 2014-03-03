@@ -3,6 +3,7 @@
 	"wrapped_class": "shark::Softmax",
 	"dependencies": [
 		"<shark/Models/Softmax.h>",
+		"rb_Datatypes.h",
 		"ruby.h",
 		"rb_conversions.h",
 		"extras/models/rb_abstract_model.extras"
