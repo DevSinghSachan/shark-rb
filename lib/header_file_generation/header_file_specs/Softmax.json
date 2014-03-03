@@ -37,7 +37,7 @@
 	"methods": [
 		{
 			"name": "eval",
-			"accessor_name": "operator()",
+			"accessor_name": "eval",
 			"types": ["vector"],
 			"type": "batch"
 		}
