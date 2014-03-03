@@ -45,12 +45,17 @@ module HeaderFileGenerator
 			end
 
 			def matches_family family
-				Conjunction.new(
-					[
-						"number_of_arguments == #{family.length}",
-						Conjunction.new(family.map {|i| i.is_a?(OverloadedInput) ? Disjunction.new(i.type.map {|t| i.check_for_type(t)}) : i.check_for_type(i.type)})
-					]
-				)
+				family_tests = Conjunction.new(family.map {|i| i.is_a?(OverloadedInput) ? Disjunction.new(i.type.map {|t| i.check_for_type(t)}) : i.check_for_type(i.type)})
+				if variable_number_of_arguments?
+					Conjunction.new(
+						[
+							"number_of_arguments == #{family.length}",
+							family_tests
+						]
+					)
+				else
+					family_tests
+				end
 			end
 
 			def overloaded_call_methodology
@@ -99,8 +104,12 @@ VALUE #{function_name} (#{input_parameters}) {
 				@cpp_method_name[@observed_family]
 			end
 
+			def variable_number_of_arguments?
+				@max_number_of_inputs > 0 and @max_number_of_inputs != @min_number_of_inputs
+			end
+
 			def extra_input_parameters_declarations
-				if @max_number_of_inputs > 0 and @max_number_of_inputs != @min_number_of_inputs
+				if variable_number_of_arguments?
 					ip = "\tVALUE "
 					param_names = []
 					@max_number_of_inputs.times do |i|

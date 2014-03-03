@@ -51,7 +51,7 @@ VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
-	if (number_of_arguments == 1 && (((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(parameter_1, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class())))) {
+	if (((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(parameter_1, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class()))) {
 		// Checking whether parameter_1 is a "matrix"
 		if ((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(parameter_1, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class()))
 			rb_raise(rb_eArgError, "1st Argument must be an MatrixType (\"RealMatrix\", \"RealMatrixReference\", \"Array< Array< Float > >\").");
@@ -74,7 +74,7 @@ VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 
 		return self; // cpp functions require return variable, so if all tests fail "self" is returned.
 
-	} else if (number_of_arguments == 1 && (((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class())))) {
+	} else if (((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class()))) {
 		// Checking whether parameter_1 is a "vector"
 		if ((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class()))
 			rb_raise(rb_eArgError, "1st Argument must be an ArrayType (\"RealVector\", \"RealVector\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\")");
