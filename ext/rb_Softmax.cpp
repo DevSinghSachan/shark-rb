@@ -2,7 +2,7 @@
 #include "extras/models/rb_abstract_model.extras"
 #include "rb_Softmax.h"
 
-rb_Softmax::rb_Softmax() : model(shark::Rng::globalRng) {}
+rb_Softmax::rb_Softmax() : model() {}
 
 shark::Softmax * rb_Softmax::getModel() {
 	return &model;
