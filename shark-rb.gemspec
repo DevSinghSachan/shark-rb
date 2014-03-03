@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-03-01"
+  s.date = "2014-03-03"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -111,6 +111,8 @@ Gem::Specification.new do |s|
     "ext/rb_RegressionDataset.cpp",
     "ext/rb_RegressionDataset.h",
     "ext/rb_Rprop.h",
+    "ext/rb_Softmax.cpp",
+    "ext/rb_Softmax.h",
     "ext/rb_SolutionSet.cpp",
     "ext/rb_SolutionSet.h",
     "ext/rb_SteepestDescent.cpp",
@@ -132,6 +134,7 @@ Gem::Specification.new do |s|
     "lib/header_file_generation/Converter.rb",
     "lib/header_file_generation/CppChecker.rb",
     "lib/header_file_generation/CppClass.rb",
+    "lib/header_file_generation/CppError.rb",
     "lib/header_file_generation/HeaderFile.rb",
     "lib/header_file_generation/Input.rb",
     "lib/header_file_generation/Method.rb",
@@ -151,6 +154,7 @@ Gem::Specification.new do |s|
     "lib/header_file_generation/header_file_specs/NegExponential.json",
     "lib/header_file_generation/header_file_specs/Normal.json",
     "lib/header_file_generation/header_file_specs/Poisson.json",
+    "lib/header_file_generation/header_file_specs/Softmax.json",
     "lib/header_file_generation/header_file_specs/TruncatedExponential.json",
     "lib/header_file_generation/header_file_specs/Uniform.json",
     "lib/header_file_generation/header_file_specs/weibull.json",

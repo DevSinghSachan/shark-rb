@@ -17,10 +17,10 @@ VALUE method_rb_Softmax_set_set_structure (VALUE self, VALUE parameter_1) {
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
 	
-	// Checking whether parameter_1 is a "double"
+	// Checking whether parameter_1 is an "int"
 	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
-	r->getModel()->setStructure(NUM2DBL(parameter_1));
+		rb_raise(rb_eArgError, "Argument 1 must be an Integer.");
+	r->getModel()->setStructure(NUM2INT(parameter_1));
 	return self;
 }
 
