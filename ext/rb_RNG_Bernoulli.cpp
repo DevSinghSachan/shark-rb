@@ -1,5 +1,5 @@
-#include "rb_RNG_Bernoulli.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
+#include "rb_RNG_Bernoulli.h"
 
 rb_RNG_Bernoulli::rb_RNG_Bernoulli() : model(shark::Rng::globalRng) {}
 

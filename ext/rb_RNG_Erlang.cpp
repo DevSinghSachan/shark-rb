@@ -1,5 +1,5 @@
-#include "rb_RNG_Erlang.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
+#include "rb_RNG_Erlang.h"
 
 rb_RNG_Erlang::rb_RNG_Erlang() : model(shark::Rng::globalRng) {}
 

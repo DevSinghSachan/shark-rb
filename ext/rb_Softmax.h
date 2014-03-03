@@ -5,7 +5,6 @@
 #include "rb_Datatypes.h"
 #include "ruby.h"
 #include "rb_conversions.h"
-#include "extras/models/rb_abstract_model.extras"
 
 class rb_Softmax {
 

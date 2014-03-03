@@ -7,6 +7,8 @@ module HeaderFileGenerator
 		attr_reader :init_functions
 		attr_reader :pointer_acquirer
 		attr_reader :pointer_name
+		attr_reader :dependencies
+		attr_reader :cpp_dependencies
 
 		def define_getters getter_list=[]
 			if !getter_list.nil?
@@ -40,12 +42,15 @@ module HeaderFileGenerator
 			@setters, @methods, @getters   = [], [], []
 			@filename                      = opts["filename"]
 			@wrapped_class                 = opts["wrapped_class"]
-			@dependencies                  = opts["dependencies"]
+			@dependencies                  = opts["dependencies"]     || []
+			@cpp_dependencies              = ["extras/utils/rb_pointer_wrapping.extras"]
+			@cpp_dependencies             += (opts["cpp_dependencies"] || [])
 			@pointer_acquirer              = [(opts["pointer_getter"] || "getModel")].flatten
 			@pointer_name                  = opts["pointer_name"] || "model"
 			@init_functions                = opts["initialization"] || []
 			raise StandardError.new "pointer_name: \"#{opts["pointer_name"] || "model"}\" cannot have the same name as one of the class methods (pointer_getter) : \"#{[(opts["pointer_getter"] || "getModel")].flatten.join("\", \"")}\"" if [(opts["pointer_getter"] || "getModel")].flatten.include?(opts["pointer_name"] || "model")
 			@cpp_class                     = Method::CppClass.new opts["class"]
+			@cpp_dependencies << "#{@cpp_class}.h"
 			@rb_class_name                 = opts["rb_class"]
 			@default_constructor_arguments = opts["constructor_arguments"] || []
 			# this is to define the function that returns the class and singleton methods too
@@ -77,6 +82,10 @@ module HeaderFileGenerator
 void #{init_function_name} () {
 #{func_definition}
 }"""
+		end
+
+		def cpp_file_dependencies
+			@cpp_dependencies.map {|i| "#include "+(i =~ /^<|"/ ? i : "\"#{i}\"")}.join("\n")
 		end
 
 		def include_header_file
@@ -123,9 +132,7 @@ VALUE #{@cpp_class.rb_class} {
 
 		def to_cpp_file
 			cpp = ""
-			cpp += include_header_file
-			cpp += "\n"
-			cpp += include_pointer_wrapper_extras
+			cpp += cpp_file_dependencies
 			cpp += "\n"
 			cpp += generate_cpp_constructor_function
 			cpp += generate_cpp_pointer_acquirer_functions

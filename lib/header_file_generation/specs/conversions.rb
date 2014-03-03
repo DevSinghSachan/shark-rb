@@ -3,10 +3,10 @@ require_relative '../header_file_generation'
 describe 'C++ HeaderFiles' do
 	before(:all) do
 		
-		@header_file_vector = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel()"]
-		@header_file_array  = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>()"]
+		@header_file_vector = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel()"], "dependencies" => ["models/Nil"]
+		@header_file_array  = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>()"], "cpp_dependencies" => ["extras/models/rb_abstract_model.extras"]
 		@header_file_getter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>"]
-		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel"]
+		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel"], "dependencies" => ["<models/Nil>"]
 		
 		@vector_definition = {
 				"name" => "test",
@@ -189,6 +189,28 @@ describe 'C++ HeaderFiles' do
 				@header_file_setter
 			].each do |header|
 				header.generate_init_function.should match /#{header.init_functions.first["()"] ? header.init_functions.first : (header.init_functions.first + "()")}/
+			end
+		end
+	end
+
+	describe 'should have dependencies' do
+		it 'that are injected to the header file (.h)' do
+			@header_file_vector.h_file_dependencies.should match /#{'"'+@header_file_vector.dependencies.first+'"'}/
+			@header_file_setter.h_file_dependencies.should match /#{@header_file_setter.dependencies.first}/
+			@header_file_getter.h_file_dependencies.should be_empty
+			@header_file_array.h_file_dependencies.should be_empty
+		end
+
+		it 'that are injected to the C++ file (.cpp)' do
+			@header_file_array.cpp_file_dependencies.should match /#{'"'+@header_file_array.cpp_dependencies.first+'"'}/
+			[
+				@header_file_vector,
+				@header_file_vector,
+				@header_file_getter,
+				@header_file_setter
+			].each do |header|
+				header.cpp_file_dependencies.should match /#{header.cpp_class.to_s+'.h'}/
+				header.cpp_file_dependencies.should match /#{"extras/utils/rb_pointer_wrapping.extras"}/
 			end
 		end
 	end

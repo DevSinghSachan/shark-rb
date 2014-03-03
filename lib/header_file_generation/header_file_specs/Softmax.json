@@ -5,7 +5,9 @@
 		"<shark/Models/Softmax.h>",
 		"rb_Datatypes.h",
 		"ruby.h",
-		"rb_conversions.h",
+		"rb_conversions.h"
+	],
+	"cpp_dependencies": [
 		"extras/models/rb_abstract_model.extras"
 	],
 	"rb_class" : "rb_optimizer_rng_poisson_klass",

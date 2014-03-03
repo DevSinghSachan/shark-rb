@@ -1,5 +1,6 @@
-#include "rb_Softmax.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
+#include "extras/models/rb_abstract_model.extras"
+#include "rb_Softmax.h"
 
 rb_Softmax::rb_Softmax() : model(shark::Rng::globalRng) {}
 
