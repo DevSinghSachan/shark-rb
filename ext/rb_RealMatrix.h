@@ -15,6 +15,7 @@ class rb_RealMatrix {
 	public:
 		static VALUE rb_class();
 		rb_RealMatrix(RealMatrix const &);
+		rb_RealMatrix(RealMatrix &);
 		rb_RealMatrix();
 		RealMatrix data;
 		RealMatrix* getData();

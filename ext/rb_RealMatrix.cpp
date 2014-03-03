@@ -15,6 +15,9 @@ rb_RealMatrix::rb_RealMatrix() {}
 rb_RealMatrix::rb_RealMatrix(RealMatrix const& _data) {
 	data = _data;// implicit copy here
 }
+rb_RealMatrix::rb_RealMatrix(RealMatrix & _data) {
+	data = _data;// implicit copy here
+}
 RealMatrix* rb_RealMatrix::getData() {
 	return &data;
 }
