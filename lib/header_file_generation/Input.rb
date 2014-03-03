@@ -43,7 +43,7 @@ module HeaderFileGenerator
 					if requires_conversion?
 						cpp = ""
 						compatible_classes.each_with_index do |cpp_class, k|
-							cpp += (k==0 ? "#{"\t"*indent}if" : " else if") + " (" + (matches_classes [cpp_class] ).to_s + ") " + "{\n"
+							cpp += (k==0 ? "#{"\t"*indent}if" : " else if") + " " + (matches_classes [cpp_class] ).to_s + " " + "{\n"
 							cpp += cpp_class.convert_into_class self, indent+1
 							self.input_class = cpp_class
 							if remaining_params.length > 0
@@ -110,8 +110,8 @@ module HeaderFileGenerator
 					)
 				end
 
-				def comment_about_check
-					"// Checking whether #{parameter_name} is a#{@type.to_s =~ /^[aeiou]/ ? "n" : ""} \"#{@type}\""
+				def comment_about_check type, indent=0
+					"#{"\t"*indent}// Checking whether #{parameter_name} is a#{type.to_s =~ /^[aeiou]/ ? "n" : ""} \"#{type}\"\n"
 				end
 
 				def check_for_type type
@@ -132,8 +132,12 @@ module HeaderFileGenerator
 					end
 				end
 
-				def check
-					check_for_type(@type).rb_raise_if(nil, 1)
+				def check indent=1
+					if test = check_for_type(@type)
+						comment_about_check(@type, indent) + test.rb_raise_if(nil, indent)
+					else
+						""
+					end
 				end
 
 				def has_input_class!
@@ -147,8 +151,7 @@ module HeaderFileGenerator
 					when *IntegerTypes
 						Converter.convert(parameter_name).from(Fixnum).to("int").to_s
 					when *(MatrixTypes+ArrayTypes + (MatrixTypes+ArrayTypes).map {|i| (i.to_s + "*").to_sym})
-						has_input_class!
-						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(outclass)
+						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(outclass).to_s
 					else # must've been converted beforehand...
 						#if requires_conversion? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" with no conversion." end
 						parameter_name

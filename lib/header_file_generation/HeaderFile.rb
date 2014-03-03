@@ -29,7 +29,11 @@ module HeaderFileGenerator
 		def define_methods method_list=[]
 			if !method_list.nil?
 				method_list.each do |s|
-					@methods << Method.new(s.merge({"hf" => self}))
+					if s["overload"]
+						@methods << OverloadedMethod.new(s.merge({"hf" => self}))
+					else
+						@methods << Method.new(s.merge({"hf" => self}))
+					end
 				end
 			end
 		end

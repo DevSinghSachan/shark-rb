@@ -8,6 +8,8 @@ describe 'C++ HeaderFiles' do
 		@header_file_getter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>"]
 		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel"], "dependencies" => ["<models/Nil>"]
 		@header_file_overloaded = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil"
+		@header_file_specific = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil"
+		@header_file_specific_two_sized = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil"
 		
 		@vector_definition = {
 				"name" => "test",
@@ -29,6 +31,32 @@ describe 'C++ HeaderFiles' do
 			"name" => "test",
 			"types" => [["double", "array"]]
 		}
+		@specific_definition = {
+			"name" => "test",
+			"overload" => [
+				{
+					"types" => ["double"],
+					"type" => "double"
+				},
+				{
+					"types" => ["array"],
+					"type" => "array"
+				}
+			]
+		}
+		@specific_definition_two_sizes = {
+			"name" => "test",
+			"overload" => [
+				{
+					"types" => ["double"],
+					"type" => "double"
+				},
+				{
+					"types" => ["array", "double"],
+					"type" => "array"
+				}
+			]
+		}
 		@std_vector    = HeaderFileGenerator::HeaderFile::Method::CppClass.new("std::vector<double>", :pointer => true)
 		@rb_RealVector = HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealVector")
 		@RealVector    = HeaderFileGenerator::HeaderFile::Method::CppClass.new("RealVector")
@@ -41,12 +69,17 @@ describe 'C++ HeaderFiles' do
 			@header_file_vector.define_methods      [@vector_definition]
 			@header_file_array.define_methods       [@array_definition]
 			@header_file_overloaded.define_methods  [@overloaded_definition]
+			@header_file_specific.define_methods    [@specific_definition]
+			@header_file_specific_two_sized.define_methods [@specific_definition_two_sizes]
 
-			@getter_method  = @header_file_getter.cpp_methods.select        {|i| i.method_name == @getter_definition["name"]}.first
-			@vector_method  = @header_file_vector.cpp_methods.select        {|i| i.method_name == @vector_definition["name"]}.first
-			@array_method   = @header_file_array.cpp_methods.select         {|i| i.method_name == @array_definition["name"] }.first
-			@setter_method  = @header_file_setter.cpp_methods.select        {|i| i.method_name == @setter_definition["name"]}.first
-			@overloaded_method = @header_file_overloaded.cpp_methods.select {|i| i.method_name == @overloaded_definition["name"]}.first
+			@getter_method     = @header_file_getter.cpp_methods.select        {|i| i.method_name == @getter_definition["name"]}.first
+			@vector_method     = @header_file_vector.cpp_methods.select        {|i| i.method_name == @vector_definition["name"]}.first
+			@array_method      = @header_file_array.cpp_methods.select         {|i| i.method_name == @array_definition["name"] }.first
+			@setter_method     = @header_file_setter.cpp_methods.select        {|i| i.method_name == @setter_definition["name"]}.first
+			@specific_method   = @header_file_specific.cpp_methods.select      {|i| i.method_name == @specific_definition["name"]}.first
+			@overloaded_method = @header_file_overloaded.cpp_methods.select    {|i| i.method_name == @overloaded_definition["name"]}.first
+			@specific_two_sizes = @header_file_specific_two_sized.cpp_methods.select {|i| i.method_name == @specific_definition_two_sizes["name"]}.first
+			@methods = [@getter_method, @vector_method, @array_method, @setter_method, @specific_method, @overloaded_method, @specific_two_sizes]
 		end
 
 		it 'and add those methods to method list' do
@@ -65,12 +98,19 @@ describe 'C++ HeaderFiles' do
 			@overloaded_method.should_not be_nil
 		end
 
+		it 'and add those methods with specific overloading parameters to method list' do
+			@specific_method.should_not be_nil
+			@specific_two_sizes.should_not be_nil
+		end
+
 		describe 'whose parameters' do
 			before(:all) do
-				@vector_parameter = @vector_method.parameters.first
-				@array_parameter = @array_method.parameters.first
-				@getter_parameter = @getter_method.parameters.first
+				@vector_parameter     = @vector_method.parameters.first
+				@array_parameter      = @array_method.parameters.first
+				@getter_parameter     = @getter_method.parameters.first
 				@overloaded_parameter = @overloaded_method.parameters.first
+				@specific_parameter   = @specific_method.parameters.first
+				@specific_two_sizes_parameter = @specific_two_sizes.parameters.first
 			end
 
 			it 'should exist' do
@@ -90,6 +130,12 @@ describe 'C++ HeaderFiles' do
 
 			it 'are empty when none are needed' do
 				@getter_parameter.should be_nil
+				
+			end
+
+			it 'are empty when using overloading (families)' do
+				@specific_parameter.should be_nil
+				@specific_two_sizes_parameter.should be_nil
 			end
 
 			describe 'have output classes that' do
@@ -145,13 +191,13 @@ describe 'C++ HeaderFiles' do
 				end
 
 				it 'should provide a converted format for a variable' do
-					@array_parameter.input_class = @array_parameter.compatible_classes.first
+					@array_parameter.input_class = @array_parameter.compatible_classes.select {|i| i.ruby? }.first
 					@array_parameter.to_converted_form.should match /\*.+#{@array_parameter.parameter_name}/
 				end
 
 				it 'should provide a converted format for a variable w/. pointer' do
-					@vector_parameter.input_class = @array_parameter.compatible_classes.first
-					@vector_parameter.to_converted_form.should match /&.+#{@array_parameter.parameter_name}/
+					@vector_parameter.input_class = @vector_parameter.compatible_classes.select {|i| i.type != "Array"}.first
+					@vector_parameter.to_converted_form.should match /&.+#{@vector_parameter.parameter_name}/
 				end
 
 				it 'should find reasonable compatible classes' do
@@ -177,10 +223,37 @@ describe 'C++ HeaderFiles' do
 
 		end
 
+		describe 'whose parameter families' do
+
+			it 'should correspond to the number of overloadings' do
+				@specific_two_sizes.parameter_families.length.should == @specific_definition_two_sizes["overload"].length
+				@specific_method.parameter_families.length.should == @specific_definition["overload"].length
+			end
+
+
+			it 'should get a scan argument if there are variable argument amounts' do
+				@specific_two_sizes.input_parameters.should match /number_of_arguments/
+				@specific_two_sizes.to_cpp_function_definition.should match /rb_scan_args/
+			end
+
+			it 'should not get a scan argument if there is a static argument amount' do
+				@specific_method.input_parameters.should_not match /number_of_arguments/
+				@specific_method.to_cpp_function_definition.should_not match /rb_scan_args/
+			end
+		end
+
 		describe 'whose output' do
 			before(:all) do
-				@getter_output = @getter_method.return_methodology
-				@setter_output = @setter_method.return_methodology
+				@getter_output = @getter_method.return_methodology @getter_method.parameters
+				@setter_output = @setter_method.return_methodology @setter_method.parameters
+				@specific_method.observed_family    = 0
+				@specific_method_output_1           = @specific_method.return_methodology @specific_method.parameter_families.first
+				@specific_method.observed_family    = 1
+				@specific_method_output_2           = @specific_method.return_methodology @specific_method.parameter_families.last
+				@specific_two_sizes.observed_family = 0
+				@specific_method_multisize_output_1 = @specific_two_sizes.return_methodology @specific_two_sizes.parameter_families.first
+				@specific_two_sizes.observed_family = 1
+				@specific_method_multisize_output_2 = @specific_two_sizes.return_methodology @specific_two_sizes.parameter_families.last
 			end
 
 			it 'should not be nil' do
@@ -195,14 +268,26 @@ describe 'C++ HeaderFiles' do
 			it 'should return self when no return type is provided' do
 				@setter_output.should match /return self/
 			end
+
+			it 'should depend on which family is current active' do
+				@specific_method_output_1.should_not match           "wrap_pointer<rb_RealVector>"
+				@specific_method_multisize_output_1.should_not match "wrap_pointer<rb_RealVector>"
+				@specific_method_output_2.should match               "wrap_pointer<rb_RealVector>"
+				@specific_method_multisize_output_2.should match     "wrap_pointer<rb_RealVector>"
+			end
 		end
 
 		it 'that can output a C++ function definition' do
-			->(){ @getter_method.to_cpp_function_definition }.should_not raise_error
-			->(){ @setter_method.to_cpp_function_definition }.should_not raise_error
-			->(){ @vector_method.to_cpp_function_definition }.should_not raise_error
-			->(){ @array_method.to_cpp_function_definition  }.should_not raise_error
-			->(){ @overloaded_method.to_cpp_function_definition}.should_not raise_error
+			@methods.each do |method|
+				->(){method.to_cpp_function_definition}.should_not raise_error
+			end
+		end
+
+		it 'that can output a C++ function definition with balanced squiggly brackets' do
+			@methods.each do |method|
+				str = method.to_cpp_function_definition
+				str.count("{").should == str.count("}")
+			end
 		end
 	end
 

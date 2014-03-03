@@ -19,10 +19,10 @@ module HeaderFileGenerator
 				ObjectTypes  = ArrayTypes + MatrixTypes + ColumnTypes + RowTypes + VectorReferenceTypes + DataTypes
 
 				def initialize(name, opts={})
-					@type = opts[:type].to_sym
-					@converted = false
-					@cast      = opts[:cast].nil? ? false : opts[:cast]
-					@output_name = name
+					@type         = opts[:type].to_sym
+					@converted    = false
+					@cast         = opts[:cast].nil? ? false : opts[:cast]
+					@output_name  = name
 					@output_class = compatible_class
 				end
 

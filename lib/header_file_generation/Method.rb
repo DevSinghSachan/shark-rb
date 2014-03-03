@@ -43,16 +43,20 @@ module HeaderFileGenerator
 				end
 				@requires_conversion = @parameters.any? {|i| i.requires_conversion?}
 				 # switch this to classes.
-				create_return_type opts["type"]
+				@return_type, @cast_return_type = create_return_type opts["type"]
 			end
 
 			def create_return_type type_definition
 				if type_definition.is_a? Hash
-					@return_type         = (type_definition["name"] || "nil").to_sym
-					@cast_return_type    = type_definition["cast"].nil? ? false : type_definition["cast"]
+					[
+						(type_definition["name"] || "nil").to_sym,
+						(type_definition["cast"].nil? ? false : type_definition["cast"])
+					]
 				else
-					@return_type         = (type_definition || "nil").to_sym
-					@cast_return_type    = false
+					[
+						(type_definition || "nil").to_sym,
+						false
+					]
 				end
 			end
 
@@ -76,63 +80,66 @@ module HeaderFileGenerator
 				ip
 			end
 
-			def parameters
-				@parameters
-			end
-
-			def params
+			def params some_parameters
 				params = []
-				@parameters.each do |param|
+				some_parameters.each do |param|
 					params << param.to_s
 				end
 				params.join(", ")
 			end
 
-			def parameter_conversions
-				parameters_to_convert = @parameters
-				parameters_requiring_conversions = @parameters.select {|i| i.requires_conversion?}
+			def parameter_conversions some_parameters, indent=0
+				parameters_to_convert = some_parameters
+				parameters_requiring_conversions = some_parameters.select {|i| i.requires_conversion?}
 				cpp = ""
-				cpp += "\t// Converting parameter#{parameters_requiring_conversions.length == 1 ? "" : "s"} #{"\""+parameters_requiring_conversions.map {|i| i.parameter_name}.join("\", \"")+"\""} before #{parameters_requiring_conversions.length == 1 ? "it" : "they"} can be used.\n"
-				cpp += @parameters.first.convert_and_embed(
-					@parameters,
-					@parameters[1..(@parameters.length - 1)],
-					->(i=0) {self.return_methodology(i)},
-					1)
+				cpp += "#{"\t"*indent}// Converting parameter#{parameters_requiring_conversions.length == 1 ? "" : "s"} #{"\""+parameters_requiring_conversions.map {|i| i.parameter_name}.join("\", \"")+"\""} before #{parameters_requiring_conversions.length == 1 ? "it" : "they"} can be used.\n"
+				cpp += some_parameters.first.convert_and_embed(
+					some_parameters,
+					some_parameters[1..(some_parameters.length - 1)],
+					->(i=0) {self.return_methodology(some_parameters, i)},
+					indent)
 				cpp
 			end
 
-			def checking_methodology
+			def checking_methodology some_parameters, indent=0
 				checks = []
-				@parameters.each do |param|
-					checks << param.check
+				some_parameters.each do |param|
+					checks << param.check(indent)
 				end
 				checks.join("\n")
 			end
 
-			def call_methodology_with_conversion
+			def call_methodology_with_conversion some_parameters, indent=0
 """
-#{parameter_conversions}
-	return self; // cpp functions require return variable, so if all tests fail \"self\" is returned.
+#{parameter_conversions some_parameters, indent}
+#{"\t"*indent}return self; // cpp functions require return variable, so if all tests fail \"self\" is returned.
 """
 			end
 
-			def call_methodology indent=0
+			def call_methodology some_parameters, indent=0
 				if @cpp_method_name =~ /operator\s*(.+)/
 					if $1 == "()"
-						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))(#{params})"
+						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))(#{params(some_parameters)})"
 					else
-						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))#{$1} #{params}"
+						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))#{$1} #{params(some_parameters)}"
 					end
 				else
-					"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{params})"
+					"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{params(some_parameters)})"
 				end
 			end
 
-			def return_methodology indent=0
-				if @return_type.downcase == :nil
-					"#{call_methodology(indent)};\n#{"\t"*indent}return self;"
+			def current_return_type
+				@return_type
+			end
+			def current_cast_return_type_cast
+				@cast_return_type
+			end
+
+			def return_methodology some_parameters, indent=0
+				if current_return_type.downcase == :nil
+					"#{call_methodology(some_parameters, indent)};\n#{"\t"*indent}return self;"
 				else
-					output = Output.new(call_methodology, :type => @return_type, :cast => @cast_return_type)
+					output = Output.new(call_methodology(some_parameters), :type => current_return_type, :cast => current_cast_return_type_cast)
 					if output.requires_cast?
 						(
 							("\t"*indent) + output.cast_variable    + ";\n" +
@@ -149,12 +156,12 @@ module HeaderFileGenerator
 VALUE #{function_name} (#{input_parameters}) {
 	#{cpp_class.pointer} #{symbol};
 	Data_Get_Struct(self, #{cpp_class}, #{symbol});
-#{checking_methodology}
+#{checking_methodology @parameters, 1}
 """
 				if @requires_conversion
-					cpp += "#{call_methodology_with_conversion}}\n"
+					cpp += "#{call_methodology_with_conversion @parameters, 1}}\n"
 				else
-					cpp += "#{return_methodology(1)}\n}\n"
+					cpp += "#{return_methodology(@parameters, 1)}\n}\n"
 				end
 				cpp
 			end

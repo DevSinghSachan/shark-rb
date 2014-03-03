@@ -35,8 +35,16 @@
 		{
 			"name": "eval",
 			"accessor_name": "operator()",
-			"types": [["matrix", "vector"]],
-			"type": "vector"
+			"overload": [
+				{
+					"types": ["matrix"],
+					"type": "matrix"
+				},
+				{
+					"types": ["vector"],
+					"type": "vector"
+				},
+			]
 		}
 	]
 }

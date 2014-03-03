@@ -8,6 +8,7 @@ require_relative 'InputChecker'
 require_relative 'OverloadedInput'
 require_relative 'Output'
 require_relative 'Method'
+require_relative 'OverloadedMethod'
 
 require 'json'
 module HeaderFileGenerator
