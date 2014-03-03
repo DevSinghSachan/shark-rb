@@ -247,6 +247,8 @@ module HeaderFileGenerator
 			CppClass::Ruby2DArray = RubyArray.new "RealMatrix"
 			CppClass::AllClasses << CppClass::RubyArray
 			CppClass::AllClasses << CppClass::Ruby2DArray
+
+			# add specializations for RealMatrixRow / Column so that wrapped_class is shark::blas::matrix_row<RealMatrix>/_column.
 		end
 	end
 end

@@ -18,17 +18,16 @@ module HeaderFileGenerator
 				}
 			end
 
-			def self.create_cast_conversion type, fromtype
+			def self.create_cast_conversion type
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
-					puts "using a cast conversion to #{type} from #{fromtype}"
 					if out_param_name
-						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};CAST_CONVERSION"
+						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};"
 					else
 						if pointer
-							"&(#{input_param_name})CAST_CONVERSION"
+							"&(#{input_param_name})"
 						else
-							"#{input_param_name}CAST_CONVERSION"
+							"#{input_param_name}"
 						end
 					end
 				}
@@ -144,7 +143,7 @@ module HeaderFileGenerator
 			def self.create_castable_equivalences *equivs
 				equivs.each do |equiv|
 					equivs.each do |equiv_other|
-						Conversions[equiv][equiv_other] = create_cast_conversion(equiv_other, equiv)
+						Conversions[equiv][equiv_other] = create_cast_conversion equiv_other
 					end
 				end
 			end

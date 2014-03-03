@@ -60,29 +60,29 @@ VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
-		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData())CAST_CONVERSION);
+		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData()));
 		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
 	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
 
 		rb_RealVectorReference * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
-		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData())CAST_CONVERSION);
+		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData()));
 		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
 
 		rb_RealMatrixColumn * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
-		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData())CAST_CONVERSION);
+		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData()));
 		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
 
 		rb_RealMatrixRow * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
-		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData())CAST_CONVERSION);
+		RealMatrix casted_output = (*(r->getModel()))(*(parameter_1_converted->getData()));
 		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
 	} else if (TYPE(parameter_1) == T_ARRAY) {
 		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
-		RealMatrix casted_output = (*(r->getModel()))(parameter_1_convertedCAST_CONVERSION);
+		RealMatrix casted_output = (*(r->getModel()))(parameter_1_converted);
 		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
 	}
 
