@@ -124,6 +124,10 @@ VALUE #{function_name} (#{input_parameters}) {
 				end
 			end
 
+			def to_rb_function_definition
+				"rb_define_method(#{cpp_class.rb_class}, \"#{rb_method_name}\", (rb_method) #{function_name}, #{variable_number_of_arguments? ? -1 : @max_number_of_inputs});"
+			end
+
 			def input_parameters
 				if @max_number_of_inputs == @min_number_of_inputs
 					ip =  "VALUE self"

@@ -117,6 +117,6 @@ void Init_rb_Softmax () {
 	rb_define_alloc_func(rb_Softmax::rb_class(), (rb_alloc_func_t) method_rb_Softmax_allocate);
 	rb_define_method(rb_Softmax::rb_class(), "initialize", (rb_method) method_rb_Softmax_initialize, 0);
 	rb_define_method(rb_Softmax::rb_class(), "set_structure", (rb_method) method_rb_Softmax_set_structure, 1);
-	rb_define_method(rb_Softmax::rb_class(), "eval", (rb_method) method_rb_Softmax_eval, );
+	rb_define_method(rb_Softmax::rb_class(), "eval", (rb_method) method_rb_Softmax_eval, 1);
 InitAbstractModel<rb_Softmax>();
 }
