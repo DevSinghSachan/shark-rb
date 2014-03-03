@@ -25,13 +25,6 @@
 			"name": "number_of_inputs",
 			"accessor_name": "inputSize",
 			"type": "int"
-		},
-		{
-			"name": "prob",
-			"accessor_name": "p",
-			"number_of_inputs": 1,
-			"types": ["double"],
-			"type": "double"
 		}
 	],
 	"setters" : [
@@ -46,7 +39,7 @@
 			"name": "eval",
 			"accessor_name": "operator()",
 			"types": ["vector"],
-			"type": "vector"
+			"type": "batch"
 		}
 	]
 }

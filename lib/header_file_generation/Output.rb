@@ -9,13 +9,14 @@ module HeaderFileGenerator
 				attr_reader :output_name
 
 				# centralize these types...
-				ArrayTypes   = [:array, :"1darray", :vector, :realvector]
-				MatrixTypes  = [:matrix, :"2darray", :realmatrix]
-				IntegerTypes = [:integer, :int]
+				ArrayTypes   = CppClass::ArrayTypes
+				MatrixTypes  = CppClass::MatrixTypes
+				IntegerTypes = CppClass::IntegerTypes
+				DataTypes    = CppClass::DataTypes
 				ColumnTypes  = [:realmatrixcolumn, :matrixcolumn, :column]
 				RowTypes     = [:realmatrixrow, :matrixrow, :row]
 				VectorReferenceTypes = [:realvectorreference, :vectorreference]
-				ObjectTypes  = ArrayTypes + MatrixTypes + ColumnTypes + RowTypes + VectorReferenceTypes
+				ObjectTypes  = ArrayTypes + MatrixTypes + ColumnTypes + RowTypes + VectorReferenceTypes + DataTypes
 
 				def initialize(name, opts={})
 					@type = opts[:type].to_sym
@@ -32,6 +33,8 @@ module HeaderFileGenerator
 						CppClass.new("rb_RealMatrixRow", :pointer => true)
 					when *ColumnTypes
 						CppClass.new("rb_RealMatrixColumn", :pointer => true)
+					when *DataTypes
+						CppClass.new("rb_UnlabeledData")
 					when *ArrayTypes
 						CppClass.new("rb_RealVector")
 					when *MatrixTypes

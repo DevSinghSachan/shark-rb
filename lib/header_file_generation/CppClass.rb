@@ -16,9 +16,10 @@ module HeaderFileGenerator
 					end
 				end
 
-				ArrayTypes   = [:array, :"1darray", :vector]
-				MatrixTypes  = [:matrix, :"2darray"]
+				ArrayTypes   = [:array, :"1darray", :vector, :realvector]
+				MatrixTypes  = [:matrix, :"2darray", :realmatrix]
 				IntegerTypes = [:integer, :int]
+				DataTypes    = [:data, :unlabeleddata, :batch]
 
 				def self.guess_from_type type
 					type.match(/([^\*]+)(\*)?/)
@@ -27,6 +28,8 @@ module HeaderFileGenerator
 						CppClass.new("RealMatrix", :pointer => !$2.nil?)
 					when *ArrayTypes
 						CppClass.new("RealVector", :pointer => !$2.nil?)
+					when *DataTypes
+						CppClass.new("UnlabeledData", :pointer => !$2.nil?)
 					when *IntegerTypes
 						CppClass.new("int", :pointer => !$2.nil?)
 					when :double
