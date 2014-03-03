@@ -39,7 +39,7 @@
 			"types": ["vector"],
 			"type": {
 				"name":"vector",
-				"cast":true
+				"cast":false
 			}
 		}
 	]
