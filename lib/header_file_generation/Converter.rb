@@ -21,6 +21,7 @@ module HeaderFileGenerator
 			def self.create_cast_conversion type
 				cpp_class = Method::CppClass.new(type)
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
+					puts "using a cast conversion to #{type}"
 					if out_param_name
 						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};"
 					else
