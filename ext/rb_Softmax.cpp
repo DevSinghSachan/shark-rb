@@ -70,28 +70,28 @@ VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 
 		rb_RealVector * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix((*(r->getModel()))(*(parameter_1_converted->getData()))));
+		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
 	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
 
 		rb_RealVectorReference * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix((*(r->getModel()))(*(parameter_1_converted->getData()))));
+		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
 
 		rb_RealMatrixColumn * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix((*(r->getModel()))(*(parameter_1_converted->getData()))));
+		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
 	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
 
 		rb_RealMatrixRow * parameter_1_converted;
 		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix((*(r->getModel()))(*(parameter_1_converted->getData()))));
+		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
 	} else if (TYPE(parameter_1) == T_ARRAY) {
 		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix((*(r->getModel()))(parameter_1_converted)));
+		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1_converted)));
 	} else if (TYPE(parameter_1) == T_ARRAY) {
 		RealMatrix parameter_1_converted = rb_ary_to_realmatrix(parameter_1);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix((*(r->getModel()))(parameter_1_converted)));
+		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1_converted)));
 	}
 
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
