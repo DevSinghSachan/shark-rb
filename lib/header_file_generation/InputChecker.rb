@@ -19,10 +19,12 @@ module HeaderFileGenerator
 
 				def negate
 					@negated = true
+					self
 				end
 
 				def positive
 					@negated = false
+					self
 				end
 
 				def and other_test

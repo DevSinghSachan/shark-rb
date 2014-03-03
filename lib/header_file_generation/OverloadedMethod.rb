@@ -45,16 +45,16 @@ module HeaderFileGenerator
 			end
 
 			def matches_family family
-				family_tests = Conjunction.new(family.map {|i| i.is_a?(OverloadedInput) ? Disjunction.new(i.type.map {|t| i.check_for_type(t)}) : i.check_for_type(i.type)})
+				family_tests = Conjunction.new(family.map {|i| i.is_a?(OverloadedInput) ? Disjunction.new(i.type.map {|t| i.check_for_type(t)}) : i.check_for_type(i.type)}).negate
 				if variable_number_of_arguments?
 					Conjunction.new(
 						[
 							"number_of_arguments == #{family.length}",
-							"!" + family_tests.to_s
+							family_tests
 						]
 					)
 				else
-					"!" + family_tests.to_s
+					family_tests
 				end
 			end
 
