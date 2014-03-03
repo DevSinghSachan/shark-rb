@@ -31,7 +31,7 @@ VALUE method_rb_RNG_DiscreteUniform_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiscreteUniform * r;
 	Data_Get_Struct(self, rb_RNG_DiscreteUniform, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
@@ -41,7 +41,7 @@ VALUE method_rb_RNG_DiscreteUniform_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_DiscreteUniform * r;
 	Data_Get_Struct(self, rb_RNG_DiscreteUniform, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
@@ -59,11 +59,11 @@ VALUE method_rb_RNG_DiscreteUniform_set_range (VALUE self, VALUE parameter_1, VA
 	rb_RNG_DiscreteUniform * r;
 	Data_Get_Struct(self, rb_RNG_DiscreteUniform, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	// Checking whether parameter_2 is a "double"
-	if ((TYPE(parameter_2) != T_FLOAT && TYPE(parameter_2) != T_FIXNUM)
+	if (TYPE(parameter_2) != T_FLOAT && TYPE(parameter_2) != T_FIXNUM)
 		rb_raise(rb_eArgError, "2nd Argument must be a Float.");
 
 	r->getModel()->setRange(NUM2DBL(parameter_1), NUM2DBL(parameter_2));

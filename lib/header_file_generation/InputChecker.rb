@@ -63,7 +63,7 @@ module HeaderFileGenerator
 
 			class Conjunction < InputChecker
 				def to_s
-					"#{@negated ? "(!" : ""}((" + @tests.map {|i| i.to_s}.join(" && ") + ")#{@negated ? ")" : ""}"
+					"#{@negated ? "(!" : ""}(" + @tests.map {|i| i.to_s}.join(" && ") + ")#{@negated ? ")" : ""}"
 				end
 			end
 

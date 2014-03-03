@@ -17,7 +17,7 @@ VALUE method_rb_RNG_LogNormal_set_scale (VALUE self, VALUE parameter_1) {
 	rb_RNG_LogNormal * r;
 	Data_Get_Struct(self, rb_RNG_LogNormal, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	r->getModel()->scale(NUM2DBL(parameter_1));
@@ -28,7 +28,7 @@ VALUE method_rb_RNG_LogNormal_set_location (VALUE self, VALUE parameter_1) {
 	rb_RNG_LogNormal * r;
 	Data_Get_Struct(self, rb_RNG_LogNormal, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	r->getModel()->location(NUM2DBL(parameter_1));
@@ -53,7 +53,7 @@ VALUE method_rb_RNG_LogNormal_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_LogNormal * r;
 	Data_Get_Struct(self, rb_RNG_LogNormal, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
@@ -63,7 +63,7 @@ VALUE method_rb_RNG_LogNormal_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_LogNormal * r;
 	Data_Get_Struct(self, rb_RNG_LogNormal, r);
 	// Checking whether parameter_1 is a "double"
-	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
+	if (TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM)
 		rb_raise(rb_eArgError, "1st Argument must be a Float.");
 
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
