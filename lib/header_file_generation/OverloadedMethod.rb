@@ -9,14 +9,13 @@ module HeaderFileGenerator
 				raise StandardError.new "\"name\" cannot contain any non a-Z 0-9 _ characters" if (opts["name"] and opts["name"].match(/[^a-zA-Z0-9_]/))
 				@header_file      = opts["hf"]
 				if opts["hf"].nil? then raise StandardError.new "Cannot initialize a header file method without providing a Header File." end
-				@cpp_method_name  = opts["accessor_name"] || opts["name"]
 				@method_name      = opts["name"]
 
 				@number_of_inputs_per_family = opts["overload"].map {|i| i["types"].nil? ? 0 : i["types"].length}
 				@return_type_per_family      = opts["overload"].map {|i| create_return_type i["type"]}
 				@parameter_families          = []
 				@parameters                  = []
-
+				@cpp_method_name             = opts["overload"].map {|i| (i["accessor_name"] || opts["accessor_name"]) || opts["name"]}
 				@min_number_of_inputs        = @number_of_inputs_per_family.min
 				@max_number_of_inputs        = @number_of_inputs_per_family.max
 				opts["overload"].each_with_index do |overload, k|
@@ -89,9 +88,15 @@ VALUE #{function_name} (#{input_parameters}) {
 				if @observed_family.nil? then raise RuntimeError.new "Asking for return type in overloaded method when no family is specified." end
 				@return_type_per_family[@observed_family][0]
 			end
+
 			def current_cast_return_type_cast
 				if @observed_family.nil? then raise RuntimeError.new "Asking for return type in overloaded method when no family is specified." end
 				@return_type_per_family[@observed_family][1]
+			end
+
+			def current_cpp_method_name
+				if @observed_family.nil? then raise RuntimeError.new "Asking for cpp method name in overloaded method when no family is specified." end
+				@cpp_method_name[@observed_family]
 			end
 
 			def extra_input_parameters_declarations

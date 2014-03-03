@@ -116,15 +116,19 @@ module HeaderFileGenerator
 """
 			end
 
+			def current_cpp_method_name
+				@cpp_method_name
+			end
+
 			def call_methodology some_parameters, indent=0
-				if @cpp_method_name =~ /operator\s*(.+)/
+				if current_cpp_method_name =~ /operator\s*(.+)/
 					if $1 == "()"
 						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))(#{params(some_parameters)})"
 					else
 						"#{"\t"*indent}(*(#{symbol}->#{@header_file.pointer_acquirer.first}()))#{$1} #{params(some_parameters)}"
 					end
 				else
-					"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{@cpp_method_name}(#{params(some_parameters)})"
+					"#{"\t"*indent}#{symbol}->#{@header_file.pointer_acquirer.first}()->#{current_cpp_method_name}(#{params(some_parameters)})"
 				end
 			end
 
