@@ -95,7 +95,7 @@ module HeaderFileGenerator
 							Conjunction.new(
 								[
 									"RARRAY_LEN(#{parameter_name}) > 0",
-									"TYPE( rb_ary_entry(ary, 0) ) != T_ARRAY"
+									"TYPE( rb_ary_entry(#{parameter_name}, 0) ) != T_ARRAY"
 								]
 							),
 							Conjunction.new(

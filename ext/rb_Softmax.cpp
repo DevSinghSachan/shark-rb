@@ -51,9 +51,9 @@ VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
-	if (number_of_arguments == 1 && (((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(ary, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class())))) {
+	if (number_of_arguments == 1 && (((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(parameter_1, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class())))) {
 		// Checking whether parameter_1 is a "matrix"
-		if ((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(ary, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class()))
+		if ((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(parameter_1, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class()))
 			rb_raise(rb_eArgError, "1st Argument must be an MatrixType (\"RealMatrix\", \"RealMatrixReference\", \"Array< Array< Float > >\").");
 
 		// Converting parameter "parameter_1" before it can be used.
