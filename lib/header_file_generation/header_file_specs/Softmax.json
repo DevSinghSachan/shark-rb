@@ -38,7 +38,7 @@
 			"accessor_name": "operator()",
 			"types": ["vector"],
 			"type": {
-				"name":"matrix",
+				"name":"vector",
 				"cast":true
 			}
 		}
