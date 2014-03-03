@@ -284,8 +284,18 @@ Each has a `sample` method that replaces the `operator()` method from C++. Their
 * etc...
 
 
+Softmax Model
+-------------
 
+The [Softmax](http://image.diku.dk/shark/doxygen_pages/html/classshark_1_1_softmax.html) model is wrapped as follows:
 
+	soft = Shark::Softmax.new
+	soft.set_structure 3
+
+	soft.eval [1, 2, 3]
+	# => #<Optimizer::RealVector:0x007fc20b00fd00 @data = [0.09003057317038046, 0.24472847105479767, 0.6652409557748219]>
+
+Support for better constructors is on its way (so that the `set_structure` step can be avoided) :) !
 
 
 Binary Restricted Boltzmann Machines
