@@ -33,7 +33,18 @@ module HeaderFileGenerator
 						)
 				end
 				@requires_conversion = @parameters.any? {|i| i.requires_conversion?}
-				@return_type         = (opts["type"] || "nil").to_sym # switch this to classes.
+				 # switch this to classes.
+				create_return_type opts["type"]
+			end
+
+			def create_return_type type_definition
+				if type_definition.is_a? Hash
+					@return_type         = (type_definition["name"] || "nil").to_sym
+					@cast_return_type    = type_definition["cast"].nil? ? false : type_definition["cast"]
+				else
+					@return_type         = (type_definition || "nil").to_sym
+					@cast_return_type    = false
+				end
 			end
 
 			def cpp_class
@@ -111,7 +122,7 @@ module HeaderFileGenerator
 				if @return_type.downcase == :nil
 					"#{call_methodology(indent)};\n#{"\t"*indent}return self;"
 				else
-					("\t"*indent) + "return " + Output.new(call_methodology, :type => @return_type).to_s + ";"
+					("\t"*indent) + "return " + Output.new(call_methodology, :type => @return_type, :cast => @cast_return_type).to_s + ";"
 				end
 			end
 

@@ -37,7 +37,10 @@
 			"name": "eval",
 			"accessor_name": "operator()",
 			"types": ["vector"],
-			"type": "vector"
+			"type": {
+				"name":"matrix",
+				"cast":true
+			}
 		}
 	]
 }
