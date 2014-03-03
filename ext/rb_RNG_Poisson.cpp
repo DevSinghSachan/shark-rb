@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_Poisson.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_Poisson::rb_RNG_Poisson() : model(shark::Rng::globalRng) {}
 

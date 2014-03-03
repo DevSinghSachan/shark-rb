@@ -20,6 +20,29 @@ VALUE method_matrix_get_exp (VALUE self) {
 			);
 }
 
+
+template<class Obtype>
+Obtype log(Obtype & _mat) {
+
+	Obtype _log_mat = _mat;
+
+	for (size_t i=0;i < _mat.size1();i++)
+		for (size_t j=0;j < _mat.size2();j++)
+			_log_mat = std::log(_mat(i,j));
+
+	return _log_mat;
+}
+
+template<class Obtype>
+VALUE method_matrix_get_log (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(log<>(*(m->getData())))
+			);
+}
+
 template<class Obtype>
 static double mean(Obtype& m) {
 	double total(0.0);
@@ -1078,12 +1101,13 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_matrix_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_matrix_get_mean<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_matrix_get_exp<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_matrix_get_log<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "columns", (rb_method)method_matrix_to_columns<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_unlabeleddata", (rb_method)method_matrix_to_unlabeleddata<Obtype>,0);
-	rb_define_alias("to_unlabeled_data", "to_unlabeleddata");
+	rb_define_alias(Obtype::rb_class(), "to_unlabeled_data", "to_unlabeleddata");
 	rb_define_method(Obtype::rb_class(), "cols", (rb_method)method_matrix_to_columns<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "*", (rb_method)method_matrix_multiply<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "**", (rb_method)method_matrix_get_pow<Obtype>, 1);

@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_Geometric.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_Geometric::rb_RNG_Geometric() : model(shark::Rng::globalRng) {}
 

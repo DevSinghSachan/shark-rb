@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_Dirichlet.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_Dirichlet::rb_RNG_Dirichlet() : model(shark::Rng::globalRng) {}
 

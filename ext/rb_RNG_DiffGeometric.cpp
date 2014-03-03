@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_DiffGeometric.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_DiffGeometric::rb_RNG_DiffGeometric() : model(shark::Rng::globalRng) {}
 

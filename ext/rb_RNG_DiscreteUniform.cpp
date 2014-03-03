@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_DiscreteUniform.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_DiscreteUniform::rb_RNG_DiscreteUniform() : model(shark::Rng::globalRng) {}
 

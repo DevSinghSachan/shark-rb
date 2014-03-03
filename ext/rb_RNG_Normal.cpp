@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_Normal.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_Normal::rb_RNG_Normal() : model(shark::Rng::globalRng) {}
 

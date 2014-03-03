@@ -1,5 +1,5 @@
-#include "extras/utils/rb_pointer_wrapping.extras"
 #include "rb_RNG_TruncatedExponential.h"
+#include "extras/utils/rb_pointer_wrapping.extras"
 
 rb_RNG_TruncatedExponential::rb_RNG_TruncatedExponential() : model(shark::Rng::globalRng) {}
 
