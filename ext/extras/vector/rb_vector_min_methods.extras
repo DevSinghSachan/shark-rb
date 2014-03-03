@@ -24,6 +24,31 @@ VALUE method_vector_get_exp (VALUE self) {
 			);
 }
 
+
+template<class Obtype>
+static Obtype log(Obtype & _vec) {
+
+	Obtype _log_vec = _vec;
+
+	for( typename Obtype::iterator itt = _vec.begin(); itt != _vec.end(); ++itt )
+		* itt = std::log(*itt);
+
+	// for (size_t i=0;i < _vec.size();i++)
+	// 	_log_vec(i) = std::log(_vec(i));
+
+	return _log_vec;
+}
+
+template<class Obtype>
+VALUE method_vector_get_log (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(log<>(*(m->getData())))
+			);
+}
+
 template<class Obtype>
 static double mean(Obtype& m) {
 	double total = 0.0;
@@ -558,6 +583,7 @@ void Init_VectorMinMethods () {
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_vector_get_mean<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_vector_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_vector_get_exp<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_vector_get_log<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "==", (rb_method) method_vector_soft_eql<Obtype>,1);

@@ -22,13 +22,13 @@ VALUE method_matrix_get_exp (VALUE self) {
 
 
 template<class Obtype>
-Obtype log(Obtype & _mat) {
+static Obtype log(Obtype & _mat) {
 
 	Obtype _log_mat = _mat;
 
 	for (size_t i=0;i < _mat.size1();i++)
 		for (size_t j=0;j < _mat.size2();j++)
-			_log_mat = std::log(_mat(i,j));
+			_log_mat(i,j) = std::log(_mat(i,j));
 
 	return _log_mat;
 }
