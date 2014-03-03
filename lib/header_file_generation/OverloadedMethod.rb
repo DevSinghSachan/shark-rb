@@ -54,7 +54,7 @@ module HeaderFileGenerator
 						]
 					)
 				else
-					family_tests
+					"!" + family_tests.to_s
 				end
 			end
 
