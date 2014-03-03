@@ -50,7 +50,7 @@ module HeaderFileGenerator
 					Conjunction.new(
 						[
 							"number_of_arguments == #{family.length}",
-							family_tests
+							"!" + family_tests.to_s
 						]
 					)
 				else
