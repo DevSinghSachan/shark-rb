@@ -8,10 +8,10 @@ shark::Softmax * rb_Softmax::getModel() {
 	return &model;
 }
 
-extern VALUE rb_optimizer_rng_poisson_klass;
+extern VALUE rb_optimizer_softmax_klass;
 
 VALUE rb_Softmax::rb_class() {
-	return rb_optimizer_rng_poisson_klass;
+	return rb_optimizer_softmax_klass;
 }
 
 VALUE method_rb_Softmax_get_number_of_outputs (VALUE self) {

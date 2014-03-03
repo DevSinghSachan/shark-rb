@@ -22,6 +22,9 @@ VALUE rb_optimizer_solutionset_klass   = rb_define_class_under(rb_optimizer_klas
 // LinearModel
 VALUE rb_optimizer_linearmodel_klass   = rb_define_class_under(rb_optimizer_klass, "LinearModel", rb_cObject);
 
+// Softmax model
+VALUE rb_optimizer_softmax_klass       = rb_define_class_under(rb_optimizer_klass, "Softmax", rb_cObject);
+
 // PCA algorithm:
 VALUE rb_optimizer_pca_klass           = rb_define_class_under(rb_optimizer_klass, "PCA", rb_cObject);
 
