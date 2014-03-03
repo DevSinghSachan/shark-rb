@@ -37,10 +37,7 @@
 			"name": "eval",
 			"accessor_name": "operator()",
 			"types": ["vector"],
-			"type": {
-				"name":"vector",
-				"cast":false
-			}
+			"type": "vector"
 		}
 	]
 }
