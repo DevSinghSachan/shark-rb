@@ -4,6 +4,8 @@ require_relative 'HeaderFile'
 require_relative 'CppClass'
 require_relative 'Converter'
 require_relative 'Input'
+require_relative 'InputChecker'
+require_relative 'OverloadedInput'
 require_relative 'Output'
 require_relative 'Method'
 

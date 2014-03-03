@@ -73,13 +73,9 @@ module HeaderFileGenerator
 					CppClass.new("int")
 				]
 
-				RubyIntegerClasses = [
-					CppClass.new("Fixnum")
-				]
+				RubyIntegerClasses = []
 
-				RubyDoubleClasses = [
-					CppClass.new("Float")
-				]
+				RubyDoubleClasses = []
 
 				ArrayClasses = [
 					CppClass.new("rb_RealVector"),
@@ -88,7 +84,7 @@ module HeaderFileGenerator
 					CppClass.new("rb_RealMatrixRow")
 				]
 
-				AllClasses = (ArrayClasses + IntegerClasses + DoubleClasses + MatrixClasses + RubyIntegerClasses + RubyDoubleClasses)
+				AllClasses = []
 
 				def ===(other)
 					@type == other.type and @pointer == other.pointer?
@@ -243,10 +239,91 @@ module HeaderFileGenerator
 					raise CppError.new "#{@type} is a Ruby C Object and has no class methods."
 				end
 			end
-			CppClass::RubyArray  = RubyArray.new
+			class RubyFixnum < CppClass
+
+				def initialize type="Fixnum"
+					@type = type
+				end
+
+				def class_tester
+					"TYPE"
+				end
+
+				def to_rb varName=""
+					varName
+				end
+
+				def convert_into_class input, indent=0
+					begin
+						Converter::Conversions["Fixnum"].fetch(cpp_class).call(input.parameter_name,input.converted_parameter_name,indent)
+					rescue KeyError
+						raise CppError.new "No conversion from Fixnum to #{cpp_class}."
+					end
+				end
+
+				def rb_class
+					"T_FIXNUM"
+				end
+
+				def pointer
+					raise CppError.new "#{@type} does not use pointers (often)."
+				end
+
+				def converted_parameter_pointer variableName
+					"#{variableName}" # no need to use a pointer with a RubyArray.
+				end
+
+				def wrapped_class_pointer
+					raise CppError.new "#{@type} is a Ruby C Object and has no class methods."
+				end
+			end
+			class RubyFloat < CppClass
+
+				def initialize type="Float"
+					@type = type
+				end
+
+				def class_tester
+					"TYPE"
+				end
+
+				def to_rb varName=""
+					varName
+				end
+
+				def convert_into_class input, indent=0
+					begin
+						Converter::Conversions["Float"].fetch(cpp_class).call(input.parameter_name,input.converted_parameter_name,indent)
+					rescue KeyError
+						raise CppError.new "No conversion from Float to #{cpp_class}."
+					end
+				end
+
+				def rb_class
+					"T_FLOAT"
+				end
+
+				def pointer
+					raise CppError.new "#{@type} does not use pointers (often)."
+				end
+
+				def converted_parameter_pointer variableName
+					"#{variableName}" # no need to use a pointer with a RubyArray.
+				end
+
+				def wrapped_class_pointer
+					raise CppError.new "#{@type} is a Ruby C Object and has no class methods."
+				end
+			end
+			CppClass::RubyArray   = RubyArray.new
 			CppClass::Ruby2DArray = RubyArray.new "RealMatrix"
+			CppClass::RubyFixnum  = RubyFixnum.new
+			CppClass::RubyFloat   = RubyFloat.new
+			CppClass::RubyIntegerClasses << CppClass::RubyFixnum
+			CppClass::RubyDoubleClasses << CppClass::RubyFloat
 			CppClass::AllClasses << CppClass::RubyArray
 			CppClass::AllClasses << CppClass::Ruby2DArray
+			CppClass::AllClasses.concat(CppClass::ArrayClasses + CppClass::IntegerClasses + CppClass::DoubleClasses + CppClass::MatrixClasses + CppClass::RubyIntegerClasses + CppClass::RubyDoubleClasses)
 
 			# add specializations for RealMatrixRow / Column so that wrapped_class is shark::blas::matrix_row<RealMatrix>/_column.
 		end

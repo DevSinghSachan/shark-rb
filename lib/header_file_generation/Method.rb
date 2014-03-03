@@ -25,12 +25,21 @@ module HeaderFileGenerator
 
 				@number_of_inputs.times do |i|
 					input_type = @input_type[i] || @input_type[0]
-					@parameters << Input.new(
-						:type         => input_type,
-						:position     => i,
-						:method       => self,
-						:output_class => CppClass.guess_from_type(input_type)
-						)
+					if input_type.is_a? Array
+						@parameters << OverloadedInput.new(
+							:type         => input_type,
+							:position     => i,
+							:method       => self,
+							:output_classes => input_type.map {|i| CppClass.guess_from_type(i)}
+							)
+					else
+						@parameters << Input.new(
+							:type         => input_type,
+							:position     => i,
+							:method       => self,
+							:output_class => CppClass.guess_from_type(input_type)
+							)
+					end
 				end
 				@requires_conversion = @parameters.any? {|i| i.requires_conversion?}
 				 # switch this to classes.
@@ -81,8 +90,9 @@ module HeaderFileGenerator
 
 			def parameter_conversions
 				parameters_to_convert = @parameters
+				parameters_requiring_conversions = @parameters.select {|i| i.requires_conversion?}
 				cpp = ""
-				cpp += "\t// Converting parameters #{"\""+@parameters.select {|i| i.requires_conversion?}.map {|i| i.parameter_name}.join("\", \"")+"\""} before they can be used.\n"
+				cpp += "\t// Converting parameter#{parameters_requiring_conversions.length == 1 ? "" : "s"} #{"\""+parameters_requiring_conversions.map {|i| i.parameter_name}.join("\", \"")+"\""} before #{parameters_requiring_conversions.length == 1 ? "it" : "they"} can be used.\n"
 				cpp += @parameters.first.convert_and_embed(
 					@parameters,
 					@parameters[1..(@parameters.length - 1)],
@@ -139,7 +149,7 @@ module HeaderFileGenerator
 VALUE #{function_name} (#{input_parameters}) {
 	#{cpp_class.pointer} #{symbol};
 	Data_Get_Struct(self, #{cpp_class}, #{symbol});
-	#{checking_methodology}
+#{checking_methodology}
 """
 				if @requires_conversion
 					cpp += "#{call_methodology_with_conversion}}\n"

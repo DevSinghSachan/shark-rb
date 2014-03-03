@@ -13,7 +13,7 @@ module HeaderFileGenerator
 				IntegerTypes = [:integer, :int]
 
 				def initialize(opts={})
-					@type = (opts[:type].is_a? Array) ? opts[:type] : opts[:type].to_sym
+					@type = opts[:type].to_sym
 					@position = opts[:position]
 					@converted = false
 					@method = opts[:method]
@@ -30,7 +30,7 @@ module HeaderFileGenerator
 				end
 
 				def differs_from_classes classes
-					classes.map {|i| i.test_class parameter_name, false}.join(" && ")
+					Conjunction.new classes.map {|i| i.test_class parameter_name, false}
 				end
 
 				def compatible_classes
@@ -43,7 +43,7 @@ module HeaderFileGenerator
 					if requires_conversion?
 						cpp = ""
 						compatible_classes.each_with_index do |cpp_class, k|
-							cpp += (k==0 ? "#{"\t"*indent}if" : " else if") + " (" + (matches_classes [cpp_class] ) + ") " + "{\n"
+							cpp += (k==0 ? "#{"\t"*indent}if" : " else if") + " (" + (matches_classes [cpp_class] ).to_s + ") " + "{\n"
 							cpp += cpp_class.convert_into_class self, indent+1
 							self.input_class = cpp_class
 							if remaining_params.length > 0
@@ -69,46 +69,71 @@ module HeaderFileGenerator
 				end
 
 				def matches_classes classes
-					classes.map {|i| i.test_class parameter_name}.join(" || ")
+					Disjunction.new classes.map {|i| i.test_class parameter_name}
 				end
 
 				def test_if_not_1darray
-					"TYPE(#{parameter_name}) != T_ARRAY || (RARRAY_LEN(#{parameter_name}) > 0 && TYPE(rb_ary_entry(#{parameter_name}, 0)) != T_FLOAT && TYPE(rb_ary_entry(#{parameter_name}, 0)) != T_FIXNUM)"
+					Disjunction.new(
+						[
+							"TYPE(#{parameter_name}) != T_ARRAY",
+							Conjunction.new(
+								[
+									"RARRAY_LEN(#{parameter_name}) > 0",
+									"TYPE(rb_ary_entry(#{parameter_name}, 0)) != T_FLOAT",
+									"TYPE(rb_ary_entry(#{parameter_name}, 0)) != T_FIXNUM"
+								]
+							)
+
+						]
+					)
 				end
 
 				def test_if_not_2darray
-					"TYPE(#{parameter_name}) != T_ARRAY || (RARRAY_LEN(#{parameter_name}) > 0 && TYPE(rb_ary_entry(ary, 0))) != T_ARRAY || (RARRAY_LEN(#{parameter_name}) > 0 && RARRAY_LEN(rb_ary_entry(#{parameter_name}, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(#{parameter_name}, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(#{parameter_name}, 0), 0)) != T_FIXNUM)"
+					Disjunction.new(
+						[
+							"TYPE(#{parameter_name}) != T_ARRAY",
+							Conjunction.new(
+								[
+									"RARRAY_LEN(#{parameter_name}) > 0",
+									"TYPE( rb_ary_entry(ary, 0) ) != T_ARRAY"
+								]
+							),
+							Conjunction.new(
+								[
+									"RARRAY_LEN(#{parameter_name}) > 0",
+									"RARRAY_LEN(rb_ary_entry(#{parameter_name}, 0)) > 0",
+									"TYPE(rb_ary_entry(rb_ary_entry(#{parameter_name}, 0), 0)) != T_FLOAT",
+									"TYPE(rb_ary_entry(rb_ary_entry(#{parameter_name}, 0), 0)) != T_FIXNUM"
+								]
+							)
+						]
+					)
 				end
 
 				def comment_about_check
 					"// Checking whether #{parameter_name} is a#{@type.to_s =~ /^[aeiou]/ ? "n" : ""} \"#{@type}\""
 				end
 
-				def check
-					case @type
+				def check_for_type type
+					case type
 					when :double
-"""
-	#{comment_about_check}
-	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be a Float.\");"""
+						differs_from_classes(CppClass::RubyDoubleClasses + CppClass::RubyIntegerClasses).error_message("#{(@position+1).to_word} Argument must be a Float.")
 					when *IntegerTypes
-"""
-	#{comment_about_check}
-	if (TYPE(#{parameter_name}) != T_FIXNUM && TYPE(#{parameter_name}) != T_FLOAT)
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an Integer.\");"""
+						differs_from_classes(CppClass::RubyDoubleClasses + CppClass::RubyIntegerClasses).error_message("#{(@position+1).to_word} Argument must be an Integer.")
 					when *ArrayTypes
-"""
-	#{comment_about_check}
-	if (#{test_if_not_1darray} && #{differs_from_classes CppClass::ArrayClasses})
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an ArrayType (\\\"#{(CppClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\").\");"""
+						Conjunction.new([test_if_not_1darray, differs_from_classes(CppClass::ArrayClasses)]).error_message("#{(@position+1).to_word} Argument must be an ArrayType (\\\"#{(CppClass::ArrayClasses.map {|i| i.wrapped_class} + ["Array"]).join("\\\", \\\"")}\\\")")
 					when *MatrixTypes
-"""
-	#{comment_about_check}
-	if (#{test_if_not_2darray} && #{differs_from_classes CppClass::MatrixClasses})
-		rb_raise(rb_eArgError, \"Argument #{@position+1} must be an MatrixType (\\\"#{(CppClass::MatrixClasses.map {|i| i.wrapped_class} + ["Array< Array< Float > >"]).join("\\\", \\\"")}\\\").\");"""
+						Conjunction.new([
+		test_if_not_2darray,
+		differs_from_classes(CppClass::MatrixClasses)
+		]).error_message("#{(@position+1).to_word} Argument must be an MatrixType (\\\"#{(CppClass::MatrixClasses.map {|i| i.wrapped_class} + ["Array< Array< Float > >"]).join("\\\", \\\"")}\\\").")
 					else# implement other checks as needs be.
-						""
+						nil
 					end
+				end
+
+				def check
+					check_for_type(@type).rb_raise_if(nil, 1)
 				end
 
 				def has_input_class!

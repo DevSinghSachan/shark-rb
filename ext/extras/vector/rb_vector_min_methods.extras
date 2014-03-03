@@ -30,11 +30,8 @@ static Obtype log(Obtype & _vec) {
 
 	Obtype _log_vec = _vec;
 
-	for( typename Obtype::iterator itt = _vec.begin(); itt != _vec.end(); ++itt )
-		* itt = std::log(*itt);
-
-	// for (size_t i=0;i < _vec.size();i++)
-	// 	_log_vec(i) = std::log(_vec(i));
+	for (size_t i=0;i < _vec.size();i++)
+		_log_vec(i) = std::log(_vec(i));
 
 	return _log_vec;
 }
@@ -47,6 +44,13 @@ VALUE method_vector_get_log (VALUE self) {
 			rb_RealVector::rb_class(),
 			new rb_RealVector(log<>(*(m->getData())))
 			);
+}
+
+template<class Obtype>
+VALUE method_vector_get_sum (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return rb_float_new(sum(*(m->getData())));
 }
 
 template<class Obtype>
@@ -580,6 +584,7 @@ void Init_VectorMinMethods () {
 	Init_DatatypeDeepCopy<Obtype, rb_RealVector>();
 	rb_define_method(Obtype::rb_class(), "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_vector_get_sum<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_vector_get_mean<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_vector_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_vector_get_exp<Obtype>,0);

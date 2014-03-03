@@ -100,7 +100,7 @@ module HeaderFileGenerator
 			add_conversion_from("RealMatrixColumn").to("std::vector<double>").using create_type_conversion("realvector_to_stdvectordouble", "std::vector<double>")
 			add_conversion_from("RealMatrixColumn").to("Array").using create_type_conversion("realvector_to_rb_ary", "VALUE")
 	
-			add_conversion_from("RealMatrix").to("Array").using create_type_conversion("realvector_to_rb_ary", "VALUE")
+			add_conversion_from("RealMatrix").to("Array").using create_type_conversion("realmatrix_to_rb_ary", "VALUE")
 
 			add_conversion_from("Float").to("double").using create_type_conversion("NUM2DBL","double")
 			add_conversion_from("Float").to("int").using create_type_conversion("NUM2INT","int")
@@ -118,6 +118,8 @@ module HeaderFileGenerator
 			add_conversion_from("VALUE").to("rb_RealVector").using create_ruby_conversion("rb_RealVector")
 			add_conversion_from("VALUE").to("rb_RealMatrixColumn").using create_ruby_conversion("rb_RealMatrixColumn")
 			add_conversion_from("VALUE").to("rb_RealMatrixRow").using create_ruby_conversion("rb_RealMatrixRow")
+			add_conversion_from("VALUE").to("rb_RealMatrix").using create_ruby_conversion("rb_RealMatrix")
+			add_conversion_from("VALUE").to("rb_RealMatrixReference").using create_ruby_conversion("rb_RealMatrixReference")
 
 			add_conversion_from("rb_RealVector").to("RealVector").using create_ruby_conversion("rb_RealVector")
 			add_conversion_from("rb_RealVector").to("std::vector<double>").using create_combined_conversion(
@@ -139,6 +141,9 @@ module HeaderFileGenerator
 					create_ruby_conversion("rb_RealMatrixColumn"),
 					Conversions["RealVector"]["std::vector<double>"])
 
+			add_conversion_from("rb_RealMatrix").to("RealMatrix").using create_ruby_conversion("rb_RealMatrix")
+			add_conversion_from("rb_RealMatrixReference").to("RealMatrix").using create_ruby_conversion("rb_RealMatrixReference")
+
 			def self.create_castable_equivalences *equivs
 				equivs.each do |equiv|
 					equivs.each do |equiv_other|
@@ -149,6 +154,8 @@ module HeaderFileGenerator
 
 			create_castable_equivalences "RealVector", "RealMatrixColumn", "RealMatrixRow"
 			create_castable_equivalences "RealMatrix"
+			create_castable_equivalences "Fixnum"
+			create_castable_equivalences "Float"
 
 			def self.converts_to(typeName)
 				Conversions.fetch(typeName).keys

@@ -15,12 +15,12 @@ class Optimizer
     class LogisticRegression
 
         def initialize opts={}
-            @input = opts[:samples]
-            @labels = opts[:labels]
-            @number_of_inputs = opts[:number_of_inputs]
+            @input             = opts[:samples]
+            @labels            = opts[:labels]
+            @number_of_inputs  = opts[:number_of_inputs]
             @number_of_outputs = opts[:number_of_outputs]
-            @parameters = Shark::RealMatrix.new @number_of_inputs, @number_of_outputs
-            @bias = Shark::RealVector.new @number_of_outputs
+            @parameters        = Shark::RealMatrix.new @number_of_inputs, @number_of_outputs
+            @bias              = Shark::RealVector.new @number_of_outputs
         end
 
         def softmax x
@@ -84,7 +84,7 @@ def test_lr(learning_rate=0.01, n_epochs=200)
     ]
 
     # construct LogisticRegression
-    classifier = LogisticRegression samples: x,
+    classifier = Optimizer::LogisticRegression.new samples: x,
                                     labels: y,
                                     number_of_inputs: 6,
                                     number_of_outputs: 2

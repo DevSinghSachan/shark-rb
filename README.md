@@ -205,6 +205,64 @@ Check for stricter equality:
 	mat.row(0).to_a.to_realvector.eql? mat[0]
 	# => false
 
+
+##### Matrix and Vector sums #####
+
+In Numpy there's a nice feature for matrices with directed sums:
+
+	mat = numpy.array( [[1,2], [10, 20]])
+
+	mat.sum
+	#=> 33
+
+	numpy.sum(mat, axis=0)
+	#=> array([11, 22])
+
+	numpy.sum(mat, axis=1)
+	#=> array([ 3, 30])
+
+
+Can we replicate it here? Yes!
+
+	mat = Shark::RealMatrix.new [[1,2], [10, 20]]
+
+	mat.sum
+	# => 33.0
+
+	mat.sum :axis => 0
+	# => #<Optimizer::RealVector:0x007f980b8590f8 @data = [11.0, 22.0]> 
+
+	mat.sum :axis => 1
+	# => #<Optimizer::RealVector:0x007f980b898b40 @data = [3.0, 30.0]>
+
+
+And finally all these methods can also be accessed as follows for convenience:
+
+	mat.sum 1
+	# => #<Optimizer::RealVector:0x007f980b898b40 @data = [3.0, 30.0]>
+	mat.sum 0
+	# => #<Optimizer::RealVector:0x007f980b8590f8 @data = [11.0, 22.0]> 
+	mat.sum :rows
+	# => #<Optimizer::RealVector:0x007f980b873638 @data = [3.0, 30.0]>
+	mat.sum :columns
+	# => #<Optimizer::RealVector:0x007f980b8590f8 @data = [11.0, 22.0]>
+	mat.sum :axis => :columns
+	# => #<Optimizer::RealVector:0x007f980b8590f8 @data = [11.0, 22.0]>
+	mat.sum :axis => :rows
+	# => #<Optimizer::RealVector:0x007f980b873638 @data = [3.0, 30.0]>
+	mat.sum :direction => :rows
+	# => #<Optimizer::RealVector:0x007f980b873638 @data = [3.0, 30.0]>
+	# etc...
+
+
+For vectors, this is much more basic:
+
+	vec = [1, 2, 3].to_realvector
+
+	vec.sum
+	# => 6.0
+
+
 #### Matrix and Vector Initialization ###
 
 Okay, so **numpy** has beautiful syntax like this:

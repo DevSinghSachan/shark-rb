@@ -16,10 +16,9 @@ VALUE rb_RNG_Erlang::rb_class() {
 VALUE method_rb_RNG_Erlang_set_mean (VALUE self, VALUE parameter_1) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	r->getModel()->mean(NUM2DBL(parameter_1));
 	return self;
 }
@@ -27,10 +26,9 @@ VALUE method_rb_RNG_Erlang_set_mean (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Erlang_set_variance (VALUE self, VALUE parameter_1) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	r->getModel()->variance(NUM2DBL(parameter_1));
 	return self;
 }
@@ -38,34 +36,32 @@ VALUE method_rb_RNG_Erlang_set_variance (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Erlang_get_mean (VALUE self) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
+
 	return rb_float_new(r->getModel()->mean());
 }
 
 VALUE method_rb_RNG_Erlang_get_variance (VALUE self) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
+
 	return rb_float_new(r->getModel()->variance());
 }
 
 VALUE method_rb_RNG_Erlang_get_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
 VALUE method_rb_RNG_Erlang_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	return rb_float_new(r->getModel()->p(NUM2DBL(parameter_1)));
 }
 
@@ -80,7 +76,7 @@ VALUE method_rb_RNG_Erlang_initialize (VALUE self) {
 VALUE method_rb_RNG_Erlang_sample (VALUE self) {
 	rb_RNG_Erlang * r;
 	Data_Get_Struct(self, rb_RNG_Erlang, r);
-	
+
 	return rb_float_new((*(r->getModel()))());
 }
 

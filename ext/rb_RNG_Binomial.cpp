@@ -20,10 +20,9 @@ VALUE rb_RNG_Binomial::rb_class() {
 VALUE method_rb_RNG_Binomial_set_n (VALUE self, VALUE parameter_1) {
 	rb_RNG_Binomial * r;
 	Data_Get_Struct(self, rb_RNG_Binomial, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	r->getDistribution()->n(NUM2DBL(parameter_1));
 	return self;
 }
@@ -31,10 +30,9 @@ VALUE method_rb_RNG_Binomial_set_n (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Binomial_set_p (VALUE self, VALUE parameter_1) {
 	rb_RNG_Binomial * r;
 	Data_Get_Struct(self, rb_RNG_Binomial, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	r->getDistribution()->prob(NUM2DBL(parameter_1));
 	return self;
 }
@@ -42,24 +40,23 @@ VALUE method_rb_RNG_Binomial_set_p (VALUE self, VALUE parameter_1) {
 VALUE method_rb_RNG_Binomial_get_n (VALUE self) {
 	rb_RNG_Binomial * r;
 	Data_Get_Struct(self, rb_RNG_Binomial, r);
-	
+
 	return rb_float_new(r->getDistribution()->n());
 }
 
 VALUE method_rb_RNG_Binomial_get_p (VALUE self) {
 	rb_RNG_Binomial * r;
 	Data_Get_Struct(self, rb_RNG_Binomial, r);
-	
+
 	return rb_float_new(r->getDistribution()->prob());
 }
 
 VALUE method_rb_RNG_Binomial_get_prob (VALUE self, VALUE parameter_1) {
 	rb_RNG_Binomial * r;
 	Data_Get_Struct(self, rb_RNG_Binomial, r);
-	
-	// Checking whether parameter_1 is a "double"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be a Float.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be a Float.");
+
 	return rb_float_new(r->getDistribution()->p(NUM2DBL(parameter_1)));
 }
 
@@ -74,7 +71,7 @@ VALUE method_rb_RNG_Binomial_initialize (VALUE self) {
 VALUE method_rb_RNG_Binomial_sample (VALUE self) {
 	rb_RNG_Binomial * r;
 	Data_Get_Struct(self, rb_RNG_Binomial, r);
-	
+
 	return rb_float_new((*(r->getDistribution()))());
 }
 

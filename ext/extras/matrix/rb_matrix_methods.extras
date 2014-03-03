@@ -20,6 +20,83 @@ VALUE method_matrix_get_exp (VALUE self) {
 			);
 }
 
+template<class Obtype>
+VALUE sum_matrix_rows (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	RealVector directed_sum(m->getData()->size1());
+	for (size_t i=0;i< m->getData()->size1(); i++) {
+		directed_sum(i) = sum(row(*(m->getData()), i));
+	}
+	return wrap_pointer<rb_RealVector>(
+		rb_RealVector::rb_class(),
+		new rb_RealVector(directed_sum)
+		);
+}
+
+template<class Obtype>
+VALUE sum_matrix_columns (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	RealVector directed_sum(m->getData()->size2());
+	for (size_t i=0;i< m->getData()->size2(); i++) {
+		directed_sum(i) = sum(column(*(m->getData()), i));
+	}
+	return wrap_pointer<rb_RealVector>(
+		rb_RealVector::rb_class(),
+		new rb_RealVector(directed_sum)
+		);
+}
+
+template<class Obtype>
+static void method_matrix_get_sum_input_error() {
+	rb_raise(rb_eArgError, "To sum a %s you can: \n\t-specify a direction using symbols: :columns, or :rows\n\t-specify a direction for the axis: 0 or 1,\n\t-specify a hash with an axis or direction field that is either a Fixnum (1 or 0) or a Symbol (:columns or :rows).", rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
+VALUE method_matrix_get_sum_non_overloaded(VALUE self, VALUE direction) {
+	if (TYPE(direction) == T_SYMBOL) {
+		if (direction == rb_sym_new("rows")) {
+			return sum_matrix_rows<Obtype>(self);
+		} else if (direction == rb_sym_new("columns")) {
+			return sum_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_sum_input_error<Obtype>();
+		}
+	} else if (TYPE(direction) == T_FIXNUM) {
+		if (NUM2INT(direction) == 1) {
+			return sum_matrix_rows<Obtype>(self);
+		} else if (NUM2INT(direction) == 0) {
+			return sum_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_sum_input_error<Obtype>();
+		}
+	} else if (direction == Qnil) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		return rb_float_new(sum(*(m->getData())));
+	} else {
+		method_matrix_get_sum_input_error<Obtype>();
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_get_sum (int number_of_arguments, VALUE * ruby_arguments, VALUE self) {
+	VALUE direction = Qnil;
+	rb_scan_args(number_of_arguments, ruby_arguments, "01", &direction);
+
+	if (TYPE(direction) == T_HASH) {
+		VALUE hash_direction = rb_hash_aref(direction, rb_sym_new("axis"));
+		if (hash_direction == Qnil) {
+			hash_direction = rb_hash_aref(direction, rb_sym_new("direction"));
+		}
+		return method_matrix_get_sum_non_overloaded<Obtype>(self, hash_direction);
+	} else {
+		return method_matrix_get_sum_non_overloaded<Obtype>(self, direction);
+	}
+	return self;
+}
 
 template<class Obtype>
 static Obtype log(Obtype & _mat) {
@@ -1099,6 +1176,7 @@ template<class Obtype>
 void Init_MatrixMethods () {
 	Init_DatatypeDeepCopy<Obtype, rb_RealMatrix>();
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_matrix_get_inverse<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_matrix_get_sum<Obtype>, -1);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_matrix_get_mean<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_matrix_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_matrix_get_log<Obtype>,0);

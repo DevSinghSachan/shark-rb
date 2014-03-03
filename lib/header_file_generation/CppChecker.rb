@@ -85,10 +85,18 @@ module HeaderFileGenerator
 			def test_cpp_methods
 				(@methods + @setters + @getters).select {|i| i.class != HeaderFile::Allocator and i.class != HeaderFile::Initializer}.each_with_index do |method,k|
 					begin
-						print "\e[0;95;49mTesting\e[0m (\e[0;34;49m#{method.class.to_s.split("::").last}\e[0m) #{method.cpp_class}##{method.cpp_method_name}(#{method.parameters.map {|i| i.compatible_classes.first.cpp_class}.join(", ")}) "
+						print "\e[0;95;49mTesting\e[0m (\e[0;34;49m#{method.class.to_s.split("::").last}\e[0m) #{method.cpp_class}##{method.cpp_method_name}(#{method.parameters.map {|i| (i.is_a?(HeaderFile::Method::OverloadedInput) ? i.compatible_classes.for(i.output_classes.first) : i.compatible_classes).first.cpp_class}.join(", ")}) "
 						HeaderFile.test_cpp test_existence_of_method(method)
 					rescue NoMethodError => e
-						missing_cpp_classes = method.parameters.select {|i| i.compatible_classes.length == 0}.map {|i| "#{i.type} (#{i.position+1})"}
+						missing_cpp_classes = method.parameters.select do |i|
+							compatible_classes = i.compatible_classes
+							if compatible_classes.is_a? Proc
+								i.output_classes.map {|klass| compatible_classes.for(klass) }.any? {|j| j.length == 0}
+							else
+								compatible_classes.length == 0
+							end
+						end
+						missing_cpp_classes = missing_cpp_classes.map {|i| "#{i.type} (#{i.position+1})"}
 						if missing_cpp_classes.empty?
 							raise e
 						else

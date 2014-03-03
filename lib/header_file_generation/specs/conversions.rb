@@ -7,6 +7,7 @@ describe 'C++ HeaderFiles' do
 		@header_file_array  = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>()"], "cpp_dependencies" => ["extras/models/rb_abstract_model.extras"]
 		@header_file_getter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>"]
 		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel"], "dependencies" => ["<models/Nil>"]
+		@header_file_overloaded = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil"
 		
 		@vector_definition = {
 				"name" => "test",
@@ -24,6 +25,10 @@ describe 'C++ HeaderFiles' do
 				"name" => "test",
 				"types" => ["double"]
 			}
+		@overloaded_definition = {
+			"name" => "test",
+			"types" => [["double", "array"]]
+		}
 		@std_vector    = HeaderFileGenerator::HeaderFile::Method::CppClass.new("std::vector<double>", :pointer => true)
 		@rb_RealVector = HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealVector")
 		@RealVector    = HeaderFileGenerator::HeaderFile::Method::CppClass.new("RealVector")
@@ -31,15 +36,17 @@ describe 'C++ HeaderFiles' do
 
 	describe 'should create & own methods' do
 		before(:all) do
-			@header_file_getter.define_methods [@getter_definition]
-			@header_file_setter.define_methods [@setter_definition]
-			@header_file_vector.define_methods [@vector_definition]
-			@header_file_array.define_methods  [@array_definition]
+			@header_file_getter.define_methods      [@getter_definition]
+			@header_file_setter.define_methods      [@setter_definition]
+			@header_file_vector.define_methods      [@vector_definition]
+			@header_file_array.define_methods       [@array_definition]
+			@header_file_overloaded.define_methods  [@overloaded_definition]
 
-			@getter_method  = @header_file_getter.cpp_methods.select {|i| i.method_name == @getter_definition["name"]}.first
-			@vector_method  = @header_file_vector.cpp_methods.select {|i| i.method_name == @vector_definition["name"]}.first
-			@array_method   = @header_file_array.cpp_methods.select  {|i| i.method_name == @array_definition["name"] }.first
-			@setter_method  = @header_file_setter.cpp_methods.select {|i| i.method_name == @setter_definition["name"]}.first
+			@getter_method  = @header_file_getter.cpp_methods.select        {|i| i.method_name == @getter_definition["name"]}.first
+			@vector_method  = @header_file_vector.cpp_methods.select        {|i| i.method_name == @vector_definition["name"]}.first
+			@array_method   = @header_file_array.cpp_methods.select         {|i| i.method_name == @array_definition["name"] }.first
+			@setter_method  = @header_file_setter.cpp_methods.select        {|i| i.method_name == @setter_definition["name"]}.first
+			@overloaded_method = @header_file_overloaded.cpp_methods.select {|i| i.method_name == @overloaded_definition["name"]}.first
 		end
 
 		it 'and add those methods to method list' do
@@ -54,11 +61,16 @@ describe 'C++ HeaderFiles' do
 			@getter_method.should_not be_nil
 		end
 
+		it 'and add those methods with overloaded parameters to method list' do
+			@overloaded_method.should_not be_nil
+		end
+
 		describe 'whose parameters' do
 			before(:all) do
 				@vector_parameter = @vector_method.parameters.first
 				@array_parameter = @array_method.parameters.first
 				@getter_parameter = @getter_method.parameters.first
+				@overloaded_parameter = @overloaded_method.parameters.first
 			end
 
 			it 'should exist' do
@@ -69,6 +81,11 @@ describe 'C++ HeaderFiles' do
 			it 'should exist w/. pointers' do
 				@vector_parameter.should_not be_nil
 				@vector_parameter.class.should == HeaderFileGenerator::HeaderFile::Method::Input
+			end
+
+			it 'should exist w/. overloading' do
+				@overloaded_parameter.should_not be_nil
+				@overloaded_parameter.class.should == HeaderFileGenerator::HeaderFile::Method::OverloadedInput
 			end
 
 			it 'are empty when none are needed' do
@@ -185,6 +202,7 @@ describe 'C++ HeaderFiles' do
 			->(){ @setter_method.to_cpp_function_definition }.should_not raise_error
 			->(){ @vector_method.to_cpp_function_definition }.should_not raise_error
 			->(){ @array_method.to_cpp_function_definition  }.should_not raise_error
+			->(){ @overloaded_method.to_cpp_function_definition}.should_not raise_error
 		end
 	end
 

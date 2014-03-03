@@ -17,14 +17,14 @@ VALUE rb_Softmax::rb_class() {
 VALUE method_rb_Softmax_get_number_of_outputs (VALUE self) {
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
-	
+
 	return INT2FIX(r->getModel()->outputSize());
 }
 
 VALUE method_rb_Softmax_get_number_of_inputs (VALUE self) {
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
-	
+
 	return INT2FIX(r->getModel()->inputSize());
 }
 
@@ -39,10 +39,9 @@ VALUE method_rb_Softmax_initialize (VALUE self) {
 VALUE method_rb_Softmax_set_structure (VALUE self, VALUE parameter_1) {
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
-	
-	// Checking whether parameter_1 is an "int"
-	if (TYPE(parameter_1) != T_FIXNUM && TYPE(parameter_1) != T_FLOAT)
-		rb_raise(rb_eArgError, "Argument 1 must be an Integer.");
+	if ((TYPE(parameter_1) != T_FLOAT && TYPE(parameter_1) != T_FIXNUM))
+		rb_raise(rb_eArgError, "1st Argument must be an Integer.");
+
 	r->getModel()->setStructure(NUM2INT(parameter_1));
 	return self;
 }
@@ -50,37 +49,56 @@ VALUE method_rb_Softmax_set_structure (VALUE self, VALUE parameter_1) {
 VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 	rb_Softmax * r;
 	Data_Get_Struct(self, rb_Softmax, r);
-	
-	// Checking whether parameter_1 is a "vector"
-	if (TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM) && CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class())
-		rb_raise(rb_eArgError, "Argument 1 must be an ArrayType (\"RealVector\", \"RealVector\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\").");
+	if ((((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE( rb_ary_entry(ary, 0) ) != T_ARRAY) || (RARRAY_LEN(parameter_1) > 0 && RARRAY_LEN(rb_ary_entry(parameter_1, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FLOAT && TYPE(rb_ary_entry(rb_ary_entry(parameter_1, 0), 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealMatrix::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixReference::rb_class())) || ((TYPE(parameter_1) != T_ARRAY || (RARRAY_LEN(parameter_1) > 0 && TYPE(rb_ary_entry(parameter_1, 0)) != T_FLOAT && TYPE(rb_ary_entry(parameter_1, 0)) != T_FIXNUM)) && (CLASS_OF(parameter_1) != rb_RealVector::rb_class() && CLASS_OF(parameter_1) != rb_RealVectorReference::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixColumn::rb_class() && CLASS_OF(parameter_1) != rb_RealMatrixRow::rb_class()))))
+		rb_raise(rb_eArgError, "1st Argument must be an MatrixType (\"RealMatrix\", \"RealMatrixReference\", \"Array< Array< Float > >\")\n OR 1st Argument must be an ArrayType (\"RealVector\", \"RealVector\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\"");
 
-	// Converting parameters "parameter_1" before they can be used.
-	if (CLASS_OF(parameter_1) == rb_RealVector::rb_class()) {
 
-		rb_RealVector * parameter_1_converted;
-		Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
-		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
-	} else if (CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class()) {
+	// Converting parameter "parameter_1" before it can be used.
+	if ((TYPE(parameter_1) == T_ARRAY || CLASS_OF(parameter_1) == rb_RealMatrix::rb_class() || CLASS_OF(parameter_1) == rb_RealMatrixReference::rb_class())) {
+		// Checking whether overloaded input matches 1st possibility: RealMatrix.
+		if ((TYPE(parameter_1) == T_ARRAY)) {
+			RealMatrix parameter_1_converted = rb_ary_to_realmatrix(parameter_1);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		} else if ((CLASS_OF(parameter_1) == rb_RealMatrix::rb_class())) {
 
-		rb_RealVectorReference * parameter_1_converted;
-		Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
-		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
-	} else if (CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class()) {
+			rb_RealMatrix * parameter_1_converted;
+			Data_Get_Struct(parameter_1, rb_RealMatrix, parameter_1_converted);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		} else if ((CLASS_OF(parameter_1) == rb_RealMatrixReference::rb_class())) {
 
-		rb_RealMatrixColumn * parameter_1_converted;
-		Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
-		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
-	} else if (CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class()) {
+			rb_RealMatrixReference * parameter_1_converted;
+			Data_Get_Struct(parameter_1, rb_RealMatrixReference, parameter_1_converted);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		}
 
-		rb_RealMatrixRow * parameter_1_converted;
-		Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
-		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(*(parameter_1_converted->getData()))));
-	} else if (TYPE(parameter_1) == T_ARRAY) {
-		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
-		return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1_converted)));
+	} else if ((TYPE(parameter_1) == T_ARRAY || CLASS_OF(parameter_1) == rb_RealVector::rb_class() || CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class() || CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class() || CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class())) {
+		// Checking whether overloaded input matches 2nd possibility: RealVector.
+		if ((TYPE(parameter_1) == T_ARRAY)) {
+			RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		} else if ((CLASS_OF(parameter_1) == rb_RealVector::rb_class())) {
+
+			rb_RealVector * parameter_1_converted;
+			Data_Get_Struct(parameter_1, rb_RealVector, parameter_1_converted);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		} else if ((CLASS_OF(parameter_1) == rb_RealVectorReference::rb_class())) {
+
+			rb_RealVectorReference * parameter_1_converted;
+			Data_Get_Struct(parameter_1, rb_RealVectorReference, parameter_1_converted);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		} else if ((CLASS_OF(parameter_1) == rb_RealMatrixColumn::rb_class())) {
+
+			rb_RealMatrixColumn * parameter_1_converted;
+			Data_Get_Struct(parameter_1, rb_RealMatrixColumn, parameter_1_converted);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		} else if ((CLASS_OF(parameter_1) == rb_RealMatrixRow::rb_class())) {
+
+			rb_RealMatrixRow * parameter_1_converted;
+			Data_Get_Struct(parameter_1, rb_RealMatrixRow, parameter_1_converted);
+			return wrap_pointer<rb_RealVector>(rb_RealVector::rb_class(), new rb_RealVector((*(r->getModel()))(parameter_1)));
+		}
+
 	}
-
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.
 }
 
