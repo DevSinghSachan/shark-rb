@@ -23,12 +23,12 @@ module HeaderFileGenerator
 				->(input_param_name, out_param_name=nil, indent=0, pointer=false) {
 					puts "using a cast conversion to #{type} from #{fromtype}"
 					if out_param_name
-						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};"
+						"#{"\t"*indent}#{cpp_class.cpp_class} #{out_param_name} = #{input_param_name};CAST_CONVERSION"
 					else
 						if pointer
-							"&(#{input_param_name})"
+							"&(#{input_param_name})CAST_CONVERSION"
 						else
-							"#{input_param_name}"
+							"#{input_param_name}CAST_CONVERSION"
 						end
 					end
 				}
