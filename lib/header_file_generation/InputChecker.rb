@@ -6,6 +6,7 @@ module HeaderFileGenerator
 				def initialize tests=[]
 					@tests = tests
 					@message = nil
+					@negated = false
 				end
 
 				def default_message
@@ -14,6 +15,14 @@ module HeaderFileGenerator
 
 				def tests
 					@tests
+				end
+
+				def negate
+					@negated = true
+				end
+
+				def positive
+					@negated = false
 				end
 
 				def and other_test
@@ -52,13 +61,13 @@ module HeaderFileGenerator
 
 			class Conjunction < InputChecker
 				def to_s
-					"(" + @tests.map {|i| i.to_s}.join(" && ") + ")"
+					"#{@negated ? "(!" : ""}((" + @tests.map {|i| i.to_s}.join(" && ") + ")#{@negated ? ")" : ""}"
 				end
 			end
 
 			class Disjunction < InputChecker
 				def to_s
-					"(" + @tests.map {|i| i.to_s}.join(" || ") + ")"
+					"#{@negated ? "(!" : ""}(" + @tests.map {|i| i.to_s}.join(" || ") + ")#{@negated ? ")" : ""}"
 				end
 			end
 		end
