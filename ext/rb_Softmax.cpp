@@ -84,10 +84,6 @@ VALUE method_rb_Softmax_eval (VALUE self, VALUE parameter_1) {
 		RealVector parameter_1_converted = rb_ary_to_1d_realvector(parameter_1);
 		RealMatrix casted_output = (*(r->getModel()))(parameter_1_converted);
 		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
-	} else if (TYPE(parameter_1) == T_ARRAY) {
-		RealMatrix parameter_1_converted = rb_ary_to_realmatrix(parameter_1);
-		RealMatrix casted_output = (*(r->getModel()))(parameter_1_converted);
-		return wrap_pointer<rb_RealMatrix>(rb_RealMatrix::rb_class(), new rb_RealMatrix(casted_output));
 	}
 
 	return self; // cpp functions require return variable, so if all tests fail "self" is returned.

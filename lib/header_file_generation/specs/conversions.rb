@@ -136,6 +136,25 @@ describe 'C++ HeaderFiles' do
 					@vector_parameter.input_class = @array_parameter.compatible_classes.first
 					@vector_parameter.to_converted_form.should match /&.+#{@array_parameter.parameter_name}/
 				end
+
+				it 'should find reasonable compatible classes' do
+					inp = HeaderFileGenerator::HeaderFile::Method::Input.new(
+						type: :array,
+						output_class: HeaderFileGenerator::HeaderFile::Method::CppClass.guess_from_type(:array),
+						position: 0)
+					inp.compatible_classes.should include *[
+						@rb_RealVector,
+						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealVectorReference"),
+						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealMatrixRow"),
+						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealMatrixColumn"),
+						HeaderFileGenerator::HeaderFile::Method::CppClass::RubyArray
+					]
+					inp.compatible_classes.should_not include *[
+						HeaderFileGenerator::HeaderFile::Method::CppClass::Ruby2DArray,
+						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealMatrix"),
+						HeaderFileGenerator::HeaderFile::Method::CppClass.new("rb_RealMatrixReference")
+					]
+				end
 				
 			end
 

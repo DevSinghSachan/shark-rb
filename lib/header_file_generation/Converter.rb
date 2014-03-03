@@ -148,7 +148,8 @@ module HeaderFileGenerator
 				end
 			end
 
-			create_castable_equivalences "RealVector", "RealMatrix", "RealMatrixColumn", "RealMatrixRow"
+			create_castable_equivalences "RealVector", "RealMatrixColumn", "RealMatrixRow"
+			create_castable_equivalences "RealMatrix"
 
 			def self.converts_to(typeName)
 				Conversions.fetch(typeName).keys
@@ -200,6 +201,7 @@ module HeaderFileGenerator
 					@destination = type
 					origin_type = Conversions[@origin.to_s]
 					if origin_type
+						#puts origin_type[@destination.to_s]
 						if origin_type[@destination.to_s]
 							true
 						else
