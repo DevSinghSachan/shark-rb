@@ -10,6 +10,7 @@
 #include "rb_RNG_NegExponential.h"
 #include "rb_RNG_Normal.h"
 #include "rb_RNG_Poisson.h"
+#include "rb_Softmax.h"
 #include "rb_RNG_TruncatedExponential.h"
 #include "rb_RNG_Uniform.h"
 #include "rb_RNG_Weibull.h"
@@ -26,6 +27,7 @@ void Init_Generated_Headers() {
 	Init_rb_RNG_NegExponential();
 	Init_rb_RNG_Normal();
 	Init_rb_RNG_Poisson();
+	Init_rb_Softmax();
 	Init_rb_RNG_TruncatedExponential();
 	Init_rb_RNG_Uniform();
 	Init_rb_RNG_Weibull();

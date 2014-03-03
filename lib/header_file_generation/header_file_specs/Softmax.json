@@ -1,0 +1,49 @@
+{
+	"class" : "rb_Softmax",
+	"wrapped_class": "shark::Softmax",
+	"dependencies": [
+		"<shark/Models/Softmax.h>",
+		"ruby.h",
+		"rb_conversions.h",
+		"extras/models/rb_abstract_model.extras"
+	],
+	"rb_class" : "rb_optimizer_rng_poisson_klass",
+	"constructor_arguments": ["shark::Rng::globalRng"],
+	"initialization": [
+		"InitAbstractModel<rb_Softmax>"
+	],
+	"getters" : [
+		{
+			"name": "number_of_outputs",
+			"accessor_name": "outputSize",
+			"type": "int"
+		},
+		{
+			"name": "number_of_inputs",
+			"accessor_name": "inputSize",
+			"type": "int"
+		},
+		{
+			"name": "prob",
+			"accessor_name": "p",
+			"number_of_inputs": 1,
+			"types": ["double"],
+			"type": "double"
+		}
+	],
+	"setters" : [
+		{
+			"name": "set_structure",
+			"accessor_name": "setStructure",
+			"types": ["double"]
+		}
+	],
+	"methods": [
+		{
+			"name": "eval",
+			"accessor_name": "operator()",
+			"types": ["vector"],
+			"type": "vector"
+		}
+	]
+}

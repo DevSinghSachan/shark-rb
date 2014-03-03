@@ -3,10 +3,10 @@ require_relative '../header_file_generation'
 describe 'C++ HeaderFiles' do
 	before(:all) do
 		
-		@header_file_vector = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
-		@header_file_array  = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
-		@header_file_getter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
-		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "wrapped_class" => "rb_Nil", "class" => "Nil"
+		@header_file_vector = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel()"]
+		@header_file_array  = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>()"]
+		@header_file_getter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel<rb_Nil>"]
+		@header_file_setter = HeaderFileGenerator::HeaderFile.new "filename" => "test.json", "class" => "rb_Nil", "wrapped_class" => "Nil", "initialization" => ["InitAbstractModel"]
 		
 		@vector_definition = {
 				"name" => "test",
@@ -42,15 +42,15 @@ describe 'C++ HeaderFiles' do
 			@setter_method  = @header_file_setter.cpp_methods.select {|i| i.method_name == @setter_definition["name"]}.first
 		end
 
-		it 'should add methods to method list' do
+		it 'and add those methods to method list' do
 			@array_method.should_not be_nil
 		end
 
-		it 'should add methods w/. pointers to method list' do
+		it 'and add those methods w/. pointers to method list' do
 			@vector_method.should_not be_nil
 		end
 
-		it 'should add methods with no parameters to method list' do
+		it 'and add those methods with no parameters to method list' do
 			@getter_method.should_not be_nil
 		end
 
@@ -166,6 +166,30 @@ describe 'C++ HeaderFiles' do
 			->(){ @setter_method.to_cpp_function_definition }.should_not raise_error
 			->(){ @vector_method.to_cpp_function_definition }.should_not raise_error
 			->(){ @array_method.to_cpp_function_definition  }.should_not raise_error
+		end
+	end
+
+	describe 'should create an initialization function' do
+		it 'that should create an initialization function' do
+			[
+				@header_file_vector,
+				@header_file_vector,
+				@header_file_getter,
+				@header_file_setter
+			].each do |header|
+				header.generate_init_function.should match /#{header.init_function_name}/
+			end
+		end
+
+		it 'that should create extra initializations functions' do
+			[
+				@header_file_vector,
+				@header_file_vector,
+				@header_file_getter,
+				@header_file_setter
+			].each do |header|
+				header.generate_init_function.should match /#{header.init_functions.first["()"] ? header.init_functions.first : (header.init_functions.first + "()")}/
+			end
 		end
 	end
 end

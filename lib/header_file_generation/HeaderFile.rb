@@ -4,6 +4,7 @@ module HeaderFileGenerator
 		attr_reader :getters
 		attr_reader :setters
 		attr_reader :cpp_class
+		attr_reader :init_functions
 		attr_reader :pointer_acquirer
 		attr_reader :pointer_name
 
@@ -42,6 +43,7 @@ module HeaderFileGenerator
 			@dependencies                  = opts["dependencies"]
 			@pointer_acquirer              = [(opts["pointer_getter"] || "getModel")].flatten
 			@pointer_name                  = opts["pointer_name"] || "model"
+			@init_functions                = opts["initialization"] || []
 			raise StandardError.new "pointer_name: \"#{opts["pointer_name"] || "model"}\" cannot have the same name as one of the class methods (pointer_getter) : \"#{[(opts["pointer_getter"] || "getModel")].flatten.join("\", \"")}\"" if [(opts["pointer_getter"] || "getModel")].flatten.include?(opts["pointer_name"] || "model")
 			@cpp_class                     = Method::CppClass.new opts["class"]
 			@rb_class_name                 = opts["rb_class"]
@@ -69,6 +71,7 @@ module HeaderFileGenerator
 			@methods.each do |method|
 				rb_function_definitions << ("\t"+method.to_rb_function_definition)
 			end
+			rb_function_definitions += @init_functions.map {|i| i.match(/.+\(\)/) ? i+";" : i+"();"}
 			func_definition = rb_function_definitions.join("\n")
 """
 void #{init_function_name} () {

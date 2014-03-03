@@ -14,20 +14,26 @@ VALUE rb_UnlabeledData::rb_class () {
 rb_UnlabeledData::rb_UnlabeledData(UnlabeledData<RealVector> _data) {
 	data = _data;
 }
+
 rb_UnlabeledData::rb_UnlabeledData() {
 }
-vector<RealVector> rb_UnlabeledData::input () {
-	vector<RealVector> my_input(data.numberOfElements());
-	for (size_t i=0; i<data.numberOfElements(); i++)
+
+UnlabeledData<RealVector>* rb_UnlabeledData::getData() {
+	return &data;
+}
+
+std::vector<RealVector> rb_UnlabeledData::input () {
+	std::vector<RealVector> my_input(getData()->numberOfElements());
+	for (size_t i=0; i<getData()->numberOfElements(); i++)
 	{
-		RealVector output(data.element(i));
+		RealVector output(getData()->element(i));
 		my_input[i] = output;
 	}
 	return my_input;
 }
 
 void rb_UnlabeledData::remove_NaN(double replacement = 0.0) {
-	BOOST_FOREACH(UnlabeledData<RealVector>::element_reference vector, data.elements()) {
+	BOOST_FOREACH(UnlabeledData<RealVector>::element_reference vector, getData()->elements()) {
 		for (size_t i = 0;i< vector.size();i++)
 			if (vector(i) != vector(i))
 				vector(i) = replacement;
@@ -35,7 +41,7 @@ void rb_UnlabeledData::remove_NaN(double replacement = 0.0) {
 }
 
 void rb_UnlabeledData::fill(double replacement) {
-	BOOST_FOREACH(UnlabeledData<RealVector>::element_reference vector, data.elements()) {
+	BOOST_FOREACH(UnlabeledData<RealVector>::element_reference vector, getData()->elements()) {
 		std::fill(vector.begin(), vector.end(), replacement);
 	}
 }
@@ -84,7 +90,7 @@ VALUE method_unlabeleddata_initialize (int number_of_arguments, VALUE* ruby_argu
 		&dataset);
 
 	if (TYPE(dataset) == T_ARRAY)
-		s->data = rb_ary_to_unlabeleddata(dataset);
+		*(s->getData()) = rb_ary_to_unlabeleddata(dataset);
 
 	return self;
 }
@@ -93,19 +99,17 @@ VALUE method_unlabeleddata_initialize (int number_of_arguments, VALUE* ruby_argu
 VALUE method_unlabeleddata_length (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
-	return INT2FIX((s->data).numberOfElements());
+	return INT2FIX(s->getData()->numberOfElements());
 }
 VALUE method_unlabeleddata_batchlength (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
-	return INT2FIX((s->data).numberOfBatches());
+	return INT2FIX(s->getData()->numberOfBatches());
 }
 VALUE method_unlabeleddata_empty (VALUE self) {
 	rb_UnlabeledData *s;
 	Data_Get_Struct(self, rb_UnlabeledData, s);
-	// if ((s->data).empty())
-	// 	return Qtrue;
-	return (s->data).empty() ? Qtrue : Qfalse;
+	return s->getData()->empty() ? Qtrue : Qfalse;
 }
 VALUE method_unlabeleddata_fill (VALUE self, VALUE filling) {
 	if (TYPE(filling) != T_FLOAT && TYPE(filling) != T_FIXNUM)
@@ -146,13 +150,13 @@ VALUE method_unlabeleddata_insert (VALUE self, VALUE position, VALUE assignment)
 	rb_RealVector *a;
 	Data_Get_Struct(assignment, rb_RealVector, a);
 	if (NUM2INT(position) < 0) {
-		if (NUM2INT(position) < (int)-(s->data).numberOfElements())
+		if (NUM2INT(position) < int(-(s->getData()->numberOfElements())))
 			rb_raise(rb_eArgError, "Out of range.");
-		(s->data).element((s->data).numberOfElements() + NUM2INT(position)) = a->data;
+		s->getData()->element(s->getData()->numberOfElements() + NUM2INT(position)) = *(a->getData());
 	} else {
-		if (NUM2INT(position) >= (int)(s->data).numberOfElements())
+		if (NUM2INT(position) >= int(s->getData()->numberOfElements()))
 			rb_raise(rb_eArgError, "Out of range.");
-		(s->data).element(NUM2INT(position)) = a->data;
+		s->getData()->element(NUM2INT(position)) = *(a->getData());
 	}
 	return self;
 }
@@ -164,7 +168,7 @@ VALUE method_unlabeleddata_mean (VALUE self) {
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return wrap_pointer<rb_RealVector>(
 		rb_RealVector::rb_class(),
-		new rb_RealVector(mean(s->data))
+		new rb_RealVector(mean(*(s->getData())))
 	);
 }
 // We wrap the variance method of Shark with a realvector
@@ -173,7 +177,7 @@ VALUE method_unlabeleddata_variance (VALUE self) {
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return wrap_pointer<rb_RealVector>(
 		rb_RealVector::rb_class(),
-		new rb_RealVector(variance(s->data))
+		new rb_RealVector(variance(*(s->getData())))
 	);
 }
 
@@ -182,7 +186,7 @@ VALUE method_unlabeleddata_covariance (VALUE self) {
 	Data_Get_Struct(self, rb_UnlabeledData, s);
 	return wrap_pointer<rb_RealMatrix>(
 		rb_RealMatrix::rb_class(),
-		new rb_RealMatrix(covariance(s->data))
+		new rb_RealMatrix(covariance(*(s->getData())))
 	);
 }
 
@@ -196,7 +200,7 @@ VALUE method_unlabeleddata_shift (VALUE self, VALUE shift_vector) {
 
 	rb_RealVector *v;
 	Data_Get_Struct(shift_vector, rb_RealVector, v);
-	s->data = transform(s->data, shark::Shift(-(v->data)));
+	*(s->getData()) = transform(*(s->getData()), shark::Shift(-(*(v->getData()))));
 	return self;
 }
 
@@ -211,7 +215,7 @@ VALUE method_unlabeleddata_posshift (VALUE self, VALUE shift_vector) {
 
 	rb_RealVector *v;
 	Data_Get_Struct(shift_vector, rb_RealVector, v);
-	s->data = transform(s->data, shark::Shift((v->data)));
+	*(s->getData()) = transform(*(s->getData()), shark::Shift(*(v->getData())));
 	return self;
 }
 
@@ -229,7 +233,7 @@ VALUE method_unlabeleddata_truncate (VALUE self, VALUE minX, VALUE minY) {
 	Data_Get_Struct(minX, rb_RealVector,    minVX);
 	Data_Get_Struct(minY, rb_RealVector,    minVY);
 
-	s->data = transform(s->data, shark::Truncate(minVX->data, minVY->data));
+	*(s->getData()) = transform(*(s->getData()), shark::Truncate(*(minVX->getData()), *(minVY->getData())));
 	return self;
 }
 
@@ -251,7 +255,7 @@ VALUE method_unlabeleddata_truncate_and_rescale (VALUE self, VALUE minX, VALUE m
 		Data_Get_Struct(minX, rb_RealVector,    minVX);
 		Data_Get_Struct(minY, rb_RealVector,    minVY);
 
-		s->data = transform(s->data, shark::TruncateAndRescale(minVX->data, minVY->data, NUM2DBL(newMin), NUM2DBL(newMax)));
+		*(s->getData()) = transform(*(s->getData()), shark::TruncateAndRescale(*(minVX->getData()), *(minVY->getData()), NUM2DBL(newMin), NUM2DBL(newMax)));
 
 	} else {
 		rb_raise(rb_eArgError, "New scale must be bounded by numbers");

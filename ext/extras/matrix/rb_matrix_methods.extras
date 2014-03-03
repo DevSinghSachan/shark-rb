@@ -96,6 +96,22 @@ VALUE method_matrix_to_ary (VALUE self) {
 	return realmatrix_to_rb_ary(*(m->getData()));
 }
 
+template<class Obtype>
+VALUE method_matrix_to_unlabeleddata (VALUE self) {
+    Obtype *m;
+    Data_Get_Struct(self, Obtype, m);
+
+    std::vector<RealVector > elements(m->getData()->size1());
+
+    for (size_t i=0; i< m->getData()->size1(); i++)
+        elements[i] = row(*(m->getData()), i);
+
+    return wrap_pointer<rb_UnlabeledData>(
+        rb_UnlabeledData::rb_class(),
+        new rb_UnlabeledData(shark::createDataFromRange(elements))
+    );
+}
+
 template<class matType, class Obtype>
 static VALUE add_matrix_with_matrix(Obtype* m, VALUE adder) {
 	matType *other;
@@ -213,11 +229,11 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
 			return add_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
+			return add_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
 			return add_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return add_matrix_with_vector<rb_RealVector>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return add_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
 		} else {
 			rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
 		}
@@ -279,11 +295,11 @@ VALUE method_matrix_subtract (VALUE self, VALUE rb_other) {
 		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
 			return subtract_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
+			return subtract_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
 			return subtract_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return subtract_matrix_with_vector<rb_RealVector>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return subtract_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
 		} else {
 			rb_raise(rb_eArgError, "You can only subtract Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
 		}
@@ -429,7 +445,7 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return add_equals_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
@@ -1066,6 +1082,8 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "columns", (rb_method)method_matrix_to_columns<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "to_unlabeleddata", (rb_method)method_matrix_to_unlabeleddata<Obtype>,0);
+	rb_define_alias("to_unlabeled_data", "to_unlabeleddata");
 	rb_define_method(Obtype::rb_class(), "cols", (rb_method)method_matrix_to_columns<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "*", (rb_method)method_matrix_multiply<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "**", (rb_method)method_matrix_get_pow<Obtype>, 1);

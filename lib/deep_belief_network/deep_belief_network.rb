@@ -1,4 +1,5 @@
 require 'shark-rb'
+require_relative 'LogisticRegression'
 require_relative 'HiddenLayer'
 require_relative 'DBN'
 

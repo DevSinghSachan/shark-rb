@@ -6,10 +6,7 @@
 #include <boost/format.hpp>
 #include <shark/Data/Dataset.h>
 #include "rb_conversions.h"
-#include "rb_RealVector.h"
-#include "rb_RealMatrixRow.h"
-#include "rb_RealMatrixColumn.h"
-#include "rb_RealMatrix.h"
+#include "rb_Datatypes.h"
 
 
 using namespace std;
