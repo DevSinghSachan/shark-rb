@@ -104,6 +104,7 @@ module HeaderFileGenerator
 			def checking_methodology some_parameters, indent=0
 				checks = []
 				some_parameters.each do |param|
+					puts param.check(indent)
 					checks << param.check(indent)
 				end
 				checks.join("\n")
