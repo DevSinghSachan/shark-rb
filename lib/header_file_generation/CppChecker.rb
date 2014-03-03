@@ -85,7 +85,7 @@ module HeaderFileGenerator
 			def test_cpp_methods
 				(@methods + @setters + @getters).select {|i| i.class != HeaderFile::Allocator and i.class != HeaderFile::Initializer}.each_with_index do |method,k|
 					begin
-						print "\e[0;95;49mTesting\e[0m (\e[0;34;49m#{method.class.to_s.split("::").last}\e[0m) #{method.cpp_class}##{method.cpp_method_name}(#{method.parameters.map {|i| (i.is_a?(HeaderFile::Method::OverloadedInput) ? i.compatible_classes.for(i.output_classes.first) : i.compatible_classes).first.cpp_class}.join(", ")}) "
+						print "\e[0;95;49mTesting\e[0m (\e[0;34;49m#{method.class.to_s.split("::").last}\e[0m) #{method.cpp_class}##{method.cpp_method_name}(#{method.parameters.map {|i| i.is_a?(HeaderFile::Method::OverloadedInput) ? ("[" + i.output_classes.map {|k| i.compatible_classes.for(k).first.cpp_class }.join(", ") +"]") : i.compatible_classes.first.cpp_class}.join(", ")}) "
 						HeaderFile.test_cpp test_existence_of_method(method)
 					rescue NoMethodError => e
 						missing_cpp_classes = method.parameters.select do |i|
