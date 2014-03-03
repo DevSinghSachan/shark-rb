@@ -57,7 +57,7 @@ module HeaderFileGenerator
 				end
 
 				def casted_variable_name
-					output_name+"_casted"
+					"casted_output"
 				end
 
 				def cast_variable
