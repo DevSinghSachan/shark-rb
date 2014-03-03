@@ -125,7 +125,7 @@ module HeaderFileGenerator
 					output = Output.new(call_methodology, :type => @return_type, :cast => @cast_return_type)
 					if output.requires_cast?
 						(
-							("\t"*indent) + output.cast_variable    + ";" +
+							("\t"*indent) + output.cast_variable    + ";\n" +
 							("\t"*indent) + "return " + output.to_s + ";"
 						)
 					else
