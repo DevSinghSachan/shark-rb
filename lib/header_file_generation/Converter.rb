@@ -147,13 +147,15 @@ module HeaderFileGenerator
 			def self.create_castable_equivalences *equivs
 				equivs.each do |equiv|
 					equivs.each do |equiv_other|
+						Conversions[equiv] ||= {}
+						Conversions[equiv][equiv_other] ||= {}
 						Conversions[equiv][equiv_other] = create_cast_conversion equiv_other
 					end
 				end
 			end
 
 			create_castable_equivalences "RealVector", "RealMatrixColumn", "RealMatrixRow"
-			create_castable_equivalences "RealMatrix"
+			create_castable_equivalences "RealMatrix", "RealMatrixReference"
 			create_castable_equivalences "Fixnum"
 			create_castable_equivalences "Float"
 

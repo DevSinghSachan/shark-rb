@@ -140,19 +140,23 @@ module HeaderFileGenerator
 					if @input_class.nil? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" before an input class was determined. (#{@method.header_file.inspect})" end
 				end
 
-				def to_converted_form
-					case @type
+				def to_converted_form_for_type type, outclass
+					case type
 					when :double
 						Converter.convert(parameter_name).from(Float).to("double").to_s
 					when *IntegerTypes
 						Converter.convert(parameter_name).from(Fixnum).to("int").to_s
 					when *(MatrixTypes+ArrayTypes + (MatrixTypes+ArrayTypes).map {|i| (i.to_s + "*").to_sym})
 						has_input_class!
-						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(@output_class)
+						Converter.convert(@input_class.converted_parameter_pointer(converted_parameter_name)).from(@input_class.wrapped_class).to(outclass)
 					else # must've been converted beforehand...
 						#if requires_conversion? then raise RuntimeError.new "#{parameter_name} of type #{@type} was used in method \"#{@method.method_name}\" accessed via \"#{@method.cpp_method_name}\" with no conversion." end
 						parameter_name
 					end
+				end
+
+				def to_converted_form
+					to_converted_form_for_type @type, @output_class
 				end
 
 				def to_s
