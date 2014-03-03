@@ -122,7 +122,15 @@ module HeaderFileGenerator
 				if @return_type.downcase == :nil
 					"#{call_methodology(indent)};\n#{"\t"*indent}return self;"
 				else
-					("\t"*indent) + "return " + Output.new(call_methodology, :type => @return_type, :cast => @cast_return_type).to_s + ";"
+					output = Output.new(call_methodology, :type => @return_type, :cast => @cast_return_type)
+					if output.requires_cast?
+						(
+							("\t"*indent) + output.cast_variable    + ";" +
+							("\t"*indent) + "return " + output.to_s + ";"
+						)
+					else
+						("\t"*indent) + "return " + output.to_s + ";"
+					end
 				end
 			end
 

@@ -50,6 +50,16 @@ module HeaderFileGenerator
 					@type = typeName
 				end
 
+				def declare_variable name
+					declaration = ->(varname_from=nil){
+						"#{wrapped_class}#{pointer? ? " *" : ""} #{name}" + (varname_from ? " = #{varname_from}" : "")
+					}
+					def declaration.from from_name
+						self.call(from_name)
+					end
+					declaration
+				end
+
 				MatrixClasses = [
 					CppClass.new("rb_RealMatrix"),
 					CppClass.new("rb_RealMatrixReference")

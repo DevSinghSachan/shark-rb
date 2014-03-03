@@ -21,6 +21,7 @@ module HeaderFileGenerator
 				def initialize(name, opts={})
 					@type = opts[:type].to_sym
 					@converted = false
+					@cast      = opts[:cast].nil? ? false : opts[:cast]
 					@output_name = name
 					@output_class = compatible_class
 				end
@@ -51,22 +52,36 @@ module HeaderFileGenerator
 					@output_class.to_rb val
 				end
 
+				def requires_cast?
+					@cast
+				end
+
+				def casted_variable_name
+					output_name+"_casted"
+				end
+
+				def cast_variable
+					# could add a protection here to check if variable was casted...
+					@output_class.declare_variable(casted_variable_name).from(output_name)
+				end
+
 				def to_converted_form
+					out_name = requires_cast? ? casted_variable_name : output_name
 					case @type.downcase
 					when :double
-						Converter.convert(output_name).from("double").to Float
+						Converter.convert(out_name).from("double").to Float
 					when *IntegerTypes
-						Converter.convert(output_name).from("int").to Fixnum
+						Converter.convert(out_name).from("int").to Fixnum
 					when :rubyarray
-						Converter.convert(output_name).from("RealVector").to Array
+						Converter.convert(out_name).from("RealVector").to Array
 					when :ruby2darray
-						Converter.convert(output_name).from("RealMatrix").to Array
+						Converter.convert(out_name).from("RealMatrix").to Array
 						# should check c++ function signature here.
 					when *ObjectTypes
 						if @output_class.nil? then raise RuntimeError.new "#{output_name} of type #{@type} was used before an output class was determined." end
-						convert_into_rb_object output_name
+						convert_into_rb_object out_name
 					else # must've been converted beforehand...
-						output_name
+						out_name
 					end
 				end
 
