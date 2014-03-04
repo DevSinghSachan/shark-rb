@@ -92,6 +92,44 @@ Then you may want to do the following:
 Where `my_rb_class` is the named of the C++ class wrapped your object.
 
 
+Overloading Methods
+-------------------
+
+C++ allows methods to be overloading, meaning that different combinations of parameters will trigger
+different functions. Because Ruby has no type checking for its methods the way to implement this is
+to call the same method for each overloading and test within the function call what function we want.
+
+Say we want to wrap a C++ header with an overloaded functions `test_func` which either takes
+
+2. 1 Integer
+1. 2 Doubles
+
+
+To separate out these two cases we add an *overload* field to our method declaration with the
+input types specified in the `types` array. The return type changes, so we can specify it too with
+`type` as shown below:
+
+
+	{
+		"methods": [
+			{
+				"name": "test",
+				"accessor_name": "test_func",
+				"overload": [
+					{
+						"types": ["int"],
+						"type": "int"
+					},
+					{
+						"types": ["double", "double"],
+						"type": "double"
+					}
+				]
+			}
+		]
+	}
+
+
 Notes
 -----
 

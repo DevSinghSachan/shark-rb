@@ -19,14 +19,32 @@ class Optimizer::RealMatrixReference
 	include(MatrixInspector)
 end
 
+class Float
+	alias_method :old_multiply, :*
+	def *(other)
+		[
+			Optimizer::RealVector, Optimizer::RealVectorReference, Optimizer::RealMatrix, Optimizer::RealMatrixReference, Optimizer::RealMatrixRow, Optimizer::RealMatrixColumn
+		].include?(other.class) ? (other * self) : self.old_multiply(other)
+	end
+end
+
+class Fixnum
+	alias_method :old_multiply, :*
+	def *(other)
+		[
+			Optimizer::RealVector, Optimizer::RealVectorReference, Optimizer::RealMatrix, Optimizer::RealMatrixReference, Optimizer::RealMatrixRow, Optimizer::RealMatrixColumn
+		].include?(other.class) ? (other * self) : self.old_multiply(other)
+	end
+end
+
 class Array
 	alias_method :old_sum, :+
 
 	def +(other)
-		other.class == Optimizer::RealVector ? (other + self) : self.old_sum(other)
+		[
+			Optimizer::RealVector, Optimizer::RealVectorReference, Optimizer::RealMatrix, Optimizer::RealMatrixReference, Optimizer::RealMatrixRow, Optimizer::RealMatrixColumn
+		].include?(other.class) ? (other + self) : self.old_sum(other)
 	end
-
-	alias_method :old_product, :+ # could do the same for scalars.
 end
 
 module ArrayInspector

@@ -24,6 +24,20 @@ VALUE method_vector_get_exp (VALUE self) {
 			);
 }
 
+template<class Obtype>
+VALUE method_vector_get_max (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return m->getData()->size() > 0 ? rb_float_new(max(*(m->getData()))) : Qnil;
+}
+
+template<class Obtype>
+VALUE method_vector_get_min (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return m->getData()->size() > 0 ? rb_float_new(min(*(m->getData()))) : Qnil;
+}
+
 
 template<class Obtype>
 static Obtype log(Obtype & _vec) {
@@ -586,6 +600,8 @@ void Init_VectorMinMethods () {
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_vector_get_sum<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_vector_get_mean<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "min", (rb_method)method_vector_get_min<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "max", (rb_method)method_vector_get_max<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_vector_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_vector_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_vector_get_log<Obtype>,0);

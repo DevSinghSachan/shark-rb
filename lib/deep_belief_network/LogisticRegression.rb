@@ -25,29 +25,40 @@ class Optimizer
 
         def softmax x
             e = (x - x.max).exp
-            if e.size == 1
-                e / e.sum(:columns)  # sum columns...
+            case e
+            when Shark::RealVector, Shark::RealVectorReference, Shark::RealMatrixColumn, Shark::RealMatrixRow
+                e / e.sum  # sum columns...
             else
-                e / ~(e.sum(:rows))
+                puts e.size.inspect
+                puts e.sum(axis:1).size.inspect
+                e / e.sum(axis:1)
             end
         end
 
         def output x
-             #softmax(x * @parameters + @bias)
-            soft = Shark::Softmax.new
-            soft.set_structure(@number_of_outputs)
-            soft.eval(x * @parameters + @bias) # this could be a matrix too!
+            if x.is_a?(Array)
+                output (~x.to_realvector.to_matrix)
+            else
+                softmax(x * @parameters + @bias)
+                # why doesnt this work??
+                # soft = Shark::Softmax.new
+                # soft.set_structure(@number_of_outputs)
+                # soft.eval(x * @parameters + @bias) # this could be a matrix too!
+            end
         end
 
         def train opts={}
             if opts[:input] then @input = opts[:input] end
             l2_reg        = opts[:l2_reg] || 0.0
-            learning_rate = opts[:learning_rate] || 0.01
+            lr            = opts[:learning_rate] || 0.01
 
             p_y_given_x  = output @input
             d_y          = @labels - p_y_given_x
-            @parameters += (~@parameters) * dy * learning_rate -  @parameters * learning_rate * l2_reg
-            @bias       += (d_y.mean * learning_rate)
+            puts (lr * (~@input * d_y) - lr * l2_reg * @parameters).to_a
+            @parameters += lr * (~@input * d_y) - lr * l2_reg * @parameters
+            @bias       += lr * d_y.mean
+            # print "@bias.to_a => ", @bias.to_a, "\n"
+            # print "@parameters.to_a => ", @parameters.to_a, "\n"
         end
 
         def negative_log_likelihood
@@ -64,7 +75,7 @@ class Optimizer
 end
 
 
-def test_lr(learning_rate=0.01, n_epochs=200)
+def test_lr(learning_rate=0.01, n_epochs=2)
     # training data
     x = Shark::RealMatrix.new [
         [1,1,1,0,0,0],
@@ -102,7 +113,8 @@ def test_lr(learning_rate=0.01, n_epochs=200)
         [1, 1, 1, 1, 1, 0]
     ]
 
-    print classifier.predict(x)
+    puts classifier.predict(x)
+    puts classifier.output([1, 1, 0, 0, 0, 0]).to_a
 
 end
 

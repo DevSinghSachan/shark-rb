@@ -132,7 +132,7 @@ VALUE method_linearmodel_hasOffset(VALUE self) {
 };
 
 void linearmodel_rb_error_unmatched_dimensions(shark::Exception e) {
-	rb_raise(rb_eRuntimeError, (std::string(e.what()) + "\nCheck that the the data you are inputting matches the linear models's input size.").c_str());
+	rb_raise(rb_eRuntimeError, "%s\nCheck that the the data you are inputting matches the linear models's input size.", e.what());
 }
 
 VALUE method_linearmodel_eval(VALUE self, VALUE dataset) {

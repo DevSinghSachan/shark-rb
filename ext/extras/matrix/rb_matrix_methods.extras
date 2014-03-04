@@ -99,6 +99,182 @@ VALUE method_matrix_get_sum (int number_of_arguments, VALUE * ruby_arguments, VA
 }
 
 template<class Obtype>
+VALUE max_matrix_rows (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	RealVector directed_max(m->getData()->size1());
+	for (size_t i=0;i< m->getData()->size1(); i++) {
+		directed_max(i) = max(row(*(m->getData()), i));
+	}
+	return wrap_pointer<rb_RealVector>(
+		rb_RealVector::rb_class(),
+		new rb_RealVector(directed_max)
+		);
+}
+
+template<class Obtype>
+VALUE max_matrix_columns (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	RealVector directed_max(m->getData()->size2());
+	for (size_t i=0;i< m->getData()->size2(); i++) {
+		directed_max(i) = max(column(*(m->getData()), i));
+	}
+	return wrap_pointer<rb_RealVector>(
+		rb_RealVector::rb_class(),
+		new rb_RealVector(directed_max)
+		);
+}
+
+template<class Obtype>
+static double calculate_matrix_max(Obtype& _mat) {
+	double _max = -std::numeric_limits<double>::infinity();
+	for (size_t i=0;i<_mat.size1();i++) {
+		double new_max = max(row(_mat, i));
+		_max = new_max > _max ? new_max : _max;
+	}
+	return _max;
+}
+
+template<class Obtype>
+static double calculate_matrix_min(Obtype& _mat) {
+	double _min = std::numeric_limits<double>::infinity();
+	for (size_t i=0;i<_mat.size1();i++) {
+		double new_min = min(row(_mat, i));
+		_min = new_min < _min ? new_min : _min;
+	}
+	return _min;
+}
+
+template<class Obtype>
+static void method_matrix_get_max_input_error() {
+	rb_raise(rb_eArgError, "To obtain the max of a %s you can: \n\t-specify a direction using symbols: :columns, or :rows\n\t-specify a direction for the axis: 0 or 1,\n\t-specify a hash with an axis or direction field that is either a Fixnum (1 or 0) or a Symbol (:columns or :rows).", rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
+VALUE method_matrix_get_max_non_overloaded(VALUE self, VALUE direction) {
+	if (TYPE(direction) == T_SYMBOL) {
+		if (direction == rb_sym_new("rows")) {
+			return max_matrix_rows<Obtype>(self);
+		} else if (direction == rb_sym_new("columns")) {
+			return max_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_max_input_error<Obtype>();
+		}
+	} else if (TYPE(direction) == T_FIXNUM) {
+		if (NUM2INT(direction) == 1) {
+			return max_matrix_rows<Obtype>(self);
+		} else if (NUM2INT(direction) == 0) {
+			return max_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_max_input_error<Obtype>();
+		}
+	} else if (direction == Qnil) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		return (m->getData()->size1() > 0 && m->getData()->size2() > 0) ? rb_float_new(calculate_matrix_max<>(*(m->getData()))) : Qnil;
+	} else {
+		method_matrix_get_max_input_error<Obtype>();
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_get_max (int number_of_arguments, VALUE * ruby_arguments, VALUE self) {
+	VALUE direction = Qnil;
+	rb_scan_args(number_of_arguments, ruby_arguments, "01", &direction);
+
+	if (TYPE(direction) == T_HASH) {
+		VALUE hash_direction = rb_hash_aref(direction, rb_sym_new("axis"));
+		if (hash_direction == Qnil) {
+			hash_direction = rb_hash_aref(direction, rb_sym_new("direction"));
+		}
+		return method_matrix_get_max_non_overloaded<Obtype>(self, hash_direction);
+	} else {
+		return method_matrix_get_max_non_overloaded<Obtype>(self, direction);
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE min_matrix_rows (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	RealVector directed_min(m->getData()->size1());
+	for (size_t i=0;i< m->getData()->size1(); i++) {
+		directed_min(i) = min(row(*(m->getData()), i));
+	}
+	return wrap_pointer<rb_RealVector>(
+		rb_RealVector::rb_class(),
+		new rb_RealVector(directed_min)
+		);
+}
+
+template<class Obtype>
+VALUE min_matrix_columns (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	RealVector directed_min(m->getData()->size2());
+	for (size_t i=0;i< m->getData()->size2(); i++) {
+		directed_min(i) = min(column(*(m->getData()), i));
+	}
+	return wrap_pointer<rb_RealVector>(
+		rb_RealVector::rb_class(),
+		new rb_RealVector(directed_min)
+		);
+}
+
+template<class Obtype>
+static void method_matrix_get_min_input_error() {
+	rb_raise(rb_eArgError, "To obtain the min of a %s you can: \n\t-specify a direction using symbols: :columns, or :rows\n\t-specify a direction for the axis: 0 or 1,\n\t-specify a hash with an axis or direction field that is either a Fixnum (1 or 0) or a Symbol (:columns or :rows).", rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
+VALUE method_matrix_get_min_non_overloaded(VALUE self, VALUE direction) {
+	if (TYPE(direction) == T_SYMBOL) {
+		if (direction == rb_sym_new("rows")) {
+			return min_matrix_rows<Obtype>(self);
+		} else if (direction == rb_sym_new("columns")) {
+			return min_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_min_input_error<Obtype>();
+		}
+	} else if (TYPE(direction) == T_FIXNUM) {
+		if (NUM2INT(direction) == 1) {
+			return min_matrix_rows<Obtype>(self);
+		} else if (NUM2INT(direction) == 0) {
+			return min_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_min_input_error<Obtype>();
+		}
+	} else if (direction == Qnil) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		return (m->getData()->size1() > 0 && m->getData()->size2() > 0) ? rb_float_new(calculate_matrix_min<>(*(m->getData()))) : Qnil;
+	} else {
+		method_matrix_get_min_input_error<Obtype>();
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_get_min (int number_of_arguments, VALUE * ruby_arguments, VALUE self) {
+	VALUE direction = Qnil;
+	rb_scan_args(number_of_arguments, ruby_arguments, "01", &direction);
+
+	if (TYPE(direction) == T_HASH) {
+		VALUE hash_direction = rb_hash_aref(direction, rb_sym_new("axis"));
+		if (hash_direction == Qnil) {
+			hash_direction = rb_hash_aref(direction, rb_sym_new("direction"));
+		}
+		return method_matrix_get_min_non_overloaded<Obtype>(self, hash_direction);
+	} else {
+		return method_matrix_get_min_non_overloaded<Obtype>(self, direction);
+	}
+	return self;
+}
+
+template<class Obtype>
 static Obtype log(Obtype & _mat) {
 
 	Obtype _log_mat = _mat;
@@ -131,40 +307,99 @@ static double mean(Obtype& m) {
 }
 
 template<class Obtype>
-VALUE method_matrix_get_mean (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
-	VALUE row_or_column;
+static void method_matrix_get_mean_input_error() {
+	rb_raise(rb_eArgError, "To obtain the mean of %s you can: \n\t-specify a direction using symbols: :columns, or :rows\n\t-specify a direction for the axis: 0 or 1,\n\t-specify a hash with an axis or direction field that is either a Fixnum (1 or 0) or a Symbol (:columns or :rows).", rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
+VALUE mean_matrix_rows(VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-	rb_scan_args(number_of_arguments, ruby_arguments, "01", &row_or_column);
 
-	if (row_or_column == rb_sym_new("column")) {
+	RealVector means(m->getData()->size1());
 
-		RealVector means(m->getData()->size2());
-
-		for (size_t i = 0 ; i< m->getData()->size2(); i++) {
-			shark::blas::matrix_column<RealMatrix> _slice(*(m->getData()), i);
-			means[i] = mean<shark::blas::matrix_column<RealMatrix> >(_slice);
-		}
-
-		return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(means)
-				);
-
-	} else {
-
-		RealVector means(m->getData()->size1());
-
-		for (size_t i = 0 ; i< m->getData()->size2(); i++) {
-			shark::blas::matrix_row<RealMatrix> _slice(*(m->getData()), i);
-			means[i] = mean<shark::blas::matrix_row<RealMatrix> >(_slice);
-		}
-
-		return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(means)
-				);
+	for (size_t i = 0 ; i< m->getData()->size1(); i++) {
+		shark::blas::matrix_row<RealMatrix> _slice(*(m->getData()), i);
+		means[i] = mean<shark::blas::matrix_row<RealMatrix> >(_slice);
 	}
+
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(means)
+			);
+}
+
+template<class Obtype>
+VALUE mean_matrix_columns(VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+
+	RealVector means(m->getData()->size2());
+
+	for (size_t i = 0 ; i< m->getData()->size2(); i++) {
+		shark::blas::matrix_column<RealMatrix> _slice(*(m->getData()), i);
+		means[i] = mean<shark::blas::matrix_column<RealMatrix> >(_slice);
+	}
+
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(means)
+			);
+}
+
+template<class Obtype>
+static double calculate_matrix_mean(Obtype& _mat) {
+	double total = 0.0;
+	for (size_t i = 0;i<_mat.size1();i++)
+		for (size_t j = 0;j<_mat.size2();j++)
+			total += _mat(i,j);
+	return (_mat.size1() > 0 && _mat.size2()) ? (total / double(_mat.size1() * _mat.size2())) : total;
+}
+
+template<class Obtype>
+VALUE method_matrix_get_mean_non_overloaded(VALUE self, VALUE direction) {
+	if (TYPE(direction) == T_SYMBOL) {
+		if (direction == rb_sym_new("rows")) {
+			return mean_matrix_rows<Obtype>(self);
+		} else if (direction == rb_sym_new("columns")) {
+			return mean_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_mean_input_error<Obtype>();
+		}
+	} else if (TYPE(direction) == T_FIXNUM) {
+		if (NUM2INT(direction) == 1) {
+			return mean_matrix_rows<Obtype>(self);
+		} else if (NUM2INT(direction) == 0) {
+			return mean_matrix_columns<Obtype>(self);
+		} else {
+			method_matrix_get_mean_input_error<Obtype>();
+		}
+	} else if (direction == Qnil) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		return rb_float_new(calculate_matrix_mean<>(*(m->getData())));
+	} else {
+		method_matrix_get_mean_input_error<Obtype>();
+	}
+	return self;
+}
+
+
+template<class Obtype>
+VALUE method_matrix_get_mean (int number_of_arguments, VALUE * ruby_arguments, VALUE self) {
+	VALUE direction = Qnil;
+	rb_scan_args(number_of_arguments, ruby_arguments, "01", &direction);
+
+	if (TYPE(direction) == T_HASH) {
+		VALUE hash_direction = rb_hash_aref(direction, rb_sym_new("axis"));
+		if (hash_direction == Qnil) {
+			hash_direction = rb_hash_aref(direction, rb_sym_new("direction"));
+		}
+		return method_matrix_get_mean_non_overloaded<Obtype>(self, hash_direction);
+	} else {
+		return method_matrix_get_mean_non_overloaded<Obtype>(self, direction);
+	}
+	return self;
 }
 
 template<class Obtype>
@@ -281,7 +516,7 @@ static VALUE subtract_matrix_with_matrix(Obtype* m, VALUE adder) {
 			new rb_RealMatrix(*(m->getData()) + trans(*(other->getData())))
 			);
 	} else {
-		rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The Matrices you are substracting don't have the same dimensions, so their difference is infeasible using our current (human) technology.");
 	}
 	return Qnil;
 }
@@ -646,7 +881,7 @@ static VALUE multiply_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	vectorType *vec;
 	Data_Get_Struct(multiplier, vectorType, vec);
 	if (m->getData()->size2() != vec->getData()->size()) {
-		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.", int(m->getData()->size2()), int(vec->getData()->size()));
+		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec->getData()->size());
 	}
 	return wrap_pointer<rb_RealVector>(
 		rb_RealVector::rb_class(),
@@ -658,7 +893,7 @@ static VALUE multiply_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 	matType *multi_matrix;
 	Data_Get_Struct(multiplier, matType, multi_matrix);
 	if (m->getData()->size2() != multi_matrix->getData()->size1()) {
-		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.", int(m->getData()->size2()), int(multi_matrix->getData()->size1()));
+		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix->getData()->size1());
 	}
 	return wrap_pointer<rb_RealMatrix>(
 		rb_RealMatrix::rb_class(),
@@ -691,20 +926,16 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 	} else if (TYPE(multiplier) == T_ARRAY) {
 		if (RARRAY_LEN(multiplier) > 0 && TYPE(rb_ary_entry(multiplier, 0)) == T_ARRAY) {
 			RealMatrix multi_matrix = rb_ary_to_realmatrix(multiplier);
-			if (m->getData()->size2() != multi_matrix.size1()) {
-				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % m->getData()->size2() % multi_matrix.size1()).str().c_str());
-			}
+			if (m->getData()->size2() != multi_matrix.size1())
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix.size1());
 			return wrap_pointer<rb_RealMatrix>(
 				rb_RealMatrix::rb_class(),
 				new rb_RealMatrix(prod(*(m->getData()), multi_matrix))
 			);
 		} else if (RARRAY_LEN(multiplier) > 0) {
 			RealVector vec = rb_ary_to_1d_realvector(multiplier);
-			if (m->getData()->size2() != vec.size()) {
-				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % m->getData()->size2() % vec.size()).str().c_str());
-			}
+			if (m->getData()->size2() != vec.size())
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec.size());
 			return wrap_pointer<rb_RealVector>(
 				rb_RealVector::rb_class(),
 				new rb_RealVector(prod(*(m->getData()), vec))
@@ -723,8 +954,7 @@ static VALUE multiply_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	vectorType *vec;
 	Data_Get_Struct(multiplier, vectorType, vec);
 	if (m->getData()->size2() != vec->getData()->size()) {
-		boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-		rb_raise(rb_eArgError, (error_str % m->getData()->size2() % vec->getData()->size()).str().c_str());
+		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec->getData()->size());
 	}
 	RealMatrix temp_matrix(m->getData()->size1(), 1);
 	column(temp_matrix, 0) = prod(*(m->getData()), *(vec->getData()));
@@ -736,8 +966,7 @@ static void multiply_equals_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 	matType *multi_matrix;
 	Data_Get_Struct(multiplier, matType, multi_matrix);
 	if (m->getData()->size2() != multi_matrix->getData()->size1()) {
-		boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-		rb_raise(rb_eArgError, (error_str % m->getData()->size2() % multi_matrix->getData()->size1()).str().c_str());
+		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix->getData()->size1());
 	}
 	*(m->getData()) = prod(*(m->getData()), *(multi_matrix->getData()));
 }
@@ -764,17 +993,13 @@ VALUE method_matrix_multiply_equals (VALUE self, VALUE multiplier) {
 	} else if (TYPE(multiplier) == T_ARRAY) {
 		if (RARRAY_LEN(multiplier) > 0 && TYPE(rb_ary_entry(multiplier, 0)) == T_ARRAY) {
 			RealMatrix multi_matrix = rb_ary_to_realmatrix(multiplier);
-			if (m->getData()->size2() != multi_matrix.size1()) {
-				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % m->getData()->size2() % multi_matrix.size1()).str().c_str());
-			}
+			if (m->getData()->size2() != multi_matrix.size1())
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix.size1());
 			*(m->getData()) = prod(*(m->getData()), multi_matrix);
 		} else if (RARRAY_LEN(multiplier) > 0) {
 			RealVector vec = rb_ary_to_1d_realvector(multiplier);
-			if (m->getData()->size2() != vec.size()) {
-				boost::format error_str("For matrix product A*B incompatible number of A columns (%d) and B rows (%d) for multiplication.");
-				rb_raise(rb_eArgError, (error_str % m->getData()->size2() % vec.size()).str().c_str());
-			}
+			if (m->getData()->size2() != vec.size())
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec.size());
 			RealMatrix temp_matrix(m->getData()->size1(), 1);
 			column(temp_matrix, 0) = prod(*(m->getData()), vec);
 			*(m->getData()) = temp_matrix;
@@ -787,6 +1012,67 @@ VALUE method_matrix_multiply_equals (VALUE self, VALUE multiplier) {
 	return self;
 }
 
+// template<class Obtype>
+// VALUE method_matrix_divide (VALUE self, VALUE divider) {
+// 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+// 		Obtype *m;
+// 		Data_Get_Struct(self, Obtype, m);
+// 		return wrap_pointer<rb_RealMatrix>(
+// 			rb_RealMatrix::rb_class(),
+// 			new rb_RealMatrix(*(m->getData()) / NUM2DBL(divider))
+// 			);
+// 	} else {
+// 		rb_raise(rb_eArgError, "Can only divide %s by a number", rb_obj_classname(self));
+// 	}
+// 	return self;
+// }
+
+// template<class Obtype>
+// VALUE method_matrix_divide_equals (VALUE self, VALUE divider) {
+// 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+// 		Obtype *m;
+// 		Data_Get_Struct(self, Obtype, m);
+// 		*(m->getData()) /= NUM2DBL(divider);
+// 	} else {
+// 		rb_raise(rb_eArgError, "Can only divide %s by a number", rb_obj_classname(self));
+// 	}
+// 	return self;
+// }
+
+template<class Obtype, class vectorType>
+VALUE divide_matrix_with_vector (VALUE self, VALUE divider) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	vectorType *v;
+	Data_Get_Struct(divider, vectorType, v);
+
+	return wrap_pointer<rb_RealMatrix>(
+		rb_RealMatrix::rb_class(),
+		new rb_RealMatrix(*(m->getData()) / shark::blas::repeat(*(v->getData()), m->getData()->size1()))
+	);
+}
+
+template<class Obtype>
+static void divide_warning_compatibility () {
+	rb_raise(rb_eArgError, "Can only divide %s by a scalar, or ArrayType (\"RealVector\", \"RealVector\", \"RealMatrixColumn\", \"RealMatrixRow\", \"Array\"), or MatrixType (\"RealMatrix\", \"RealMatrixReference\").", rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype, class matType>
+VALUE divide_matrix_with_matrix (VALUE self, VALUE divider) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	matType *v;
+	Data_Get_Struct(divider, matType, v);
+
+	if (v->getData()->size1() != m->getData()->size1() || v->getData()->size2() != m->getData()->size2())
+		rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B columns (%lu) or A rows (%lu) and B rows (%lu)for division.", m->getData()->size2(), v->getData()->size2(), m->getData()->size1(), v->getData()->size1());
+
+	return wrap_pointer<rb_RealMatrix>(
+		rb_RealMatrix::rb_class(),
+		new rb_RealMatrix(*(m->getData()) / *(v->getData()))
+	);
+}
+
 template<class Obtype>
 VALUE method_matrix_divide (VALUE self, VALUE divider) {
 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
@@ -796,9 +1082,74 @@ VALUE method_matrix_divide (VALUE self, VALUE divider) {
 			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) / NUM2DBL(divider))
 			);
+	} else if (TYPE(divider) == T_DATA) {
+		VALUE divider_klass = CLASS_OF(divider);
+		if (divider_klass == rb_RealMatrix::rb_class()) {
+			return divide_matrix_with_matrix<Obtype, rb_RealMatrix>(self, divider);
+		} else if (divider_klass == rb_RealMatrixReference::rb_class()) {
+			return divide_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, divider);
+		} else if (divider_klass == rb_RealVector::rb_class()) {
+			return divide_matrix_with_vector<Obtype, rb_RealVector>(self, divider);
+		} else if (divider_klass == rb_RealVectorReference::rb_class()) {
+			return divide_matrix_with_vector<Obtype, rb_RealVectorReference>(self, divider);
+		} else if (divider_klass == rb_RealMatrixRow::rb_class()) {
+			return divide_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, divider);
+		} else if (divider_klass == rb_RealMatrixColumn::rb_class()) {
+			return divide_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, divider);
+		} else {
+			divide_warning_compatibility<Obtype>();
+		}
+	} else if (TYPE(divider) == T_ARRAY) {
+		if (RARRAY_LEN(divider) > 0 && TYPE(rb_ary_entry(divider, 0)) == T_ARRAY) {
+			RealMatrix division_matrix = rb_ary_to_realmatrix(divider);
+			Obtype *m;
+			Data_Get_Struct(self, Obtype, m);
+			if (m->getData()->size2() != division_matrix.size1())
+				rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B rows (%lu) for division.", m->getData()->size2(), division_matrix.size1());
+			return wrap_pointer<rb_RealMatrix>(
+				rb_RealMatrix::rb_class(),
+				new rb_RealMatrix(*(m->getData()) / division_matrix)
+			);
+		} else if (RARRAY_LEN(divider) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(divider);
+			Obtype *m;
+			Data_Get_Struct(self, Obtype, m);
+			if (m->getData()->size2() != vec.size())
+				rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B rows (%lu) for division.", m->getData()->size2(), vec.size());
+			return wrap_pointer<rb_RealMatrix>(
+				rb_RealMatrix::rb_class(),
+				new rb_RealMatrix(*(m->getData()) / shark::blas::repeat(vec, m->getData()->size1()))
+			);
+		} else {
+			rb_raise(rb_eArgError, "It is tough to divide by an empty %s since the computer's imagination is limited by the Kernel.", rb_obj_classname(self));
+		}
 	} else {
-		rb_raise(rb_eArgError, "Can only divide %s by a number", rb_obj_classname(self));
+		divide_warning_compatibility<Obtype>();
 	}
+}
+
+template<class Obtype, class vectorType>
+VALUE divide_equals_matrix_with_vector (VALUE self, VALUE divider) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	vectorType *v;
+	Data_Get_Struct(divider, vectorType, v);
+
+	*(m->getData()) /= shark::blas::repeat(*(v->getData()), m->getData()->size1());
+	return self;
+}
+
+template<class Obtype, class matType>
+VALUE divide_equals_matrix_with_matrix (VALUE self, VALUE divider) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	matType *v;
+	Data_Get_Struct(divider, matType, v);
+
+	if (v->getData()->size1() != m->getData()->size1() || v->getData()->size2() != m->getData()->size2())
+		rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B columns (%lu) or A rows (%lu) and B rows (%lu)for division.", m->getData()->size2(), v->getData()->size2(), m->getData()->size1(), v->getData()->size1());
+
+	*(m->getData()) /= *(v->getData());
 	return self;
 }
 
@@ -808,8 +1159,48 @@ VALUE method_matrix_divide_equals (VALUE self, VALUE divider) {
 		Obtype *m;
 		Data_Get_Struct(self, Obtype, m);
 		*(m->getData()) /= NUM2DBL(divider);
+		return self;
+	} else if (TYPE(divider) == T_DATA) {
+		VALUE divider_klass = CLASS_OF(divider);
+		if (divider_klass == rb_RealMatrix::rb_class()) {
+			return divide_equals_matrix_with_matrix<Obtype, rb_RealMatrix>(self, divider);
+		} else if (divider_klass == rb_RealMatrixReference::rb_class()) {
+			return divide_equals_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, divider);
+		} else if (divider_klass == rb_RealVector::rb_class()) {
+			return divide_equals_matrix_with_vector<Obtype, rb_RealVector>(self, divider);
+		} else if (divider_klass == rb_RealVectorReference::rb_class()) {
+			return divide_equals_matrix_with_vector<Obtype, rb_RealVectorReference>(self, divider);
+		} else if (divider_klass == rb_RealMatrixRow::rb_class()) {
+			return divide_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, divider);
+		} else if (divider_klass == rb_RealMatrixColumn::rb_class()) {
+			return divide_equals_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, divider);
+		} else {
+			divide_warning_compatibility<Obtype>();
+		}
+	} else if (TYPE(divider) == T_ARRAY) {
+		if (RARRAY_LEN(divider) > 0 && TYPE(rb_ary_entry(divider, 0)) == T_ARRAY) {
+			RealMatrix division_matrix = rb_ary_to_realmatrix(divider);
+			Obtype *m;
+			Data_Get_Struct(self, Obtype, m);
+			if (m->getData()->size2() != division_matrix.size1()) {
+				rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B rows (%lu) for division.", m->getData()->size2(), division_matrix.size1());
+			}
+			*(m->getData()) /= division_matrix;
+			return self;
+		} else if (RARRAY_LEN(divider) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(divider);
+			Obtype *m;
+			Data_Get_Struct(self, Obtype, m);
+			if (m->getData()->size2() != vec.size()) {
+				rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B rows (%lu) for division.", m->getData()->size2(), vec.size());
+			}
+			*(m->getData()) /= shark::blas::repeat(vec, m->getData()->size1());
+			return self;
+		} else {
+			rb_raise(rb_eArgError, "It is tough to divide by an empty %s since the computer's imagination is limited by the Kernel.", rb_obj_classname(self));
+		}
 	} else {
-		rb_raise(rb_eArgError, "Can only divide %s by a number", rb_obj_classname(self));
+		divide_warning_compatibility<Obtype>();
 	}
 	return self;
 }
@@ -1178,6 +1569,8 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_matrix_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_matrix_get_sum<Obtype>, -1);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_matrix_get_mean<Obtype>,-1);
+	rb_define_method(Obtype::rb_class(), "max", (rb_method)method_matrix_get_max<Obtype>,-1);
+	rb_define_method(Obtype::rb_class(), "min", (rb_method)method_matrix_get_min<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_matrix_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_matrix_get_log<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
@@ -1205,12 +1598,14 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "transpose", (rb_method)method_matrix_transpose<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "~", (rb_method)method_matrix_transpose<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "size1", (rb_method)method_matrix_size1<Obtype>, 0);
+	rb_define_alias(Obtype::rb_class(), "number_of_rows", "size1");
 	rb_define_method(Obtype::rb_class(), "size2", (rb_method)method_matrix_size2<Obtype>, 0);
+	rb_define_alias(Obtype::rb_class(), "number_of_columns", "size2");
 	rb_define_method(Obtype::rb_class(), "stride1", (rb_method)method_matrix_stride1<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "stride2", (rb_method)method_matrix_stride2<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "row", (rb_method)method_matrix_get_row<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "column", (rb_method)method_matrix_get_column<Obtype>, 1);
-	rb_define_method(Obtype::rb_class(), "col", (rb_method)method_matrix_get_column<Obtype>, 1);
+	rb_define_alias(Obtype::rb_class(), "col", "column");
 	rb_define_method(Obtype::rb_class(), "fill", (rb_method)method_matrix_fill<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "clear", (rb_method)method_matrix_clear<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "-@", (rb_method)method_matrix_negate<Obtype>,0);
