@@ -262,6 +262,36 @@ For vectors, this is much more basic:
 	vec.sum
 	# => 6.0
 
+##### Matrix and Vector products #####
+
+Remember how matlab has the `.*` operator? Or how numpy uses `numpy.dot(A, B)` or and `A * B` differently?
+
+Well in this library dot product is considered to be the default, thus `*` is the dot product (numpy: `numpy.dot`, Matlab: `*`),
+and the Hadamard product (element wise product) is used as follows:
+
+	a = Shark::RealMatrix.new(10, 20) {|i| 1.0}
+
+	b = Shark::RealMatrix.new(10, 20) {|i| 2.0}
+
+	c = a * b
+	# => ArgumentError: For matrix product A*B incompatible number of A columns (20) and B rows (10) for multiplication.
+
+	# c = a.hadamard(b)
+	# or c = a.element_wise_product(b)
+
+	c = a.o b
+	# => #<Optimizer::RealMatrix:0x007fe9c40ed048 @data = [[2.0, 2.0, 2.0, 2.0, ... etc... ]]>
+
+While the dot product is used as follows:
+
+	a = Shark::RealMatrix.new(10, 20) {|i| 1.0}
+	b = Shark::RealMatrix.new(20, 10) {|i| 2.0}
+
+	c = a * b
+	#<Optimizer::RealMatrix:0x007fe9c4042ee0 @data = [[40.0, 40.0, 40.0, 40.0, ... etc ...]]>
+
+	c.size
+	# => [10, 10]
 
 #### Matrix and Vector Initialization ###
 
