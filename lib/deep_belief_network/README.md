@@ -1,9 +1,9 @@
 Deep Belief Networks
 ====================
 
-Deep Belief Network in Ruby, using Shark (`shark-rb`) inspired by Yusuke Gomori's examples (see references).
+Deep Belief Network in Ruby, using Shark (`shark-rb`) inspired by Yusuke Gomori's examples (see [references](#references-)).
 
-** Author / Translator :** Jonathan Raiman
+**Author / Translator :** Jonathan Raiman
 
 
 Implementation
