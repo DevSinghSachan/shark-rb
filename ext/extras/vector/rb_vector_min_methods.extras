@@ -160,77 +160,213 @@ VALUE method_vector_export_pgm (VALUE self, VALUE data_hash) {
 	}
 }
 
-template<class Obtype>
-VALUE method_vector_multiply (VALUE self, VALUE multiplier) {
+template<class Obtype, class otherType>
+VALUE method_vector_multiply_vector (VALUE self, VALUE rb_other) {
 	Obtype *s;
 	Data_Get_Struct(self, Obtype, s);
+	otherType *other;
+	Data_Get_Struct(rb_other, otherType, other);
+	if (s->getData()->size() == other->getData()->size()) {
+		return rb_float_new(inner_prod(*(s->getData()), *(other->getData())));
+	} else {
+		rb_raise(rb_eArgError, "To multiply %s with %s make sure they're the same length (%lu) vs (%lu).", rb_class2name(Obtype::rb_class()), rb_class2name(otherType::rb_class()), s->getData()->size(), other->getData()->size());
+	}
+	return self;
+}
 
-	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+template<class Obtype, class otherType>
+VALUE method_vector_multiply_matrix (VALUE self, VALUE rb_other) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	otherType *other;
+	Data_Get_Struct(rb_other, otherType, other);
+	if (s->getData()->size() == other->getData()->size1()) {
+		RealMatrix result = prod(shark::blas::repeat(*(s->getData()),1), *(other->getData()));
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(result)
+			);
+	} else if (1 == other->getData()->size1()) {
+		RealMatrix result = prod(trans(shark::blas::repeat(*(s->getData()), 1)), *(other->getData()));
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(result)
+			);
+	} else {
+		rb_raise(rb_eArgError, "To multiply %s with %s make sure they're the same length (%lu) vs (%lu)x(%lu).", rb_class2name(Obtype::rb_class()), rb_class2name(otherType::rb_class()), s->getData()->size(), other->getData()->size1(), other->getData()->size2());
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_multiply (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_FLOAT || TYPE(rb_other) == T_FIXNUM) {
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
 		return wrap_pointer<rb_RealVector>(
 			rb_RealVector::rb_class(),
-			new rb_RealVector(*(s->getData()) * NUM2DBL(multiplier))
+			new rb_RealVector(*(s->getData()) * NUM2DBL(rb_other))
 			);
-	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_RealVector::rb_class()) {
-		rb_RealVector *o;
-		Data_Get_Struct(multiplier, rb_RealVector, o);
+	} else if (TYPE(rb_other) == T_DATA) {
+		VALUE rb_other_klass = CLASS_OF(rb_other);
+		if (rb_other_klass == rb_RealMatrix::rb_class()) {
+			return method_vector_multiply_matrix<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixReference::rb_class()) {
+			return method_vector_multiply_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVector::rb_class()) {
+			return method_vector_multiply_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVectorReference::rb_class()) {
+			return method_vector_multiply_vector<Obtype, rb_RealVectorReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixRow::rb_class()) {
+			return method_vector_multiply_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixColumn::rb_class()) {
+			return method_vector_multiply_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
+		} else {
+			rb_raise(rb_eArgError, "Can only multiply %s by scalar, RealVector, RealMatrix, RealMatrixReference, RealVectorReference, RealMatrixRow, RealMatrixColumn, or Array.", rb_class2name(Obtype::rb_class()));
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
 
-		if (o->getData()->size() != s->getData()->size())
-			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix multi_matrix = rb_ary_to_realmatrix(rb_other);
+			if (s->getData()->size() == multi_matrix.size1()) {
+				return wrap_pointer<rb_RealMatrix>(
+					rb_RealMatrix::rb_class(),
+					new rb_RealMatrix(prod(shark::blas::repeat(*(s->getData()), 1), trans(multi_matrix)))
+					);
+			} else if (s->getData()->size() == multi_matrix.size2()) {
+				return wrap_pointer<rb_RealMatrix>(
+					rb_RealMatrix::rb_class(),
+					new rb_RealMatrix(prod(shark::blas::repeat(*(s->getData()), 1), multi_matrix))
+					);
+			} else {
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", s->getData()->size(), multi_matrix.size1());
+			}
+				
+			*(s->getData()) = prod(*(s->getData()), multi_matrix);
+		} else if (RARRAY_LEN(rb_other) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(rb_other);
+			if (s->getData()->size() != vec.size())
+				rb_raise(rb_eArgError, "Different size vectors being multiplied (%lu) vs. (%lu)", s->getData()->size(), vec.size());
 
-		return rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
+			return rb_float_new(inner_prod(*(s->getData()), vec));
+			
+		} else {
+			if (s->getData()->size() != 0)
+				rb_raise(rb_eArgError, "It is tough to multiply by an empty %s since the computer's imagination is limited by the Kernel.", rb_class2name(Obtype::rb_class()));
+		}
 
-	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_RealVectorReference::rb_class()) {
-		rb_RealVectorReference *o;
-		Data_Get_Struct(multiplier, rb_RealVectorReference, o);
+		if (RARRAY_LEN(rb_other) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "Incompatible length, use vectors of the same length.");
 
-		if (o->getData()->size() != s->getData()->size())
-			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
-
-		return rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
-
-	} else if (TYPE(multiplier) == T_ARRAY) {
-
-		if (RARRAY_LEN(multiplier) != (int)s->getData()->size())
-			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
-
-		RealVector vec_multiplier = rb_ary_to_1d_realvector(multiplier);
-		return rb_float_new(inner_prod(*(s->getData()), vec_multiplier));
+		RealVector vec_rb_other = rb_ary_to_1d_realvector(rb_other);
+		return rb_float_new(inner_prod(*(s->getData()), vec_rb_other));
 	} else {
 		rb_raise(rb_eArgError, "Can only multiply RealVector by a scalar, RealVector, or Array.");
 	}
 	return self;
 }
 
-
-template<class Obtype>
-VALUE method_vector_multiply_equals (VALUE self, VALUE multiplier) {
+template<class Obtype, class otherType>
+VALUE method_vector_multiply_equals_vector (VALUE self, VALUE rb_other) {
 	Obtype *s;
 	Data_Get_Struct(self, Obtype, s);
-	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
-		*(s->getData()) *= NUM2DBL(multiplier);
-	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_RealVector::rb_class()) {
-		rb_RealVector *o;
-		Data_Get_Struct(multiplier, rb_RealVector, o);
+	otherType *other;
+	Data_Get_Struct(rb_other, otherType, other);
+	if (s->getData()->size() == other->getData()->size()) {
+		self = rb_float_new(inner_prod(*(s->getData()), *(other->getData())));
+	} else {
+		rb_raise(rb_eArgError, "To multiply %s with %s make sure they're the same length (%lu) vs (%lu).", rb_class2name(Obtype::rb_class()), rb_class2name(otherType::rb_class()), s->getData()->size(), other->getData()->size());
+	}
+	return self;
+}
 
-		if (o->getData()->size() != s->getData()->size())
-			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+template<class Obtype, class otherType>
+VALUE method_vector_multiply_equals_matrix (VALUE self, VALUE rb_other) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	otherType *other;
+	Data_Get_Struct(rb_other, otherType, other);
+	if (s->getData()->size() == other->getData()->size1()) {
+		RealMatrix result = prod(shark::blas::repeat(*(s->getData()),1), *(other->getData()));
+		self = wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(result)
+			);
+	} else if (1 == other->getData()->size1()) {
+		RealMatrix result = prod(trans(shark::blas::repeat(*(s->getData()), 1)), *(other->getData()));
+		self = wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(result)
+			);
+	} else {
+		rb_raise(rb_eArgError, "To multiply %s with %s make sure they're the same length (%lu) vs (%lu)x(%lu).", rb_class2name(Obtype::rb_class()), rb_class2name(otherType::rb_class()), s->getData()->size(), other->getData()->size1(), other->getData()->size2());
+	}
+	return self;
+}
 
-		self = rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
-	} else if (TYPE(multiplier) == T_DATA && CLASS_OF(multiplier) == rb_RealVectorReference::rb_class()) {
-		rb_RealVectorReference *o;
-		Data_Get_Struct(multiplier, rb_RealVectorReference, o);
+template<class Obtype>
+VALUE method_vector_multiply_equals (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_FLOAT || TYPE(rb_other) == T_FIXNUM) {
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
+		*(s->getData()) *= NUM2DBL(rb_other);
+	} else if (TYPE(rb_other) == T_DATA) {
+		VALUE rb_other_klass = CLASS_OF(rb_other);
+		if (rb_other_klass == rb_RealMatrix::rb_class()) {
+			return method_vector_multiply_equals_matrix<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixReference::rb_class()) {
+			return method_vector_multiply_equals_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVector::rb_class()) {
+			return method_vector_multiply_equals_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVectorReference::rb_class()) {
+			return method_vector_multiply_equals_vector<Obtype, rb_RealVectorReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixRow::rb_class()) {
+			return method_vector_multiply_equals_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixColumn::rb_class()) {
+			return method_vector_multiply_equals_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
+		} else {
+			rb_raise(rb_eArgError, "Can only multiply %s by scalar, RealVector, RealMatrix, RealMatrixReference, RealVectorReference, RealMatrixRow, RealMatrixColumn, or Array.", rb_class2name(Obtype::rb_class()));
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *s;
+		Data_Get_Struct(self, Obtype, s);
 
-		if (o->getData()->size() != s->getData()->size())
-			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix multi_matrix = rb_ary_to_realmatrix(rb_other);
+			if (s->getData()->size() == multi_matrix.size1()) {
+				self =  wrap_pointer<rb_RealMatrix>(
+					rb_RealMatrix::rb_class(),
+					new rb_RealMatrix(prod(shark::blas::repeat(*(s->getData()), 1), multi_matrix))
+					);
+			} else if (s->getData()->size() == multi_matrix.size2()) {
+				self = wrap_pointer<rb_RealMatrix>(
+					rb_RealMatrix::rb_class(),
+					new rb_RealMatrix(prod(shark::blas::repeat(*(s->getData()), 1), trans(multi_matrix)))
+					);
+			} else {
+				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", s->getData()->size(), multi_matrix.size1());
+			}
+				
+			*(s->getData()) = prod(*(s->getData()), multi_matrix);
+		} else if (RARRAY_LEN(rb_other) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(rb_other);
+			if (s->getData()->size() != vec.size())
+				rb_raise(rb_eArgError, "Different size vectors being multiplied (%lu) vs. (%lu)", s->getData()->size(), vec.size());
 
-		self = rb_float_new(inner_prod(*(s->getData()), *(o->getData())));
+			self =  rb_float_new(inner_prod(*(s->getData()), vec));
+			
+		} else {
+			if (s->getData()->size() != 0)
+				rb_raise(rb_eArgError, "It is tough to multiply by an empty %s since the computer's imagination is limited by the Kernel.", rb_class2name(Obtype::rb_class()));
+		}
 
-	} else if (TYPE(multiplier) == T_ARRAY) {
-		if (RARRAY_LEN(multiplier) != (int)s->getData()->size())
-			rb_raise(rb_eArgError, "To multiply RealVectors together, use vectors of the same length.");
+		if (RARRAY_LEN(rb_other) != (int)s->getData()->size())
+			rb_raise(rb_eArgError, "Incompatible length, use vectors of the same length.");
 
-		RealVector vec_multiplier = rb_ary_to_1d_realvector(multiplier);
-		self = rb_float_new(inner_prod(*(s->getData()), vec_multiplier));
+		RealVector vec_rb_other = rb_ary_to_1d_realvector(rb_other);
+		self = rb_float_new(inner_prod(*(s->getData()), vec_rb_other));
 	} else {
 		rb_raise(rb_eArgError, "Can only multiply RealVector by a scalar, RealVector, or Array.");
 	}
@@ -439,6 +575,20 @@ VALUE method_vector_to_ary (VALUE self) {
 }
 
 template<class Obtype>
+VALUE method_vector_to_realvector (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	if (Obtype::rb_class() == rb_RealVector::rb_class()) {
+		return self;
+	} else {
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()))
+			);
+	}
+}
+
+template<class Obtype>
 VALUE method_vector_to_matrix (int number_of_arguments, VALUE* ruby_arguments, VALUE self) {
 	VALUE height, width;
 	rb_scan_args(
@@ -606,6 +756,7 @@ void Init_VectorMinMethods () {
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_vector_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_vector_get_log<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_vector_to_ary<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "to_realvector", (rb_method)method_vector_to_realvector<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "remove_NaN", (rb_method) method_vector_remove_NaN<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "==", (rb_method) method_vector_soft_eql<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "eql?", (rb_method) method_vector_eql<Obtype>,1);

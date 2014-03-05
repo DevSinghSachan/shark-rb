@@ -1,6 +1,11 @@
 #include "../utils/rb_datatype_deep_copy.extras"
 
 template<class Obtype>
+static void binaryoperation_format_error(char* msg) {
+	rb_raise(rb_eArgError, "You can only %s Scalars, Arrays, RealVectors, RealMatrices, RealMatrixRows, RealMatrixColumns and numbers to a %s.", *msg, rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
 VALUE method_matrix_get_sqrt (VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
@@ -8,6 +13,100 @@ VALUE method_matrix_get_sqrt (VALUE self) {
 			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(sqrt(*(m->getData())))
 			);
+}
+
+template<class Obtype, class otherType>
+VALUE method_matrix_matrid_hadamard_product (VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	otherType *other;
+	Data_Get_Struct(rb_other, otherType, other);
+
+	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(*(m->getData()) * *(other->getData()))
+		);
+	} else {
+		rb_raise(rb_eArgError, "The %s you are hadamard producting don't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_class2name(otherType::rb_class()), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+	}
+	return self;
+}
+
+template<class Obtype, class otherType>
+VALUE method_matrix_matrid_hadamard_product_equals (VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	otherType *other;
+	Data_Get_Struct(rb_other, otherType, other);
+
+	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
+		*(m->getData()) *= *(other->getData());
+		return self;
+	} else {
+		rb_raise(rb_eArgError, "The %s you are hadamard producting don't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_class2name(otherType::rb_class()), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_hadamard_product (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_DATA) {
+		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
+			return method_matrix_matrid_hadamard_product<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
+			return method_matrix_matrid_hadamard_product<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else {
+			rb_raise(rb_eArgError, "To perform a Hadamard product use a RealMatrix, a RealMatrixReference, or an Array");
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		RealMatrix other = rb_ary_to_realmatrix(rb_other);
+		if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
+			return wrap_pointer<rb_RealMatrix>(
+				rb_RealMatrix::rb_class(),
+				new rb_RealMatrix(*(m->getData()) * other)
+			);
+		} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
+			return wrap_pointer<rb_RealMatrix>(
+				rb_RealMatrix::rb_class(),
+				new rb_RealMatrix(*(m->getData()) * trans(other))
+			);
+		} else {
+			rb_raise(rb_eArgError, "The %s you are hadamard producting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+		}
+	} else {
+		rb_raise(rb_eArgError, "To perform a Hadamard product use a RealMatrix, a RealMatrixReference, or an Array");
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_hadamard_product_equals (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_DATA) {
+		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
+			return method_matrix_matrid_hadamard_product_equals<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
+			return method_matrix_matrid_hadamard_product_equals<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else {
+			rb_raise(rb_eArgError, "To perform a Hadamard product use a RealMatrix, a RealMatrixReference, or an Array");
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		RealMatrix other = rb_ary_to_realmatrix(rb_other);
+		if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
+			*(m->getData()) *= other;
+		} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
+			*(m->getData()) *= trans(other);
+		} else {
+			rb_raise(rb_eArgError, "The %s you are hadamard producting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+		}
+	} else {
+		rb_raise(rb_eArgError, "To perform a Hadamard product use a RealMatrix, a RealMatrixReference, or an Array");
+	}
+	return self;
 }
 
 template<class Obtype>
@@ -432,6 +531,20 @@ VALUE method_matrix_to_ary (VALUE self) {
 }
 
 template<class Obtype>
+VALUE method_matrix_to_matrix (VALUE self) {
+	Obtype *s;
+	Data_Get_Struct(self, Obtype, s);
+	if (Obtype::rb_class() == rb_RealMatrix::rb_class()) {
+		return self;
+	} else {
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(*(s->getData()))
+			);
+	}
+}
+
+template<class Obtype>
 VALUE method_matrix_to_unlabeleddata (VALUE self) {
     Obtype *m;
     Data_Get_Struct(self, Obtype, m);
@@ -447,10 +560,12 @@ VALUE method_matrix_to_unlabeleddata (VALUE self) {
     );
 }
 
-template<class matType, class Obtype>
-static VALUE add_matrix_with_matrix(Obtype* m, VALUE adder) {
+template<class Obtype, class matType>
+static VALUE add_matrix_with_matrix(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	matType *other;
-	Data_Get_Struct(adder, matType, other);
+	Data_Get_Struct(rb_other, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		return wrap_pointer<rb_RealMatrix>(
 			rb_RealMatrix::rb_class(),
@@ -462,117 +577,99 @@ static VALUE add_matrix_with_matrix(Obtype* m, VALUE adder) {
 			new rb_RealMatrix(*(m->getData()) + trans(*(other->getData())))
 			);
 	} else {
-		rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
 
-template<class vectorType, class Obtype>
-static VALUE add_matrix_with_vector(Obtype* m, VALUE adder) {
+template<class Obtype, class vectorType>
+static VALUE add_matrix_with_vector(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	vectorType *other;
-	Data_Get_Struct(adder, vectorType, other);
+	Data_Get_Struct(rb_other, vectorType, other);
 	if (other->getData()->size() == m->getData()->size1()) {
-		if (m->getData()->size2() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(column(*(m->getData()), 0) - *(other->getData())));
-		} else {
-			return wrap_pointer<rb_RealMatrix>(
-				rb_RealMatrix::rb_class(),
-				new rb_RealMatrix(*(m->getData()) + trans(shark::blas::repeat(*(other->getData()), m->getData()->size2())))
-			);
-			//rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(*(m->getData()) + trans(shark::blas::repeat(*(other->getData()), m->getData()->size2())))
+		);
 	} else if (other->getData()->size() == m->getData()->size2()) {
-		if (m->getData()->size1() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(row(*(m->getData()), 0) - *(other->getData())));
-		} else {
-			return wrap_pointer<rb_RealMatrix>(
-				rb_RealMatrix::rb_class(),
-				new rb_RealMatrix(*(m->getData()) + trans(shark::blas::repeat(*(other->getData()), m->getData()->size1())))
-			);
-			//rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(*(m->getData()) + shark::blas::repeat(*(other->getData()), m->getData()->size1()))
+		);
 	} else {
-		rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
 
-template<class matType, class Obtype>
-static VALUE subtract_matrix_with_matrix(Obtype* m, VALUE adder) {
+template<class Obtype, class matType>
+static VALUE subtract_matrix_with_matrix(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	matType *other;
-	Data_Get_Struct(adder, matType, other);
+	Data_Get_Struct(rb_other, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		return wrap_pointer<rb_RealMatrix>(
 			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) + *(other->getData()))
+			new rb_RealMatrix(*(m->getData()) - *(other->getData()))
 			);
 	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
 		return wrap_pointer<rb_RealMatrix>(
 			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) + trans(*(other->getData())))
+			new rb_RealMatrix(*(m->getData()) - trans(*(other->getData())))
 			);
 	} else {
-		rb_raise(rb_eArgError, "The Matrices you are substracting don't have the same dimensions, so their difference is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are substracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
 
-template<class vectorType, class Obtype>
-static VALUE subtract_matrix_with_vector(Obtype* m, VALUE adder) {
+template<class Obtype, class vectorType>
+static VALUE subtract_matrix_with_vector(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	vectorType *other;
-	Data_Get_Struct(adder, vectorType, other);
+	Data_Get_Struct(rb_other, vectorType, other);
 	if (other->getData()->size() == m->getData()->size1()) {
-		if (m->getData()->size2() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(column(*(m->getData()), 0) - *(other->getData())));
-		} else {
-			return wrap_pointer<rb_RealMatrix>(
-				rb_RealMatrix::rb_class(),
-				new rb_RealMatrix(*(m->getData()) - trans(shark::blas::repeat(*(other->getData()), m->getData()->size2())))
-			);
-			//rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(*(m->getData()) - trans(shark::blas::repeat(*(other->getData()), m->getData()->size2())))
+		);
 	} else if (other->getData()->size() == m->getData()->size2()) {
-		if (m->getData()->size1() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(row(*(m->getData()), 0) - *(other->getData())));
-		} else {
-			return wrap_pointer<rb_RealMatrix>(
-				rb_RealMatrix::rb_class(),
-				new rb_RealMatrix(*(m->getData()) - trans(shark::blas::repeat(*(other->getData()), m->getData()->size1())))
-			);
-			//rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(*(m->getData()) - shark::blas::repeat(*(other->getData()), m->getData()->size1()))
+		);
 	} else {
-		rb_raise(rb_eArgError, "The RealVector you are subtracting doesn't have the same dimensions as either RealMatrix dimension, so their difference is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
 
 template<class Obtype>
 VALUE method_matrix_add (VALUE self, VALUE rb_other) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
 		// can also add two references together.
 		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
-			return add_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return add_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
+			return add_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
-			return add_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
+			return add_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
-			return add_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return add_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
+			return add_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixRow::rb_class()) {
+			return add_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixColumn::rb_class()) {
+			return add_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
 		} else {
-			rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
+			binaryoperation_format_error<Obtype>("add");
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
@@ -586,59 +683,61 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 					new rb_RealMatrix(*(m->getData()) + trans(other))
 					);
 			} else {
-				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are adding doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		} else {
+			Obtype *m;
+			Data_Get_Struct(self, Obtype, m);
 			RealVector other = rb_ary_to_1d_realvector(rb_other);
 			if (other.size() == m->getData()->size1()) {
-				if (m->getData()->size2() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(row(*(m->getData()), 0) + other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
-				}
+				return wrap_pointer<rb_RealMatrix>(
+						rb_RealMatrix::rb_class(),
+						new rb_RealMatrix(*(m->getData()) + shark::blas::repeat(other, m->getData()->size2()))
+						);
 			} else if (other.size() == m->getData()->size2()) {
-				if (m->getData()->size1() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(column(*(m->getData()), 0) + other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
-				}
+				return wrap_pointer<rb_RealMatrix>(
+						rb_RealMatrix::rb_class(),
+						new rb_RealMatrix(*(m->getData()) + trans(shark::blas::repeat(other, m->getData()->size1())))
+					);
 			} else {
-				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are adding doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		}
 	} else if (TYPE(rb_other) == T_FIXNUM || TYPE(rb_other) == T_FLOAT) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		return wrap_pointer<rb_RealMatrix>(
 					rb_RealMatrix::rb_class(),
 					new rb_RealMatrix(*(m->getData()) + blas::repeat(NUM2DBL(rb_other), m->getData()->size1(), m->getData()->size2()))
 					);
 	} else {
-		rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
+		binaryoperation_format_error<Obtype>("add");
 	}
 	return self;
 }
 
 template<class Obtype>
 VALUE method_matrix_subtract (VALUE self, VALUE rb_other) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
 		// can also add two references together.
 		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
-			return subtract_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
-		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return subtract_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
+			return subtract_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
-			return subtract_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
+			return subtract_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
-			return subtract_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return subtract_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
+			return subtract_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixRow::rb_class()) {
+			return subtract_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixColumn::rb_class()) {
+			return subtract_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
 		} else {
-			rb_raise(rb_eArgError, "You can only subtract Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
+			binaryoperation_format_error<Obtype>("subtract");
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
@@ -652,137 +751,130 @@ VALUE method_matrix_subtract (VALUE self, VALUE rb_other) {
 					new rb_RealMatrix(*(m->getData()) - trans(other))
 					);
 			} else {
-				rb_raise(rb_eArgError, "The Matrices you are subtracting don't have the same dimensions, so their difference is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		} else {
 			RealVector other = rb_ary_to_1d_realvector(rb_other);
 			if (other.size() == m->getData()->size1()) {
-				if (m->getData()->size2() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(row(*(m->getData()), 0) - other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
-				}
+				return wrap_pointer<rb_RealMatrix>(
+						rb_RealMatrix::rb_class(),
+						new rb_RealMatrix(*(m->getData()) - shark::blas::repeat(other, m->getData()->size2()))
+						);
 			} else if (other.size() == m->getData()->size2()) {
-				if (m->getData()->size1() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(column(*(m->getData()), 0) - other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
-				}
+				return wrap_pointer<rb_RealMatrix>(
+						rb_RealMatrix::rb_class(),
+						new rb_RealMatrix(*(m->getData()) - trans(shark::blas::repeat(other, m->getData()->size1())))
+					);
 			} else {
-				rb_raise(rb_eArgError, "The RealVector you are subtracting doesn't have the same dimensions as either RealMatrix dimension, so their difference is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		}
 	} else if (TYPE(rb_other) == T_FIXNUM || TYPE(rb_other) == T_FLOAT) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		return wrap_pointer<rb_RealMatrix>(
 					rb_RealMatrix::rb_class(),
-					new rb_RealMatrix(*(m->getData()) - blas::repeat(NUM2DBL(rb_other), m->getData()->size1(), m->getData()->size2()))
+					new rb_RealMatrix(*(m->getData()) + blas::repeat(NUM2DBL(rb_other), m->getData()->size1(), m->getData()->size2()))
 					);
 	} else {
-		rb_raise(rb_eArgError, "You can only subtract Arrays, RealVectors, and RealMatrices to a %s.", rb_obj_classname(self));
+		binaryoperation_format_error<Obtype>("subtract");
 	}
 	return self;
 }
 
-template<class matType, class Obtype>
-static VALUE add_equals_matrix_with_matrix(Obtype* m, VALUE adder) {
+template<class Obtype, class matType>
+static VALUE add_equals_matrix_with_matrix(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	matType *other;
-	Data_Get_Struct(adder, matType, other);
+	Data_Get_Struct(rb_other, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		*(m->getData()) += *(other->getData());
+		return self;
 	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
 		*(m->getData()) += trans(*(other->getData()));
+		return self;
 	} else {
-		rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are adding doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
 
-template<class vectorType, class Obtype>
-static VALUE add_equals_matrix_with_vector(Obtype* m, VALUE adder) {
+template<class Obtype, class vectorType>
+static VALUE add_equals_matrix_with_vector(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	vectorType *other;
-	Data_Get_Struct(adder, vectorType, other);
+	Data_Get_Struct(rb_other, vectorType, other);
 	if (other->getData()->size() == m->getData()->size1()) {
-		if (m->getData()->size2() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(column(*(m->getData()), 0) + *(other->getData())));
-		} else {
-			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		*(m->getData()) += trans(shark::blas::repeat(*(other->getData()), m->getData()->size2()));
+		return self;
 	} else if (other->getData()->size() == m->getData()->size2()) {
-		if (m->getData()->size1() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(row(*(m->getData()), 0) + *(other->getData())));
-		} else {
-			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		*(m->getData()) += shark::blas::repeat(*(other->getData()), m->getData()->size1());
+		return self;
 	} else {
-		rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
-	return Qnil;
+	return self;
 }
 
-template<class matType, class Obtype>
-static VALUE subtract_equals_matrix_with_matrix(Obtype* m, VALUE adder) {
+template<class Obtype, class matType>
+static VALUE subtract_equals_matrix_with_matrix(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	matType *other;
-	Data_Get_Struct(adder, matType, other);
+	Data_Get_Struct(rb_other, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		*(m->getData()) -= *(other->getData());
+		return self;
 	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
 		*(m->getData()) -= trans(*(other->getData()));
+		return self;
 	} else {
-		rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
-	return Qnil;
+	return self;
 }
 
-template<class vectorType, class Obtype>
-static VALUE subtract_equals_matrix_with_vector(Obtype* m, VALUE adder) {
+template<class Obtype, class vectorType>
+static VALUE subtract_equals_matrix_with_vector(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	vectorType *other;
-	Data_Get_Struct(adder, vectorType, other);
+	Data_Get_Struct(rb_other, vectorType, other);
 	if (other->getData()->size() == m->getData()->size1()) {
-		if (m->getData()->size2() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(column(*(m->getData()), 0) - *(other->getData())));
-		} else {
-			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		*(m->getData()) -= trans(shark::blas::repeat(*(other->getData()), m->getData()->size2()));
+		return self;
 	} else if (other->getData()->size() == m->getData()->size2()) {
-		if (m->getData()->size1() == 1) {
-			return wrap_pointer<rb_RealVector>(
-				rb_RealVector::rb_class(),
-				new rb_RealVector(row(*(m->getData()), 0) - *(other->getData())));
-		} else {
-			rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-		}
+		*(m->getData()) -= shark::blas::repeat(*(other->getData()), m->getData()->size1());
+		return self;
 	} else {
-		rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
-
 
 template<class Obtype>
 VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
 		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
-			return add_equals_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
+			return add_equals_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
-			return add_equals_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
+			return add_equals_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
-			return add_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return add_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return add_equals_matrix_with_vector<rb_RealVectorReference>(m, rb_other);
+			return add_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixRow::rb_class()) {
+			return add_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixColumn::rb_class()) {
+			return add_equals_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
+		} else {
+			binaryoperation_format_error<Obtype>("add");
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
@@ -790,53 +882,49 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 			} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
 				*(m->getData()) += trans(other);
 			} else {
-				rb_raise(rb_eArgError, "The Matrices you are summing don't have the same dimensions, so their sum is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		} else {
 			RealVector other = rb_ary_to_1d_realvector(rb_other);
 			if (other.size() == m->getData()->size1()) {
-				if (m->getData()->size2() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(row(*(m->getData()), 0) + other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
-				}
+				*(m->getData()) += shark::blas::repeat(other, m->getData()->size2());
 			} else if (other.size() == m->getData()->size2()) {
-				if (m->getData()->size1() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(column(*(m->getData()), 0) + other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-				}
+				*(m->getData()) += trans(shark::blas::repeat(other, m->getData()->size1()));
 			} else {
-				rb_raise(rb_eArgError, "The RealVector you are adding doesn't have the same dimensions as either RealMatrix dimension, so their sum is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		}
 	} else if (TYPE(rb_other) == T_FIXNUM || TYPE(rb_other) == T_FLOAT) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		*(m->getData()) += blas::repeat(NUM2DBL(rb_other), m->getData()->size1(), m->getData()->size2());
 	} else {
-		rb_raise(rb_eArgError, "You can only add Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
+		binaryoperation_format_error<Obtype>("add");
 	}
 	return self;
 }
 
 template<class Obtype>
 VALUE method_matrix_subtract_equals (VALUE self, VALUE rb_other) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
 	if (TYPE(rb_other) == T_DATA) {
 		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
-			return subtract_equals_matrix_with_matrix<rb_RealMatrix>(m, rb_other);
+			return subtract_equals_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
-			return subtract_equals_matrix_with_matrix<rb_RealMatrixReference>(m, rb_other);
+			return subtract_equals_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
-			return subtract_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return subtract_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return subtract_equals_matrix_with_vector<rb_RealVector>(m, rb_other);
+			return subtract_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixRow::rb_class()) {
+			return subtract_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixColumn::rb_class()) {
+			return subtract_equals_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
+		} else {
+			binaryoperation_format_error<Obtype>("subtract");
 		}
 	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
@@ -844,42 +932,34 @@ VALUE method_matrix_subtract_equals (VALUE self, VALUE rb_other) {
 			} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
 				*(m->getData()) -= trans(other);
 			} else {
-				rb_raise(rb_eArgError, "The Matrices you are subtracting don't have the same dimensions, so their difference is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		} else {
 			RealVector other = rb_ary_to_1d_realvector(rb_other);
 			if (other.size() == m->getData()->size1()) {
-				if (m->getData()->size2() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(row(*(m->getData()), 0) - other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and %s suffer from incompatible dimensions.", rb_obj_classname(self));
-				}
+				*(m->getData()) -= shark::blas::repeat(other, m->getData()->size2());
 			} else if (other.size() == m->getData()->size2()) {
-				if (m->getData()->size1() == 1) {
-					return wrap_pointer<rb_RealVector>(
-						rb_RealVector::rb_class(),
-						new rb_RealVector(column(*(m->getData()), 0) - other));
-				} else {
-					rb_raise(rb_eArgError, "The RealVector and RealMatrix suffer from incompatible dimensions.");
-				}
+				*(m->getData()) -= trans(shark::blas::repeat(other, m->getData()->size1()));
 			} else {
-				rb_raise(rb_eArgError, "The RealVector you are subtracting doesn't have the same dimensions as either RealMatrix dimension, so their difference is infeasible using our current (human) technology.");
+				rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
 		}
 	} else if (TYPE(rb_other) == T_FIXNUM || TYPE(rb_other) == T_FLOAT) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		*(m->getData()) -= blas::repeat(NUM2DBL(rb_other), m->getData()->size1(), m->getData()->size2());
 	} else {
-		rb_raise(rb_eArgError, "You can only subtract Arrays, RealVectors, RealMatrices, and numbers to a %s.", rb_obj_classname(self));
+		binaryoperation_format_error<Obtype>("subtract");
 	}
 	return self;
 }
 
-template<class vectorType, class Obtype>
-static VALUE multiply_matrix_with_vector(Obtype* m, VALUE multiplier) {
+template<class Obtype, class vectorType>
+static VALUE multiply_matrix_with_vector(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	vectorType *vec;
-	Data_Get_Struct(multiplier, vectorType, vec);
+	Data_Get_Struct(rb_other, vectorType, vec);
 	if (m->getData()->size2() != vec->getData()->size()) {
 		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec->getData()->size());
 	}
@@ -888,10 +968,12 @@ static VALUE multiply_matrix_with_vector(Obtype* m, VALUE multiplier) {
 		new rb_RealVector(prod(*(m->getData()), *(vec->getData())))
 		);
 }
-template<class matType, class Obtype>
-static VALUE multiply_matrix_with_matrix(Obtype* m, VALUE multiplier) {
+template<class Obtype, class matType>
+static VALUE multiply_matrix_with_matrix(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	matType *multi_matrix;
-	Data_Get_Struct(multiplier, matType, multi_matrix);
+	Data_Get_Struct(rb_other, matType, multi_matrix);
 	if (m->getData()->size2() != multi_matrix->getData()->size1()) {
 		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix->getData()->size1());
 	}
@@ -902,38 +984,44 @@ static VALUE multiply_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 }
 
 template<class Obtype>
-VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
-	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
+VALUE method_matrix_multiply (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_FLOAT || TYPE(rb_other) == T_FIXNUM) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
 		return wrap_pointer<rb_RealMatrix>(
 			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) * NUM2DBL(multiplier))
+			new rb_RealMatrix(*(m->getData()) * NUM2DBL(rb_other))
 			);
-	} else if (TYPE(multiplier) == T_DATA) {
-		VALUE multiplier_klass = CLASS_OF(multiplier);
-		if (multiplier_klass == rb_RealMatrix::rb_class()) {
-			return multiply_matrix_with_matrix<rb_RealMatrix>(m, multiplier);
-		} else if (multiplier_klass == rb_RealMatrixReference::rb_class()) {
-			return multiply_matrix_with_matrix<rb_RealMatrixReference>(m, multiplier);
-		} else if (multiplier_klass == rb_RealVector::rb_class()) {
-			return multiply_matrix_with_vector<rb_RealVector>(m, multiplier);
-		} else if (multiplier_klass == rb_RealVectorReference::rb_class()) {
-			return multiply_matrix_with_vector<rb_RealVectorReference>(m, multiplier);
+	} else if (TYPE(rb_other) == T_DATA) {
+		VALUE rb_other_klass = CLASS_OF(rb_other);
+		if (rb_other_klass == rb_RealMatrix::rb_class()) {
+			return multiply_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixReference::rb_class()) {
+			return multiply_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVector::rb_class()) {
+			return multiply_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVectorReference::rb_class()) {
+			return multiply_matrix_with_vector<Obtype, rb_RealVectorReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixRow::rb_class()) {
+			return multiply_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixColumn::rb_class()) {
+			return multiply_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
 		} else {
-			rb_raise(rb_eArgError, "Can only multiply %s by a scalar, RealMatrix, Array, or RealVector.", rb_obj_classname(self));
+			binaryoperation_format_error<Obtype>("multiply");
 		}
-	} else if (TYPE(multiplier) == T_ARRAY) {
-		if (RARRAY_LEN(multiplier) > 0 && TYPE(rb_ary_entry(multiplier, 0)) == T_ARRAY) {
-			RealMatrix multi_matrix = rb_ary_to_realmatrix(multiplier);
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix multi_matrix = rb_ary_to_realmatrix(rb_other);
 			if (m->getData()->size2() != multi_matrix.size1())
 				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix.size1());
 			return wrap_pointer<rb_RealMatrix>(
 				rb_RealMatrix::rb_class(),
 				new rb_RealMatrix(prod(*(m->getData()), multi_matrix))
 			);
-		} else if (RARRAY_LEN(multiplier) > 0) {
-			RealVector vec = rb_ary_to_1d_realvector(multiplier);
+		} else if (RARRAY_LEN(rb_other) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(rb_other);
 			if (m->getData()->size2() != vec.size())
 				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec.size());
 			return wrap_pointer<rb_RealVector>(
@@ -944,15 +1032,17 @@ VALUE method_matrix_multiply (VALUE self, VALUE multiplier) {
 			rb_raise(rb_eArgError, "It is tough to multiply by an empty %s since the computer's imagination is limited by the Kernel.", rb_obj_classname(self));
 		}
 	} else {
-		rb_raise(rb_eArgError, "Can only multiply %s by a scalar, RealMatrix, Array, or RealVector.", rb_obj_classname(self));
+		binaryoperation_format_error<Obtype>("multiply");
 	}
 	return self;
 }
-
-template<class vectorType, class Obtype>
-static VALUE multiply_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
+// replace by fast_prod ?
+template<class Obtype, class vectorType>
+static VALUE multiply_equals_matrix_with_vector(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	vectorType *vec;
-	Data_Get_Struct(multiplier, vectorType, vec);
+	Data_Get_Struct(rb_other, vectorType, vec);
 	if (m->getData()->size2() != vec->getData()->size()) {
 		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec->getData()->size());
 	}
@@ -961,10 +1051,12 @@ static VALUE multiply_equals_matrix_with_vector(Obtype* m, VALUE multiplier) {
 	*(m->getData()) = temp_matrix;
 }
 
-template<class matType, class Obtype>
-static void multiply_equals_matrix_with_matrix(Obtype* m, VALUE multiplier) {
+template<class Obtype, class matType>
+static void multiply_equals_matrix_with_matrix(VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
 	matType *multi_matrix;
-	Data_Get_Struct(multiplier, matType, multi_matrix);
+	Data_Get_Struct(rb_other, matType, multi_matrix);
 	if (m->getData()->size2() != multi_matrix->getData()->size1()) {
 		rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix->getData()->size1());
 	}
@@ -972,32 +1064,38 @@ static void multiply_equals_matrix_with_matrix(Obtype* m, VALUE multiplier) {
 }
 
 template<class Obtype>
-VALUE method_matrix_multiply_equals (VALUE self, VALUE multiplier) {
-	Obtype *m;
-	Data_Get_Struct(self, Obtype, m);
-	if (TYPE(multiplier) == T_FLOAT || TYPE(multiplier) == T_FIXNUM) {
-		*(m->getData()) *= NUM2DBL(multiplier);
-	} else if (TYPE(multiplier) == T_DATA) {
-		VALUE multiplier_klass = CLASS_OF(multiplier);
-		if (multiplier_klass == rb_RealMatrix::rb_class()) {
-			multiply_equals_matrix_with_matrix<rb_RealMatrix>(m, multiplier);
-		} else if (multiplier_klass == rb_RealMatrixReference::rb_class()) {
-			multiply_equals_matrix_with_matrix<rb_RealMatrixReference>(m, multiplier);
-		} else if (multiplier_klass == rb_RealVector::rb_class()) {
-			multiply_equals_matrix_with_vector<rb_RealVector>(m, multiplier);
-		} else if (multiplier_klass == rb_RealVectorReference::rb_class()) {
-			multiply_equals_matrix_with_vector<rb_RealVectorReference>(m, multiplier);
+VALUE method_matrix_multiply_equals (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_FLOAT || TYPE(rb_other) == T_FIXNUM) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		*(m->getData()) *= NUM2DBL(rb_other);
+	} else if (TYPE(rb_other) == T_DATA) {
+		VALUE rb_other_klass = CLASS_OF(rb_other);
+		if (rb_other_klass == rb_RealMatrix::rb_class()) {
+			multiply_equals_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixReference::rb_class()) {
+			multiply_equals_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVector::rb_class()) {
+			multiply_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+		} else if (rb_other_klass == rb_RealVectorReference::rb_class()) {
+			multiply_equals_matrix_with_vector<Obtype, rb_RealVectorReference>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixRow::rb_class()) {
+			multiply_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
+		} else if (rb_other_klass == rb_RealMatrixColumn::rb_class()) {
+			multiply_equals_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
 		} else {
-			rb_raise(rb_eArgError, "Can only multiply %s by a scalar, RealMatrix, Array, or RealVector.", rb_obj_classname(self));
+			binaryoperation_format_error<Obtype>("multiply");
 		}
-	} else if (TYPE(multiplier) == T_ARRAY) {
-		if (RARRAY_LEN(multiplier) > 0 && TYPE(rb_ary_entry(multiplier, 0)) == T_ARRAY) {
-			RealMatrix multi_matrix = rb_ary_to_realmatrix(multiplier);
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix multi_matrix = rb_ary_to_realmatrix(rb_other);
 			if (m->getData()->size2() != multi_matrix.size1())
 				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), multi_matrix.size1());
 			*(m->getData()) = prod(*(m->getData()), multi_matrix);
-		} else if (RARRAY_LEN(multiplier) > 0) {
-			RealVector vec = rb_ary_to_1d_realvector(multiplier);
+		} else if (RARRAY_LEN(rb_other) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(rb_other);
 			if (m->getData()->size2() != vec.size())
 				rb_raise(rb_eArgError, "For matrix product A*B incompatible number of A columns (%lu) and B rows (%lu) for multiplication.", m->getData()->size2(), vec.size());
 			RealMatrix temp_matrix(m->getData()->size1(), 1);
@@ -1007,44 +1105,17 @@ VALUE method_matrix_multiply_equals (VALUE self, VALUE multiplier) {
 			rb_raise(rb_eArgError, "It is tough to multiply by an empty %s since the computer's imagination is limited by the Kernel.", rb_obj_classname(self));
 		}
 	} else {
-		rb_raise(rb_eArgError, "Can only multiply %s by a scalar, RealMatrix, Array, or RealVector.", rb_obj_classname(self));
+		binaryoperation_format_error<Obtype>("multiply");
 	}
 	return self;
 }
 
-// template<class Obtype>
-// VALUE method_matrix_divide (VALUE self, VALUE divider) {
-// 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
-// 		Obtype *m;
-// 		Data_Get_Struct(self, Obtype, m);
-// 		return wrap_pointer<rb_RealMatrix>(
-// 			rb_RealMatrix::rb_class(),
-// 			new rb_RealMatrix(*(m->getData()) / NUM2DBL(divider))
-// 			);
-// 	} else {
-// 		rb_raise(rb_eArgError, "Can only divide %s by a number", rb_obj_classname(self));
-// 	}
-// 	return self;
-// }
-
-// template<class Obtype>
-// VALUE method_matrix_divide_equals (VALUE self, VALUE divider) {
-// 	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
-// 		Obtype *m;
-// 		Data_Get_Struct(self, Obtype, m);
-// 		*(m->getData()) /= NUM2DBL(divider);
-// 	} else {
-// 		rb_raise(rb_eArgError, "Can only divide %s by a number", rb_obj_classname(self));
-// 	}
-// 	return self;
-// }
-
 template<class Obtype, class vectorType>
-VALUE divide_matrix_with_vector (VALUE self, VALUE divider) {
+VALUE divide_matrix_with_vector (VALUE self, VALUE rb_other) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	vectorType *v;
-	Data_Get_Struct(divider, vectorType, v);
+	Data_Get_Struct(rb_other, vectorType, v);
 
 	return wrap_pointer<rb_RealMatrix>(
 		rb_RealMatrix::rb_class(),
@@ -1058,11 +1129,11 @@ static void divide_warning_compatibility () {
 }
 
 template<class Obtype, class matType>
-VALUE divide_matrix_with_matrix (VALUE self, VALUE divider) {
+VALUE divide_matrix_with_matrix (VALUE self, VALUE rb_other) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	matType *v;
-	Data_Get_Struct(divider, matType, v);
+	Data_Get_Struct(rb_other, matType, v);
 
 	if (v->getData()->size1() != m->getData()->size1() || v->getData()->size2() != m->getData()->size2())
 		rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B columns (%lu) or A rows (%lu) and B rows (%lu)for division.", m->getData()->size2(), v->getData()->size2(), m->getData()->size1(), v->getData()->size1());
@@ -1074,34 +1145,34 @@ VALUE divide_matrix_with_matrix (VALUE self, VALUE divider) {
 }
 
 template<class Obtype>
-VALUE method_matrix_divide (VALUE self, VALUE divider) {
-	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+VALUE method_matrix_divide (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_FLOAT || TYPE(rb_other) == T_FIXNUM) {
 		Obtype *m;
 		Data_Get_Struct(self, Obtype, m);
 		return wrap_pointer<rb_RealMatrix>(
 			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) / NUM2DBL(divider))
+			new rb_RealMatrix(*(m->getData()) / NUM2DBL(rb_other))
 			);
-	} else if (TYPE(divider) == T_DATA) {
-		VALUE divider_klass = CLASS_OF(divider);
+	} else if (TYPE(rb_other) == T_DATA) {
+		VALUE divider_klass = CLASS_OF(rb_other);
 		if (divider_klass == rb_RealMatrix::rb_class()) {
-			return divide_matrix_with_matrix<Obtype, rb_RealMatrix>(self, divider);
+			return divide_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
 		} else if (divider_klass == rb_RealMatrixReference::rb_class()) {
-			return divide_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, divider);
+			return divide_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else if (divider_klass == rb_RealVector::rb_class()) {
-			return divide_matrix_with_vector<Obtype, rb_RealVector>(self, divider);
+			return divide_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
 		} else if (divider_klass == rb_RealVectorReference::rb_class()) {
-			return divide_matrix_with_vector<Obtype, rb_RealVectorReference>(self, divider);
+			return divide_matrix_with_vector<Obtype, rb_RealVectorReference>(self, rb_other);
 		} else if (divider_klass == rb_RealMatrixRow::rb_class()) {
-			return divide_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, divider);
+			return divide_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
 		} else if (divider_klass == rb_RealMatrixColumn::rb_class()) {
-			return divide_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, divider);
+			return divide_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
 		} else {
 			divide_warning_compatibility<Obtype>();
 		}
-	} else if (TYPE(divider) == T_ARRAY) {
-		if (RARRAY_LEN(divider) > 0 && TYPE(rb_ary_entry(divider, 0)) == T_ARRAY) {
-			RealMatrix division_matrix = rb_ary_to_realmatrix(divider);
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix division_matrix = rb_ary_to_realmatrix(rb_other);
 			Obtype *m;
 			Data_Get_Struct(self, Obtype, m);
 			if (m->getData()->size2() != division_matrix.size1())
@@ -1110,8 +1181,8 @@ VALUE method_matrix_divide (VALUE self, VALUE divider) {
 				rb_RealMatrix::rb_class(),
 				new rb_RealMatrix(*(m->getData()) / division_matrix)
 			);
-		} else if (RARRAY_LEN(divider) > 0) {
-			RealVector vec = rb_ary_to_1d_realvector(divider);
+		} else if (RARRAY_LEN(rb_other) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(rb_other);
 			Obtype *m;
 			Data_Get_Struct(self, Obtype, m);
 			if (m->getData()->size2() != vec.size())
@@ -1129,22 +1200,22 @@ VALUE method_matrix_divide (VALUE self, VALUE divider) {
 }
 
 template<class Obtype, class vectorType>
-VALUE divide_equals_matrix_with_vector (VALUE self, VALUE divider) {
+VALUE divide_equals_matrix_with_vector (VALUE self, VALUE rb_other) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	vectorType *v;
-	Data_Get_Struct(divider, vectorType, v);
+	Data_Get_Struct(rb_other, vectorType, v);
 
 	*(m->getData()) /= shark::blas::repeat(*(v->getData()), m->getData()->size1());
 	return self;
 }
 
 template<class Obtype, class matType>
-VALUE divide_equals_matrix_with_matrix (VALUE self, VALUE divider) {
+VALUE divide_equals_matrix_with_matrix (VALUE self, VALUE rb_other) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
 	matType *v;
-	Data_Get_Struct(divider, matType, v);
+	Data_Get_Struct(rb_other, matType, v);
 
 	if (v->getData()->size1() != m->getData()->size1() || v->getData()->size2() != m->getData()->size2())
 		rb_raise(rb_eArgError, "For matrix division A/B incompatible number of A columns (%lu) and B columns (%lu) or A rows (%lu) and B rows (%lu)for division.", m->getData()->size2(), v->getData()->size2(), m->getData()->size1(), v->getData()->size1());
@@ -1154,32 +1225,32 @@ VALUE divide_equals_matrix_with_matrix (VALUE self, VALUE divider) {
 }
 
 template<class Obtype>
-VALUE method_matrix_divide_equals (VALUE self, VALUE divider) {
-	if (TYPE(divider) == T_FLOAT || TYPE(divider) == T_FIXNUM) {
+VALUE method_matrix_divide_equals (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_FLOAT || TYPE(rb_other) == T_FIXNUM) {
 		Obtype *m;
 		Data_Get_Struct(self, Obtype, m);
-		*(m->getData()) /= NUM2DBL(divider);
+		*(m->getData()) /= NUM2DBL(rb_other);
 		return self;
-	} else if (TYPE(divider) == T_DATA) {
-		VALUE divider_klass = CLASS_OF(divider);
+	} else if (TYPE(rb_other) == T_DATA) {
+		VALUE divider_klass = CLASS_OF(rb_other);
 		if (divider_klass == rb_RealMatrix::rb_class()) {
-			return divide_equals_matrix_with_matrix<Obtype, rb_RealMatrix>(self, divider);
+			return divide_equals_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
 		} else if (divider_klass == rb_RealMatrixReference::rb_class()) {
-			return divide_equals_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, divider);
+			return divide_equals_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
 		} else if (divider_klass == rb_RealVector::rb_class()) {
-			return divide_equals_matrix_with_vector<Obtype, rb_RealVector>(self, divider);
+			return divide_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
 		} else if (divider_klass == rb_RealVectorReference::rb_class()) {
-			return divide_equals_matrix_with_vector<Obtype, rb_RealVectorReference>(self, divider);
+			return divide_equals_matrix_with_vector<Obtype, rb_RealVectorReference>(self, rb_other);
 		} else if (divider_klass == rb_RealMatrixRow::rb_class()) {
-			return divide_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, divider);
+			return divide_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
 		} else if (divider_klass == rb_RealMatrixColumn::rb_class()) {
-			return divide_equals_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, divider);
+			return divide_equals_matrix_with_vector<Obtype, rb_RealMatrixColumn>(self, rb_other);
 		} else {
 			divide_warning_compatibility<Obtype>();
 		}
-	} else if (TYPE(divider) == T_ARRAY) {
-		if (RARRAY_LEN(divider) > 0 && TYPE(rb_ary_entry(divider, 0)) == T_ARRAY) {
-			RealMatrix division_matrix = rb_ary_to_realmatrix(divider);
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix division_matrix = rb_ary_to_realmatrix(rb_other);
 			Obtype *m;
 			Data_Get_Struct(self, Obtype, m);
 			if (m->getData()->size2() != division_matrix.size1()) {
@@ -1187,8 +1258,8 @@ VALUE method_matrix_divide_equals (VALUE self, VALUE divider) {
 			}
 			*(m->getData()) /= division_matrix;
 			return self;
-		} else if (RARRAY_LEN(divider) > 0) {
-			RealVector vec = rb_ary_to_1d_realvector(divider);
+		} else if (RARRAY_LEN(rb_other) > 0) {
+			RealVector vec = rb_ary_to_1d_realvector(rb_other);
 			Obtype *m;
 			Data_Get_Struct(self, Obtype, m);
 			if (m->getData()->size2() != vec.size()) {
@@ -1575,6 +1646,7 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_matrix_get_log<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "to_matrix", (rb_method)method_matrix_to_matrix<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "columns", (rb_method)method_matrix_to_columns<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_unlabeleddata", (rb_method)method_matrix_to_unlabeleddata<Obtype>,0);
@@ -1584,6 +1656,12 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "**", (rb_method)method_matrix_get_pow<Obtype>, 1);
 	rb_define_alias(Obtype::rb_class(), "power", "**");
 	rb_define_alias(Obtype::rb_class(), "pow", "**");
+	rb_define_method(Obtype::rb_class(), "o", (rb_method) method_matrix_hadamard_product<Obtype>, 1);
+	rb_define_alias(Obtype::rb_class(), "hadamard", "o");
+	rb_define_alias(Obtype::rb_class(), "element_wise_product", "o");
+	rb_define_method(Obtype::rb_class(), "o=", (rb_method) method_matrix_hadamard_product_equals<Obtype>, 1);
+	rb_define_alias(Obtype::rb_class(), "hadamard=", "o=");
+	rb_define_alias(Obtype::rb_class(), "element_wise_product=", "o=");
 	rb_define_method(Obtype::rb_class(), "*=", (rb_method)method_matrix_multiply_equals<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "/=", (rb_method)method_matrix_divide_equals<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "/", (rb_method)method_matrix_divide<Obtype>, 1);

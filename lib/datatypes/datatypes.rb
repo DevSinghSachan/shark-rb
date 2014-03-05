@@ -39,11 +39,38 @@ end
 
 class Array
 	alias_method :old_sum, :+
+	alias_method :old_product, :*
 
 	def +(other)
 		[
 			Optimizer::RealVector, Optimizer::RealVectorReference, Optimizer::RealMatrix, Optimizer::RealMatrixReference, Optimizer::RealMatrixRow, Optimizer::RealMatrixColumn
 		].include?(other.class) ? (other + self) : self.old_sum(other)
+	end
+
+	def to_blas_type
+		self[0].is_a?(Array) ? self.to_matrix : self.to_realvector
+	end
+
+	def *(other)
+		[
+			Optimizer::RealVector, Optimizer::RealVectorReference, Optimizer::RealMatrix, Optimizer::RealMatrixReference, Optimizer::RealMatrixRow, Optimizer::RealMatrixColumn
+		].include?(other.class) ? (self.to_blas_type * other) : self.old_product(other)
+	end
+
+	# Hadamard product.
+	def o(other)
+		if [
+			Optimizer::RealMatrix, Optimizer::RealMatrixReference
+		].include?(other.class) then (self.to_matrix.o(other))
+		else raise NoMethodError.new "undefined method `o' for #{self}" end
+	end
+
+	# Hadamard product equals.
+	def o=(other)
+		if [
+			Optimizer::RealMatrix, Optimizer::RealMatrixReference
+		].include?(other.class) then (self.to_matrix.o=(other))
+		else raise NoMethodError.new "undefined method `o=' for #{self}" end
 	end
 end
 

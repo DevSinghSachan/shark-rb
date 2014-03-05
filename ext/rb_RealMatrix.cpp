@@ -5,6 +5,7 @@ using namespace std;
 #include "extras/utils/rb_pointer_wrapping.extras"
 #include "extras/matrix/rb_matrix_methods.extras"
 
+extern VALUE rb_array_klass;
 extern VALUE rb_optimizer_realmatrix_klass;
 
 VALUE rb_RealMatrix::rb_class() {
@@ -54,8 +55,35 @@ VALUE method_realmatrix_initialize (int number_of_arguments, VALUE* ruby_argumen
 	return self;
 }
 
+VALUE method_rb_ary_to_realmatrix (VALUE self) {
+	if (RARRAY_LEN(self) > 0) {
+		if (TYPE(rb_ary_entry(self, 0)) != T_ARRAY) {
+			if (TYPE(rb_ary_entry(self, 0)) != T_FIXNUM && TYPE(rb_ary_entry(self, 0)) != T_FLOAT)
+				rb_raise(rb_eArgError, "Can only convert to RealMatrix 1 to 2-dimensional Float or Fixnum vectors (please be gentle).");
+			return wrap_pointer<rb_RealMatrix>(
+				rb_RealMatrix::rb_class(),
+				new rb_RealMatrix(rb_1d_ary_to_realmatrix(self))
+				);
+		} else {
+			if (RARRAY_LEN(rb_ary_entry(self, 0)) > 0 && TYPE(rb_ary_entry(rb_ary_entry(self, 0),0)) != T_FIXNUM && TYPE(rb_ary_entry(rb_ary_entry(self, 0),0)) != T_FLOAT)
+				rb_raise(rb_eArgError, "Can only convert to RealVector 1 to 2-dimensional Float or Fixnum vectors (please be gentle).");
+			return wrap_pointer<rb_RealMatrix>(
+				rb_RealMatrix::rb_class(),
+				new rb_RealMatrix(rb_ary_to_realmatrix(self))
+				);
+		}
+	} else {
+		return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix()
+			);
+	}
+	return self;
+}
+
 void Init_RealMatrix () {
 	Init_MatrixMethods<rb_RealMatrix>();
+	rb_define_method(rb_array_klass, "to_matrix", (rb_method)method_rb_ary_to_realmatrix, 0);
 	rb_define_alloc_func(rb_optimizer_realmatrix_klass, (rb_alloc_func_t) method_realmatrix_allocate);
 	rb_define_method(rb_optimizer_realmatrix_klass, "initialize", (rb_method)method_realmatrix_initialize,-1);
 }
