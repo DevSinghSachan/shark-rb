@@ -65,7 +65,7 @@ describe 'Logistic Regression' do
 	describe 'Prediction' do
 
 		it 'should give predictions for Arrays, Realvectors, and Matrices' do
-			->(){@classifier.predict @test_data[0].to_a }.should_not raise_error
+			->(){@classifier.predict(@test_data[0].to_a)}.should_not raise_error
 			->(){@classifier.predict @test_data[0]      }.should_not raise_error
 			->(){@classifier.predict @test_data         }.should_not raise_error
 		end
