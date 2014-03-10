@@ -77,6 +77,11 @@ describe 'Logistic Regression' do
 			@classifier.predict(@test_data).number_of_rows.should    == @test_data.number_of_rows
 			@classifier.predict(@test_data).class.should             == Shark::RealMatrix
 		end
+
+		it 'should label accordingly' do
+			@classifier.predict(@test_data[0])[0].round.should == [1.0, 0.0]
+			@classifier.predict(@test_data[1])[0].round.should == [0.0, 1.0]
+		end
 	end
 
 end

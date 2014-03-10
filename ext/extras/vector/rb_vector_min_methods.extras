@@ -15,6 +15,26 @@ VALUE method_vector_get_sqrt (VALUE self) {
 }
 
 template<class Obtype>
+static shark::RealVector round(Obtype & _vec) {
+
+    shark::RealVector _rounded(_vec);
+    
+    for (size_t i = 0; i < _rounded.size(); i++)
+        _rounded(i) = round(_rounded(i));
+    return _rounded;
+}
+
+template<class Obtype>
+VALUE method_vector_get_rounded (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(round(*(m->getData())))
+			);
+}
+
+template<class Obtype>
 VALUE method_vector_get_exp (VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
@@ -22,6 +42,32 @@ VALUE method_vector_get_exp (VALUE self) {
 			rb_RealVector::rb_class(),
 			new rb_RealVector(exp(*(m->getData())))
 			);
+}
+
+template<class Obtype>
+VALUE method_vector_each (VALUE self) {
+
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+		for (size_t i = 0; i< m->getData()->size();i++) {
+			rb_yield(NUM2DBL((*(m->getData()))[i]));
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_vector_each_with_index (VALUE self) {
+
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+		for (size_t i = 0; i< m->getData()->size();i++) {
+			rb_yield_values(2, NUM2DBL((*(m->getData()))[i]), INT2FIX(i));
+	}
+	return self;
 }
 
 template<class Obtype>
@@ -750,8 +796,11 @@ void Init_VectorMinMethods () {
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_vector_get_sum<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_vector_get_mean<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "round", (rb_method)method_vector_get_rounded<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "min", (rb_method)method_vector_get_min<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "max", (rb_method)method_vector_get_max<Obtype>,0);
+	rb_define_method(Obtype::rb_class(), "each", (rb_method) method_vector_each<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "each_with_index", (rb_method) method_vector_each_with_index<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_vector_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_vector_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_vector_get_log<Obtype>,0);

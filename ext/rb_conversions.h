@@ -30,4 +30,16 @@ VALUE realvector_to_rb_ary(const shark::RealVector&);
 VALUE stdvector_realmatrix_to_rb_ary(const std::vector<shark::RealMatrix>);
 VALUE stdvector_realvector_to_rb_ary(const std::vector<shark::RealVector>);
 
+#ifndef RETURN_SIZED_ENUMERATOR_PRE
+#define RETURN_SIZED_ENUMERATOR_PRE do { \
+	if (!rb_block_given_p()) {
+#endif
+	   	
+#ifndef RETURN_SIZED_ENUMERATOR
+#define RETURN_SIZED_ENUMERATOR(obj, argc, argv) \
+	return rb_enumeratorize((obj), ID2SYM(rb_frame_this_func()), (argc), (argv));	\
+	} \
+} while (0)
+#endif
+
 #endif

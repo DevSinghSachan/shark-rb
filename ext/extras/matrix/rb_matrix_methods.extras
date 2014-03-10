@@ -6,6 +6,29 @@ static void binaryoperation_format_error(char* msg) {
 }
 
 template<class Obtype>
+static shark::RealMatrix round(Obtype & _mat) {
+
+    shark::RealMatrix _rounded(_mat);
+    
+    for (size_t i = 0; i < _rounded.size1(); i++)
+    	for (size_t j = 0; j < _rounded.size2(); j++)
+	        _rounded(i,j) = round(_rounded(i,j));
+    return _rounded;
+}
+
+template<class Obtype>
+VALUE method_matrix_get_rounded (VALUE self) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	return wrap_pointer<rb_RealMatrix>(
+			rb_RealMatrix::rb_class(),
+			new rb_RealMatrix(round(*(m->getData())))
+			);
+
+}
+
+
+template<class Obtype>
 VALUE method_matrix_get_sqrt (VALUE self) {
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
@@ -29,6 +52,58 @@ VALUE method_matrix_matrid_hadamard_product (VALUE self, VALUE rb_other) {
 		);
 	} else {
 		rb_raise(rb_eArgError, "The %s you are hadamard producting don't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_class2name(otherType::rb_class()), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_each (VALUE self) {
+
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+		for (size_t i = 0; i< m->getData()->size1();i++) {
+			rb_yield(wrap_pointer<rb_RealMatrixRow>(
+					rb_RealMatrixRow::rb_class(),
+					new rb_RealMatrixRow(m->getData(), i)
+				)
+			);
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_each_column (VALUE self) {
+
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+		for (size_t i = 0; i< m->getData()->size2();i++) {
+			rb_yield(wrap_pointer<rb_RealMatrixColumn>(
+					rb_RealMatrixColumn::rb_class(),
+					new rb_RealMatrixColumn(m->getData(), i)
+				)
+			);
+	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_each_with_index (VALUE self) {
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+		for (size_t i = 0; i< m->getData()->size1();i++) {
+			rb_yield_values(2, 
+				wrap_pointer<rb_RealMatrixRow>(
+					rb_RealMatrixRow::rb_class(),
+					new rb_RealMatrixRow(m->getData(), i)
+				),
+				INT2FIX(i)
+			);
 	}
 	return self;
 }
@@ -1640,12 +1715,17 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "inverse", (rb_method)method_matrix_get_inverse<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_matrix_get_sum<Obtype>, -1);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_matrix_get_mean<Obtype>,-1);
+	rb_define_method(Obtype::rb_class(), "round", (rb_method)method_matrix_get_rounded<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "max", (rb_method)method_matrix_get_max<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "min", (rb_method)method_matrix_get_min<Obtype>,-1);
 	rb_define_method(Obtype::rb_class(), "exp", (rb_method)method_matrix_get_exp<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "log", (rb_method)method_matrix_get_log<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_matrix_get_sqrt<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "to_a", (rb_method)method_matrix_to_ary<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "each", (rb_method) method_matrix_each<Obtype>, 0);
+	rb_define_alias(Obtype::rb_class(), "each_row", "each");
+	rb_define_method(Obtype::rb_class(), "each_column", (rb_method) method_matrix_each_column<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "each_with_index", (rb_method) method_matrix_each_with_index<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "to_matrix", (rb_method)method_matrix_to_matrix<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "columns", (rb_method)method_matrix_to_columns<Obtype>,0);

@@ -14,9 +14,11 @@ end
 
 class Optimizer::RealMatrix
 	include(MatrixInspector)
+	include Enumerable
 end
 class Optimizer::RealMatrixReference
 	include(MatrixInspector)
+	include Enumerable
 end
 
 class Float
@@ -95,13 +97,17 @@ end
 
 class Optimizer::RealVector
 	include(ArrayInspector)
+	include Enumerable
 end
 class Optimizer::RealVectorReference
 	include(ArrayInspector)
+	include Enumerable
 end
 class Optimizer::RealMatrixRow
 	include(ArrayInspector)
+	include Enumerable
 end
 class Optimizer::RealMatrixColumn
 	include(ArrayInspector)
+	include Enumerable
 end

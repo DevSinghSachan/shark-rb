@@ -377,7 +377,6 @@ extern "C"  {
 	void Init_rb_shark() {
 
 		// TODO:
-		//   - define .each method,
 		//   - separate SparseFFNet from autoencoder
 		//   - Add RealVector/Int labeleddata for classification
 		//   - Add more cases
