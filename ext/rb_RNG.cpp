@@ -1,9 +1,10 @@
+#include "rb_RNG.h"
 #include "extras/utils/rb_pointer_wrapping.extras"
 
-VALUE method_rb_rng_seed (VALUE rb_seed) {
+VALUE method_rb_rng_seed (VALUE self, VALUE rb_seed) {
 	Check_Type(rb_seed, T_FIXNUM);
 	shark::Rng::seed(NUM2INT(rb_seed));
-	return Qnil;
+	return rb_seed;
 }
 
 extern VALUE rb_optimizer_rng_klass;

@@ -1442,16 +1442,16 @@ VALUE method_matrix_get_row (VALUE self, VALUE rb_index) {
 
 	int index = NUM2INT(rb_index);
 
-	if (index < 0 && int(index + m->getData()->size2()) < 0)
+	if (index < 0 && int(index + m->getData()->size1()) < 0)
 		rb_raise(rb_eArgError, "Out of range of %s", rb_obj_classname(self));
-	if (index >= int(m->getData()->size2()))
+	if (index >= int(m->getData()->size1()))
 		rb_raise(rb_eArgError, "Out of range of %s", rb_obj_classname(self));
 
 	return wrap_pointer<rb_RealMatrixRow>(
 		rb_RealMatrixRow::rb_class(),
 		new rb_RealMatrixRow(m->getData(),
 			index < 0 ?
-				index + m->getData()->size2() :
+				index + m->getData()->size1() :
 				index
 			)
 		);
@@ -1465,16 +1465,16 @@ VALUE method_matrix_get_column (VALUE self, VALUE rb_index) {
 	int index = NUM2INT(rb_index),
 		neg_index = 0;
 
-	if (index < neg_index && (index + int(m->getData()->size1()) < neg_index))
+	if (index < neg_index && (index + int(m->getData()->size2()) < neg_index))
 		rb_raise(rb_eArgError, "Out of range of %s", rb_obj_classname(self));
-	if (index >= int(m->getData()->size1()))
+	if (index >= int(m->getData()->size2()))
 		rb_raise(rb_eArgError, "Out of range of %s", rb_obj_classname(self));
 
 	return wrap_pointer<rb_RealMatrixColumn>(
 		rb_RealMatrixColumn::rb_class(),
 		new rb_RealMatrixColumn(m->getData(),
 			index < 0 ?
-				index + m->getData()->size1() :
+				index + m->getData()->size2() :
 				index
 			)
 		);

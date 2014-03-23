@@ -88,7 +88,7 @@ module ArrayInspector
 	end
 
 	def to_s
-		"["+self.each.map {|i| sprintf("%.2f", i)}.join(" ")+"]"
+		"["+self.each.map {|i| (i < 0 ? "" : " ") + sprintf("%.2f", i)}.join(" ")+"]"
 	end
 
 protected

@@ -5,6 +5,8 @@ describe 'Logistic Regression' do
 
 	before(:all) do
 
+		Shark::RNG.seed 123
+
 		# training data
 	    @training_data = Shark::RealMatrix.new [
 	        [1,1,1,0,0,0],

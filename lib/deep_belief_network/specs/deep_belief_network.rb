@@ -1,8 +1,9 @@
 require_relative '../deep_belief_network'
 
-
 describe 'Deep Belief Network' do
 	before(:all) do
+		Shark::RNG.seed 42
+
 		@training_data = Shark::RealMatrix.new [
 			[1,1,1,0,0,0],
 			[1,1,1,0,0,0],
@@ -22,11 +23,11 @@ describe 'Deep Belief Network' do
 	        [0, 1]
 	    ]
 
-	    @pretrain_lr=0.1
-	    @finetune_lr=0.1
-	    @k=1
-	    @pretraining_epochs=1000
-	    @finetune_epochs=200
+		@pretrain_lr        = 0.1
+		@finetune_lr        = 0.1
+		@k                  = 1
+		@pretraining_epochs = 1000
+		@finetune_epochs    = 200
 
 	    @dbn = Shark::RBM::DBN.new samples: @training_data,
 	                               labels: @training_labels,
@@ -43,7 +44,9 @@ describe 'Deep Belief Network' do
 	    @dbn.finetune learning_rate: @finetune_lr, epochs: @finetune_epochs
  
  		puts "at the end =>"
-	    puts @dbn.rbm_layers[-1].weight_matrix.each_row.map {|i| i.to_a.inspect }.join("\n")
+	    puts @dbn.rbm_layers[1].weight_matrix
+	    puts @dbn.rbm_layers[1].visible_neurons.bias
+	    puts @dbn.rbm_layers[1].hidden_neurons.bias
 
 	    # test
 	    @test_data = Shark::RealMatrix.new [

@@ -31,18 +31,15 @@ class Optimizer
 				binomial.n = 1
 				# TODO: simplify Binomials (15th March 2014)
 				if h1_mean.is_a? Shark::RealMatrix
-					h1_sample = Shark::RealMatrix.new(h1_mean.size1, h1_mean.size2)
-					h1_mean.each_cell_with_index do |cell, i, j|
-						binomial.p = cell
-						binomial.p = cell
-						h1_sample[i,j] = binomial.sample
+					h1_sample = Shark::RealMatrix.new(h1_mean.size1, h1_mean.size2) do |i, j|
+						binomial.p = h1_mean[i,j]
+						binomial.sample
 					end
 					[h1_mean, h1_sample]
 				else
-					h1_sample = Shark::RealVector.new(h1_mean.size)
-					h1_mean.each_with_index do |cell, i|
-						binomial.p = cell
-						h1_sample[i] = binomial.sample
+					h1_sample = Shark::RealVector.new(h1_mean.size) do |i|
+						binomial.p = h1_mean[i]
+						binomial.sample
 					end
 					[h1_mean, h1_sample]
 				end
@@ -85,14 +82,14 @@ class Optimizer
 						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh nh_samples
 					end
 				end
-				puts ph_sample
-				puts "***"
-				puts (((~input) * ph_sample) - ((~nv_samples) * nh_means))
-				puts "***"
-				raise StandardError.new "stop"
+				# puts nv_samples, (input - nv_samples).mean(axis:0)
+				# puts "***"
+				# puts (((~input) * ph_sample) - ((~nv_samples) * nh_means))
+				# puts "***"
 				self.weight_matrix   += lr * (~input * ph_sample - ~nv_samples * nh_means)
 				visible_neurons.bias += lr * (input - nv_samples).mean(axis:0)
 				hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
+				# raise StandardError.new "hell"
 			end
 
 			def propdown h
@@ -110,6 +107,15 @@ class Optimizer
 					h1_mean,
 					h1_sample
 				]
+			end
+
+			def reconstruct v
+				h = sigmoid( v * ~weight_matrix + hidden_neurons.bias)
+				reconstructed_v = sigmoid(h * weight_matrix + visible_neurons.bias)
+				return reconstructed_v
+			end
+
+			class TrainingError < ArgumentError
 			end
 		end
 
@@ -175,7 +181,8 @@ class Optimizer
 					end
 
 					opts[:epochs].times do |epoch| # training epochs
-						layer.contrastive_divergence input: layer_input, learning_rate: opts[:learning_rate]
+						layer.contrastive_divergence input: layer_input,
+													 learning_rate: opts[:learning_rate]
 					end
 
 					# cd.data = layer_input.to_unlabeled_data

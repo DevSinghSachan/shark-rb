@@ -812,12 +812,12 @@ void Init_VectorMinMethods () {
 	rb_define_method(Obtype::rb_class(), "**", (rb_method)method_vector_get_pow<Obtype>, 1);
 	rb_define_alias(Obtype::rb_class(), "power", "**");
 	rb_define_alias(Obtype::rb_class(), "pow", "**");
-	rb_define_method(Obtype::rb_class(), "*=", (rb_method)method_vector_multiply_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "multiply_equals", (rb_method)method_vector_multiply_equals<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "/", (rb_method)method_vector_divide<Obtype>,1);
-	rb_define_method(Obtype::rb_class(), "/=", (rb_method)method_vector_divide_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "divide_equals", (rb_method)method_vector_divide_equals<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "+", (rb_method)method_vector_add<Obtype>,1);
-	rb_define_method(Obtype::rb_class(), "+=", (rb_method)method_vector_add_equals<Obtype>,1);
-	rb_define_method(Obtype::rb_class(), "-=", (rb_method)method_vector_remove_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "add_equals", (rb_method)method_vector_add_equals<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "substract_equals", (rb_method)method_vector_remove_equals<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "clear", (rb_method)method_vector_clear<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "-", (rb_method)method_vector_remove<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "-@", (rb_method)method_vector_negate<Obtype>,0);
