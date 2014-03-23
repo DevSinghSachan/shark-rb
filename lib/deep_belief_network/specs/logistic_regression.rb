@@ -39,9 +39,6 @@ describe 'Logistic Regression' do
 	        [0, 0, 0, 1, 1, 0],
 	        [1, 1, 1, 1, 1, 0]
 	    ]
-
-	    # print "classifier.predict(x).to_a => \n", show_matrix(classifier.predict(x)), "\n"
-	    # puts show_matrix(classifier.predict([1, 1, 0, 0, 0, 0].to_realvector))
 	end
 
 	before(:all) do

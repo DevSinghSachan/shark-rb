@@ -82,14 +82,9 @@ class Optimizer
 						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh nh_samples
 					end
 				end
-				# puts nv_samples, (input - nv_samples).mean(axis:0)
-				# puts "***"
-				# puts (((~input) * ph_sample) - ((~nv_samples) * nh_means))
-				# puts "***"
-				self.weight_matrix   += lr * (~input * ph_sample - ~nv_samples * nh_means)
+				self.weight_matrix   += lr * (((~input) * ph_sample) - ((~nv_samples) * nh_means))
 				visible_neurons.bias += lr * (input - nv_samples).mean(axis:0)
 				hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
-				# raise StandardError.new "hell"
 			end
 
 			def propdown h

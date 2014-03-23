@@ -484,6 +484,28 @@ VALUE method_vector_add (VALUE self, VALUE rb_vector) {
 			rb_RealVector::rb_class(),
 			new rb_RealVector(*(s->getData()) + *(o->getData()))
 			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixColumn::rb_class()) {
+		rb_RealMatrixColumn *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixColumn, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) + *(o->getData()))
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixRow::rb_class()) {
+		rb_RealMatrixRow *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixRow, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) + *(o->getData()))
+			);
 	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
 
 		return wrap_pointer<rb_RealVector>(
@@ -491,7 +513,7 @@ VALUE method_vector_add (VALUE self, VALUE rb_vector) {
 			new rb_RealVector(*(s->getData()) + shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size()))
 			);
 	} else {
-		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays, other RealVectors, or numbers.");
+		rb_raise(rb_eArgError, "%s can be sum only with Arrays, other RealVectors, or numbers.", rb_class2name(Obtype::rb_class()));
 	}
 	return self;
 }
@@ -525,16 +547,32 @@ VALUE method_vector_add_equals (VALUE self, VALUE rb_vector) {
 			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
 
 		*(s->getData()) += *(o->getData());
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixColumn::rb_class()) {
+		rb_RealMatrixColumn *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixColumn, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		*(s->getData()) += *(o->getData());
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixRow::rb_class()) {
+		rb_RealMatrixRow *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixRow, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+
+		*(s->getData()) += *(o->getData());
 	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
 		*(s->getData()) += shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size());
 	} else {
-		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
+		rb_raise(rb_eArgError, "%s can be sum only with Scalars, Arrays, RealVectors, RealVectorReferences, RealMatrixRows, or RealMatrixColumns.", rb_class2name(Obtype::rb_class()));
 	}
 	return self;
 }
 
 template<class Obtype>
-VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
+VALUE method_vector_substract (VALUE self, VALUE rb_vector) {
 	Obtype *s;
 	Data_Get_Struct(self, Obtype, s);
 
@@ -551,7 +589,40 @@ VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
 			);
 	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealVector::rb_class()) {
 		rb_RealVector *o;
-		Data_Get_Struct(self, rb_RealVector, o);
+		Data_Get_Struct(rb_vector, rb_RealVector, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) - *(o->getData()))
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealVectorReference::rb_class()) {
+		rb_RealVectorReference *o;
+		Data_Get_Struct(rb_vector, rb_RealVectorReference, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) - *(o->getData()))
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixColumn::rb_class()) {
+		rb_RealMatrixColumn *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixColumn, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		return wrap_pointer<rb_RealVector>(
+			rb_RealVector::rb_class(),
+			new rb_RealVector(*(s->getData()) - *(o->getData()))
+			);
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixRow::rb_class()) {
+		rb_RealMatrixRow *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixRow, o);
 
 		if (o->getData()->size() != s->getData()->size())
 			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
@@ -567,35 +638,60 @@ VALUE method_vector_remove (VALUE self, VALUE rb_vector) {
 			new rb_RealVector(*(s->getData()) - shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size()))
 			);
 	} else {
-		rb_raise(rb_eArgError, "RealVectors can be substract only with Arrays and other RealVectors");
+		rb_raise(rb_eArgError, "%s can be substracted only with Arrays, other RealVectors, or numbers.", rb_class2name(Obtype::rb_class()));
 	}
 	return self;
 }
 
+
 template<class Obtype>
-VALUE method_vector_remove_equals (VALUE self, VALUE rb_vector) {
+VALUE method_vector_substract_equals (VALUE self, VALUE rb_vector) {
 	Obtype *s;
 	Data_Get_Struct(self, Obtype, s);
 
 	if (TYPE(rb_vector) == T_ARRAY) {
 		if (RARRAY_LEN(rb_vector) != (int)s->getData()->size())
-			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
 
 		RealVector summer;
 		summer = rb_ary_to_1d_realvector(rb_vector);
 		*(s->getData()) -= summer;
 	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealVector::rb_class()) {
 		rb_RealVector *o;
-		Data_Get_Struct(self, rb_RealVector, o);
+		Data_Get_Struct(rb_vector, rb_RealVector, o);
 
 		if (o->getData()->size() != s->getData()->size())
-			rb_raise(rb_eArgError, "To sum RealVectors, use vectors of the same length.");
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		*(s->getData()) -= *(o->getData());
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealVectorReference::rb_class()) {
+		rb_RealVectorReference *o;
+		Data_Get_Struct(rb_vector, rb_RealVectorReference, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		*(s->getData()) -= *(o->getData());
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixColumn::rb_class()) {
+		rb_RealMatrixColumn *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixColumn, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
+
+		*(s->getData()) -= *(o->getData());
+	} else if (TYPE(rb_vector) == T_DATA && CLASS_OF(rb_vector) == rb_RealMatrixRow::rb_class()) {
+		rb_RealMatrixRow *o;
+		Data_Get_Struct(rb_vector, rb_RealMatrixRow, o);
+
+		if (o->getData()->size() != s->getData()->size())
+			rb_raise(rb_eArgError, "To substract RealVectors, use vectors of the same length.");
 
 		*(s->getData()) -= *(o->getData());
 	} else if (TYPE(rb_vector) == T_FLOAT || TYPE(rb_vector) == T_FIXNUM) {
 		*(s->getData()) -= shark::blas::repeat(NUM2DBL(rb_vector), s->getData()->size());
 	} else {
-		rb_raise(rb_eArgError, "RealVectors can be sum only with Arrays and other RealVectors");
+		rb_raise(rb_eArgError, "%s can be substracted only with Scalars, Arrays, RealVectors, RealVectorReferences, RealMatrixRows, or RealMatrixColumns.", rb_class2name(Obtype::rb_class()));
 	}
 	return self;
 }
@@ -817,9 +913,10 @@ void Init_VectorMinMethods () {
 	rb_define_method(Obtype::rb_class(), "divide_equals", (rb_method)method_vector_divide_equals<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "+", (rb_method)method_vector_add<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "add_equals", (rb_method)method_vector_add_equals<Obtype>,1);
-	rb_define_method(Obtype::rb_class(), "substract_equals", (rb_method)method_vector_remove_equals<Obtype>,1);
+	rb_define_alias(Obtype::rb_class(), "<<", "add_equals");
+	rb_define_method(Obtype::rb_class(), "substract_equals", (rb_method)method_vector_substract_equals<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "clear", (rb_method)method_vector_clear<Obtype>,0);
-	rb_define_method(Obtype::rb_class(), "-", (rb_method)method_vector_remove<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "-", (rb_method)method_vector_substract<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "-@", (rb_method)method_vector_negate<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "stride", (rb_method)method_vector_stride<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "fill", (rb_method)method_vector_fill<Obtype>,1);

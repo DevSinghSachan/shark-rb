@@ -123,8 +123,8 @@ def test_lr(learning_rate=0.01, n_epochs=10)
         [1, 1, 1, 1, 1, 0]
     ]
 
-    print "classifier.predict(x).to_a => \n", show_matrix(classifier.predict(x)), "\n"
-    puts show_matrix(classifier.predict([1, 1, 0, 0, 0, 0].to_realvector))
+    print "classifier.predict(x).to_a => \n", classifier.predict(x).to_s, "\n"
+    puts classifier.predict([1, 1, 0, 0, 0, 0].to_realvector)
 end
 
 if __FILE__ == $0
