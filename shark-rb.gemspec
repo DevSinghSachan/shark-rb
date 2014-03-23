@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jonathan Raiman"]
-  s.date = "2014-03-03"
+  s.date = "2014-03-23"
   s.description = "Shark C++ library bindings in Ruby implementing RealVector, LabeledData, UnlabeledData, neural nets and much more!"
   s.email = "jraiman@mit.edu"
   s.extensions = ["ext/extconf.rb"]
@@ -29,7 +29,6 @@ Gem::Specification.new do |s|
     "ext/extras/matrix/rb_matrix_methods.extras",
     "ext/extras/models/rb_abstract_model.extras",
     "ext/extras/models/rb_objective_function.extras",
-    "ext/extras/random/rb_rng.extras",
     "ext/extras/rbm/rb_neuronlayer_bias.extras",
     "ext/extras/rbm/rb_neuronlayer_model.extras",
     "ext/extras/rbm/rb_rbm_model.extras",
@@ -131,7 +130,11 @@ Gem::Specification.new do |s|
     "lib/deep_belief_network/DBN.rb",
     "lib/deep_belief_network/HiddenLayer.rb",
     "lib/deep_belief_network/LogisticRegression.rb",
+    "lib/deep_belief_network/README.md",
+    "lib/deep_belief_network/Rakefile",
     "lib/deep_belief_network/deep_belief_network.rb",
+    "lib/deep_belief_network/specs/deep_belief_network.rb",
+    "lib/deep_belief_network/specs/logistic_regression.rb",
     "lib/header_file_generation/Converter.rb",
     "lib/header_file_generation/CppChecker.rb",
     "lib/header_file_generation/CppClass.rb",
@@ -173,5 +176,17 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = "2.1.11"
   s.summary = "Shark C++ library bindings in Ruby."
+
+  if s.respond_to? :specification_version then
+    s.specification_version = 4
+
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_development_dependency(%q<rspec>, [">= 0"])
+    else
+      s.add_dependency(%q<rspec>, [">= 0"])
+    end
+  else
+    s.add_dependency(%q<rspec>, [">= 0"])
+  end
 end
 
