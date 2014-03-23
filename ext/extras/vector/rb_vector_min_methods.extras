@@ -51,9 +51,8 @@ VALUE method_vector_each (VALUE self) {
 	RETURN_SIZED_ENUMERATOR(self, 0, 0);
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-		for (size_t i = 0; i< m->getData()->size();i++) {
-			rb_yield(NUM2DBL((*(m->getData()))[i]));
-	}
+	for (size_t i = 0; i< m->getData()->size();i++)
+		rb_yield(rb_float_new((*(m->getData()))[i]));
 	return self;
 }
 
@@ -64,9 +63,8 @@ VALUE method_vector_each_with_index (VALUE self) {
 	RETURN_SIZED_ENUMERATOR(self, 0, 0);
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-		for (size_t i = 0; i< m->getData()->size();i++) {
-			rb_yield_values(2, NUM2DBL((*(m->getData()))[i]), INT2FIX(i));
-	}
+	for (size_t i = 0; i< m->getData()->size();i++)
+		rb_yield_values(2, rb_float_new((*(m->getData()))[i]), INT2FIX(i));
 	return self;
 }
 

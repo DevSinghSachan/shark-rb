@@ -77,6 +77,8 @@ class Optimizer
         end
 
         alias :predict :output
+        alias :output_size :number_of_outputs
+        alias :input_size  :number_of_inputs
 
     end
 end

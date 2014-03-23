@@ -41,6 +41,7 @@
 
 #include "extras/utils/rb_pointer_wrapping.extras"
 
+#include "rb_RNG.h"
 #include "rb_RNG_Binomial.h"
 #include "rb_RNG_Cauchy.h"
 #include "rb_RNG_Uniform.h"
@@ -455,6 +456,8 @@ extern "C"  {
 		Init_RBM_Analytics();
 		Init_RBMBinaryLayer();
 		Init_RBMGaussianLayer();
+
+		Init_RNG();
 
 		// Objective Function optimizers:
 		Init_Steepest_Descent();

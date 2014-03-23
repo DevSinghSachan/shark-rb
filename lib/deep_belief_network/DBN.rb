@@ -1,5 +1,118 @@
 class Optimizer
 	module RBM
+		class BinaryRBM
+			def sigmoid x
+				((-x).exp + 1.0).inverse
+			end
+
+			def get_reconstruction_cross_entropy input
+				pre_sigmoid_activation_h = input * ~weight_matrix + hidden_neurons.bias
+				sigmoid_activation_h     = sigmoid(pre_sigmoid_activation_h)
+				
+				pre_sigmoid_activation_v = sigmoid_activation_h * weight_matrix + visible_neurons.bias
+				sigmoid_activation_v     = sigmoid(pre_sigmoid_activation_v)
+
+				- (
+						(
+							input * (~sigmoid_activation_v).log +
+						    (-input + 1.0) * ~(-sigmoid_activation_v + 1.0).log
+					    ).sum(axis:1)
+				).mean
+			end
+
+			def propup v
+				pre_sigmoid_activation = v * (~weight_matrix) + hidden_neurons.bias
+				return sigmoid(pre_sigmoid_activation)
+			end
+
+			def sample_h_given_v v0_sample
+				h1_mean   = propup v0_sample
+				binomial = Shark::RNG::Binomial.new
+				binomial.n = 1
+				# TODO: simplify Binomials (15th March 2014)
+				if h1_mean.is_a? Shark::RealMatrix
+					h1_sample = Shark::RealMatrix.new(h1_mean.size1, h1_mean.size2)
+					h1_mean.each_cell_with_index do |cell, i, j|
+						binomial.p = cell
+						binomial.p = cell
+						h1_sample[i,j] = binomial.sample
+					end
+					[h1_mean, h1_sample]
+				else
+					h1_sample = Shark::RealVector.new(h1_mean.size)
+					h1_mean.each_with_index do |cell, i|
+						binomial.p = cell
+						h1_sample[i] = binomial.sample
+					end
+					[h1_mean, h1_sample]
+				end
+			end
+
+			def sample_v_given_h h0_sample
+				v1_mean = self.propdown h0_sample
+				binomial = Shark::RNG::Binomial.new
+				binomial.n = 1
+				if v1_mean.is_a? Shark::RealMatrix
+					v1_sample = Shark::RealMatrix.new(v1_mean.size1, v1_mean.size2)
+					v1_mean.each_cell_with_index do |cell, i, j|
+						binomial.p = cell
+						v1_sample[i,j] = binomial.sample
+					end
+					[v1_mean, v1_sample]
+				else
+					v1_sample = Shark::RealVector.new(v1_mean.size)
+					v1_mean.each_with_index do |cell, i|
+						binomial.p = cell
+						v1_sample[i] = binomial.sample
+					end
+					[v1_mean, v1_sample]
+				end
+			end
+
+			def contrastive_divergence opts={}
+				opts = {:k => 1, :learning_rate => 0.1}.merge opts
+				k, lr, input = opts[:k], opts[:learning_rate], opts[:input]
+				raise TrainingError.new "Cannot perform contrastive divergence without data. #contrastive_divergence {:input => <data>}" if input.nil?
+				*, ph_sample = sample_h_given_v opts[:input]
+				chain_start = ph_sample
+
+				nv_means, nv_samples, nh_means, nh_samples = [nil, nil, nil, nil]
+
+				k.times do |step|
+					if step == 0
+						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh chain_start
+					else
+						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh nh_samples
+					end
+				end
+				puts ph_sample
+				puts "***"
+				puts (((~input) * ph_sample) - ((~nv_samples) * nh_means))
+				puts "***"
+				raise StandardError.new "stop"
+				self.weight_matrix   += lr * (~input * ph_sample - ~nv_samples * nh_means)
+				visible_neurons.bias += lr * (input - nv_samples).mean(axis:0)
+				hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
+			end
+
+			def propdown h
+				pre_sigmoid_activation = h * weight_matrix + visible_neurons.bias
+				sigmoid(pre_sigmoid_activation)
+			end
+
+			def gibbs_hvh h0_sample
+				v1_mean, v1_sample = sample_v_given_h h0_sample
+				h1_mean, h1_sample = sample_h_given_v v1_sample
+
+				[
+					v1_mean,
+					v1_sample,
+					h1_mean,
+					h1_sample
+				]
+			end
+		end
+
 		class DBN
 			class TrainingError < ArgumentError
 			end
@@ -30,6 +143,14 @@ class Optimizer
 				# TODO: add log layer too for logistic regression (Feb 13th 2014).
 			end
 
+			def create_logistic_regression_layer
+				@log_layer = LogisticRegression.new samples: @sigmoid_layers[-1].sample_h_given_v,
+                                            		labels: @labels,
+                                            		number_of_inputs: @sigmoid_layers.last.output_size,
+                                            		number_of_outputs: @output_size
+
+			end
+
 			def initialize(opts={})
 				@input          = opts[:samples]
 				@input_size     = opts[:input_size]
@@ -37,13 +158,6 @@ class Optimizer
 				@labels         = opts[:labels]
 				create_rbms_from_layers opts[:hidden_layers]
 				create_logistic_regression_layer
-			end
-
-			def create_logistic_regression_layer
-				@log_layer = Shark::LogisticRegression.new samples: @sigmoid_layers[-1].sample_h_given_v,
-														   label: @labels,
-														   number_of_inputs: @sigmoid_layers[-1].number_of_outputs,
-														   number_of_outputs: @output_size
 			end
 
 			def pretrain opts={}
@@ -60,28 +174,36 @@ class Optimizer
 						layer_input = @sigmoid_layers[l-1].sample_h_given_v layer_input
 					end
 
-					cd.data = layer_input.to_unlabeled_data
-					# optimize this layer:
-					optimizer = Shark::Algorithms::SteepestDescent.new
-					optimizer.momentum      = opts[:momentum] || 0.0
-					optimizer.learning_rate = opts[:learning_rate]
-
-					# print "l                        => ", l, "\n"
-					# print "layer.weight_matrix.size => ", layer.weight_matrix.size, "\n"
-					# print "layer_input.size         => ", layer_input.size, "\n"
-
-
-					optimizer.init cd
-
-					# may need to be modified...
-					# costly methodology, should have unlabeleddata everywhere instead...
-					# print "layer_input.size                => ", layer_input.size, "\n"
-					# print "layer.number_of_visible_neurons => ", layer.number_of_visible_neurons, "\n"
-					# print "layer.number_of_hidden_neurons  => ", layer.number_of_hidden_neurons, "\n"
-
 					opts[:epochs].times do |epoch| # training epochs
-						optimizer.step cd
+						layer.contrastive_divergence input: layer_input, learning_rate: opts[:learning_rate]
 					end
+
+					# cd.data = layer_input.to_unlabeled_data
+					# # optimize this layer:
+					# optimizer = Shark::Algorithms::SteepestDescent.new
+					# optimizer.momentum      = opts[:momentum] || 0.0
+					# optimizer.learning_rate = opts[:learning_rate]
+
+					# # print "l                        => ", l, "\n"
+					# # print "layer.weight_matrix.size => ", layer.weight_matrix.size, "\n"
+					# # print "layer_input.size         => ", layer_input.size, "\n"
+
+
+					# optimizer.init cd
+
+					# # may need to be modified...
+					# # costly methodology, should have unlabeleddata everywhere instead...
+					# # print "layer_input.size                => ", layer_input.size, "\n"
+					# # print "layer.number_of_visible_neurons => ", layer.number_of_visible_neurons, "\n"
+					# # print "layer.number_of_hidden_neurons  => ", layer.number_of_hidden_neurons, "\n"
+
+					# opts[:epochs].times do |epoch| # training epochs
+					# 	# replace by contrastive divergence
+					# 	optimizer.step cd
+					# 	# print "(#{epoch}, #{l}) layer.weight_matrix => \n", layer.weight_matrix.reduce([]) {|i,v| [v.to_a.map {|i| sprintf('%.2f', i).to_f}.inspect] + i}.join("\n"), "\n"
+					# 	# cost = layer.get_reconstruction_cross_entropy(layer_input)
+					# 	# print 'Pre-training layer %d, epoch %d, cost %f' % [l, epoch, cost], "\n"
+					# end
 				end
 			end
 
@@ -90,13 +212,19 @@ class Optimizer
 				@sigmoid_layers.each_with_index do |layer, l|
 					layer_input = layer.output layer_input
 				end
-
 				@log_layer.predict(layer_input)
-				# TODO: write this (Feb 13th 2014)
 			end
 
 			def finetune opts={}
-				# requires supervised labels and log layer for logistic regression (Feb 13th 2014)
+				layer_input = @sigmoid_layers.last.sample_h_given_v
+				# train prediction layer
+				lr = opts[:learning_rate] || 0.01
+				(opts[:epochs] || 200).times do |epoch|
+					@log_layer.train learning_rate: lr, input: layer_input
+					lr *= 0.95
+					# cost = @log_layer.negative_log_likelihood
+			  #       print 'Training epoch %d, cost is %f' % [epoch, cost], "\n"
+				end
 			end
 
 			def data_present!
@@ -111,10 +239,23 @@ class Optimizer
 				@input
 			end
 
+			attr_reader :sigmoid_layers
+			attr_reader :rbm_layers
+			
+			attr_reader :log_layer
+			alias :prediction_layer :log_layer
+
 			alias :"input=" :"data="
 			alias :input :data
+
 			alias :"unlabeled_data=" :"data="
 			alias :unlabeled_data :data
+
+			attr_reader :output_size
+			alias :number_of_outputs :output_size
+
+			attr_reader :input_size
+	        alias :number_of_inputs :input_size
 		end
 	end
 end

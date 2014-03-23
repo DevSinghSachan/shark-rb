@@ -171,6 +171,59 @@ VALUE method_rbm_get_weight_matrix (VALUE self) {
 	);
 }
 
+template<class Obtype, class MatType>
+VALUE method_rbm_assign_weight_matrix_with_matrix (VALUE self, VALUE rb_other) {
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	MatType *other;
+	Data_Get_Struct(rb_other, MatType, other);
+	if (other->getData()->size1() == m->getModel()->weightMatrix().size1() && other->getData()->size2() == m->getModel()->weightMatrix().size2()) {
+		m->getModel()->weightMatrix() = *(other->getData());
+	} else {
+		rb_raise(rb_eArgError, "The %s you are substituting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their replacement is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getModel()->weightMatrix().size1(), m->getModel()->weightMatrix().size2(), rb_class2name(Obtype::rb_class()));
+	}
+	return self;
+}
+
+
+template<class Obtype>
+static void rbm_matrix_operation_format_error(char* msg) {
+	rb_raise(rb_eArgError, "You can only %s using Arrays, RealMatrices, and numbers to a %s.", *msg, rb_class2name(Obtype::rb_class()));
+}
+
+template<class Obtype>
+VALUE method_rbm_assign_weight_matrix (VALUE self, VALUE rb_other) {
+	if (TYPE(rb_other) == T_DATA) {
+		if (CLASS_OF(rb_other) == rb_RealMatrix::rb_class()) {
+			return method_rbm_assign_weight_matrix_with_matrix<Obtype, rb_RealMatrix>(self, rb_other);
+		} else if (CLASS_OF(rb_other) == rb_RealMatrixReference::rb_class()) {
+			return method_rbm_assign_weight_matrix_with_matrix<Obtype, rb_RealMatrixReference>(self, rb_other);
+		} else {
+			rbm_matrix_operation_format_error<Obtype>("substitute");
+		}
+	} else if (TYPE(rb_other) == T_ARRAY) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		if (RARRAY_LEN(rb_other) > 0 && TYPE(rb_ary_entry(rb_other, 0)) == T_ARRAY) {
+			RealMatrix other = rb_ary_to_realmatrix(rb_other);
+			if (other.size1() == m->getModel()->weightMatrix().size1() && other.size2() == m->getModel()->weightMatrix().size2()) {
+				m->getModel()->weightMatrix() = other;
+			} else {
+				rb_raise(rb_eArgError, "The %s you are substituting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their replacement is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getModel()->weightMatrix().size1(), m->getModel()->weightMatrix().size2(), rb_class2name(Obtype::rb_class()));
+			}
+		} else {
+			rb_raise(rb_eArgError, "The %s you are substituting doesn't have the 2D dimensions (%lu x %lu) as either %s dimension, so their replacement is infeasible using our current (human) technology.", rb_obj_classname(rb_other), m->getModel()->weightMatrix().size1(), m->getModel()->weightMatrix().size2(), rb_class2name(Obtype::rb_class()));
+		}
+	} else if (TYPE(rb_other) == T_FIXNUM || TYPE(rb_other) == T_FLOAT) {
+		Obtype *m;
+		Data_Get_Struct(self, Obtype, m);
+		m->getModel()->weightMatrix() = blas::repeat(NUM2DBL(rb_other), m->getModel()->weightMatrix().size1(), m->getModel()->weightMatrix().size2());
+	} else {
+		rbm_matrix_operation_format_error<Obtype>("substitute");
+	}
+	return self;
+}
+
 template<class RbmType, class VisibleNeuronType, class HiddenNeuronType>
 void Init_RBM () {
 	InitAbstractModel<RbmType>();
@@ -181,6 +234,7 @@ void Init_RBM () {
 	rb_define_method(RbmType::rb_class(), "evaluation_type", (rb_method) method_rbm_evaluation_type<RbmType>, 2);
 	rb_define_method(RbmType::rb_class(), "initialize", (rb_method) method_rbm_initialize<RbmType>, 0);
 	rb_define_method(RbmType::rb_class(), "weight_matrix", (rb_method) method_rbm_get_weight_matrix<RbmType>, 0);
+	rb_define_method(RbmType::rb_class(), "weight_matrix=", (rb_method) method_rbm_assign_weight_matrix<RbmType>, 1);
 	rb_define_method(RbmType::rb_class(), "number_of_hidden_neurons", (rb_method) method_rbm_number_of_hidden_neurons<RbmType>, 0);
 	rb_define_method(RbmType::rb_class(), "number_of_visible_neurons", (rb_method) method_rbm_number_of_visible_neurons<RbmType>, 0);
 }

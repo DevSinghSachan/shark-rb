@@ -63,13 +63,45 @@ VALUE method_matrix_each (VALUE self) {
 	RETURN_SIZED_ENUMERATOR(self, 0, 0);
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-		for (size_t i = 0; i< m->getData()->size1();i++) {
-			rb_yield(wrap_pointer<rb_RealMatrixRow>(
-					rb_RealMatrixRow::rb_class(),
-					new rb_RealMatrixRow(m->getData(), i)
-				)
-			);
+	for (size_t i = 0; i< m->getData()->size1();i++) {
+		rb_yield(wrap_pointer<rb_RealMatrixRow>(
+				rb_RealMatrixRow::rb_class(),
+				new rb_RealMatrixRow(m->getData(), i)
+			)
+		);
 	}
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_each_cell_with_index (VALUE self) {
+
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	for (size_t i = 0; i< m->getData()->size1();i++) 
+		for (size_t j = 0; j< m->getData()->size2();j++)
+			rb_yield_values(3,
+				rb_float_new((*(m->getData()))(i, j)),
+				INT2FIX(i),
+				INT2FIX(j)
+			);
+	return self;
+}
+
+template<class Obtype>
+VALUE method_matrix_each_cell (VALUE self) {
+
+	RETURN_SIZED_ENUMERATOR_PRE
+	RETURN_SIZED_ENUMERATOR(self, 0, 0);
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	for (size_t i = 0; i< m->getData()->size1();i++) 
+		for (size_t j = 0; j< m->getData()->size2();j++)
+			rb_yield(
+				rb_float_new((*(m->getData()))(i, j))
+			);
 	return self;
 }
 
@@ -80,12 +112,12 @@ VALUE method_matrix_each_column (VALUE self) {
 	RETURN_SIZED_ENUMERATOR(self, 0, 0);
 	Obtype *m;
 	Data_Get_Struct(self, Obtype, m);
-		for (size_t i = 0; i< m->getData()->size2();i++) {
-			rb_yield(wrap_pointer<rb_RealMatrixColumn>(
-					rb_RealMatrixColumn::rb_class(),
-					new rb_RealMatrixColumn(m->getData(), i)
-				)
-			);
+	for (size_t i = 0; i< m->getData()->size2();i++) {
+		rb_yield(wrap_pointer<rb_RealMatrixColumn>(
+				rb_RealMatrixColumn::rb_class(),
+				new rb_RealMatrixColumn(m->getData(), i)
+			)
+		);
 	}
 	return self;
 }
@@ -734,7 +766,7 @@ VALUE method_matrix_add (VALUE self, VALUE rb_other) {
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return add_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return add_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+			return add_matrix_with_vector<Obtype, rb_RealVectorReference>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixRow::rb_class()) {
 			return add_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixColumn::rb_class()) {
@@ -939,7 +971,7 @@ VALUE method_matrix_add_equals (VALUE self, VALUE rb_other) {
 		} else if (CLASS_OF(rb_other) == rb_RealVector::rb_class()) {
 			return add_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealVectorReference::rb_class()) {
-			return add_equals_matrix_with_vector<Obtype, rb_RealVector>(self, rb_other);
+			return add_equals_matrix_with_vector<Obtype, rb_RealVectorReference>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixRow::rb_class()) {
 			return add_equals_matrix_with_vector<Obtype, rb_RealMatrixRow>(self, rb_other);
 		} else if (CLASS_OF(rb_other) == rb_RealMatrixColumn::rb_class()) {
@@ -1725,6 +1757,8 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "each", (rb_method) method_matrix_each<Obtype>, 0);
 	rb_define_alias(Obtype::rb_class(), "each_row", "each");
 	rb_define_method(Obtype::rb_class(), "each_column", (rb_method) method_matrix_each_column<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "each_cell", (rb_method) method_matrix_each_cell<Obtype>, 0);
+	rb_define_method(Obtype::rb_class(), "each_cell_with_index", (rb_method) method_matrix_each_cell_with_index<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "each_with_index", (rb_method) method_matrix_each_with_index<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "to_matrix", (rb_method)method_matrix_to_matrix<Obtype>, 0);
 	rb_define_method(Obtype::rb_class(), "rows", (rb_method)method_matrix_to_rows<Obtype>, 0);
@@ -1742,13 +1776,14 @@ void Init_MatrixMethods () {
 	rb_define_method(Obtype::rb_class(), "o=", (rb_method) method_matrix_hadamard_product_equals<Obtype>, 1);
 	rb_define_alias(Obtype::rb_class(), "hadamard=", "o=");
 	rb_define_alias(Obtype::rb_class(), "element_wise_product=", "o=");
-	rb_define_method(Obtype::rb_class(), "*=", (rb_method)method_matrix_multiply_equals<Obtype>, 1);
-	rb_define_method(Obtype::rb_class(), "/=", (rb_method)method_matrix_divide_equals<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "multiply_equals", (rb_method)method_matrix_multiply_equals<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "divide_equals", (rb_method)method_matrix_divide_equals<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "/", (rb_method)method_matrix_divide<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "+", (rb_method)method_matrix_add<Obtype>, 1);
-	rb_define_method(Obtype::rb_class(), "+=", (rb_method)method_matrix_add_equals<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "<<", (rb_method)method_matrix_add_equals<Obtype>, 1);
+	rb_define_alias(Obtype::rb_class(), "add_equals", "<<");
 	rb_define_method(Obtype::rb_class(), "-", (rb_method)method_matrix_subtract<Obtype>, 1);
-	rb_define_method(Obtype::rb_class(), "-=", (rb_method)method_matrix_subtract_equals<Obtype>, 1);
+	rb_define_method(Obtype::rb_class(), "subtract_equals", (rb_method)method_matrix_subtract_equals<Obtype>, 1);
 	rb_define_method(Obtype::rb_class(), "length", (rb_method)method_matrix_length<Obtype>, 0);
 	rb_define_alias(Obtype::rb_class(), "size", "length");
 	rb_define_method(Obtype::rb_class(), "==", (rb_method) method_matrix_soft_eql<Obtype>,1);

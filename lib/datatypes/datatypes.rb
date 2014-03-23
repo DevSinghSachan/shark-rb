@@ -5,6 +5,10 @@ module MatrixInspector
 		original_inspect + " " + inspect_helper.join(" ") + ">"
 	end
 
+	def to_s
+		"["+self.each_row.map {|i| i.to_s}.join("\n ")+"]"
+	end
+
 protected
 
 	def inspect_helper
@@ -81,6 +85,10 @@ module ArrayInspector
 		original_inspect = super()
 		original_inspect = original_inspect[0..original_inspect.size-2]
 		original_inspect + " " + inspect_helper.join(" ") + ">"
+	end
+
+	def to_s
+		"["+self.each.map {|i| sprintf("%.2f", i)}.join(" ")+"]"
 	end
 
 protected

@@ -4,8 +4,12 @@ class Optimizer
 			# TODO: implement this in C++ perhaps?
 			attr_accessor :parameters
 			attr_accessor :bias
+
 			attr_reader   :number_of_inputs
+			alias :input_size :number_of_inputs
+			
 			attr_reader   :number_of_outputs
+			alias :output_size :number_of_outputs
 
 			def initialize opts={}
 				@number_of_inputs  = opts[:input_size]
@@ -18,14 +22,10 @@ class Optimizer
 
 			def sigmoid x
 				# (x.exp + 1.0)**(-1) works also
-				(x.exp + 1.0).inverse
+				((-x).exp + 1.0).inverse
 			end
 
 			def output input=nil
-				# sigmoid needs to be expressed in a shark fashion.
-				# print "@input.size      => ",(input ? input : @input).size, "\n"
-				# print "@input[0].to_a   => ", @input[0].to_a, "\n"
-				# print "@parameters.size => ", @parameters.size, "\n"
 				sigmoid((input ? input : @input) * ~@parameters + @bias)
 			end
 
