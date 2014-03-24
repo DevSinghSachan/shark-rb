@@ -25,6 +25,8 @@ describe 'Binary RBM' do
 			@rbm.contrastive_divergence input: @data,
 										learning_rate: @learning_rate,
 										k: @k
+			cost = @rbm.get_reconstruction_cross_entropy(@data)
+			print 'Pre-training epoch %d, cost %f' % [epoch, cost], "\n"
 		end
 
 		@v = Shark::RealMatrix.new [
@@ -177,7 +179,5 @@ describe 'Binary RBM' do
 			).should be_within(2e-02).of(0)
 		end
 	end
-
-
 
 end

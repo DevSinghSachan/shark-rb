@@ -5,6 +5,12 @@ class Optimizer
 				((-x).exp + 1.0).inverse
 			end
 
+			def initialize_random_uniform val=0.1
+				weight_matrix = Shark::RealMatrix.new(number_of_hidden_neurons, number_of_visible_neurons) do |i|
+					Random.rand(2*val)-val
+				end
+			end
+
 			def get_reconstruction_cross_entropy input
 				pre_sigmoid_activation_h = input * ~weight_matrix + hidden_neurons.bias
 				sigmoid_activation_h     = sigmoid(pre_sigmoid_activation_h)
@@ -67,7 +73,7 @@ class Optimizer
 			end
 
 			def contrastive_divergence opts={}
-				opts = {:k => 1, :learning_rate => 0.1}.merge opts
+				opts = {k: 1, learning_rate: 0.1}.merge opts
 				k, lr, input = opts[:k], opts[:learning_rate], opts[:input]
 				raise TrainingError.new "Cannot perform contrastive divergence without data. #contrastive_divergence {:input => <data>}" if input.nil?
 				*, ph_sample = sample_h_given_v opts[:input]
@@ -82,7 +88,10 @@ class Optimizer
 						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh nh_samples
 					end
 				end
-				self.weight_matrix   += lr * (((~input) * ph_sample) - ((~nv_samples) * nh_means))
+				self.weight_matrix   += lr * (
+						((~input) * ph_sample) -
+						((~nv_samples) * nh_means)
+					)
 				visible_neurons.bias += lr * (input - nv_samples).mean(axis:0)
 				hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
 			end

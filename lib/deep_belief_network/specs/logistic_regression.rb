@@ -54,9 +54,7 @@ describe 'Logistic Regression' do
 
 		it 'should decrease with every epoch' do
 			@costs.each_with_index do |cost, i|
-				if i>0
-					@costs[i-1].should > cost
-				end
+				if i > 0 then @costs[i-1].should > cost end
 			end
 		end
 	end
