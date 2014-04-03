@@ -14,22 +14,52 @@ class Optimizer
 
 			alias :weight_matrix :parameters
 
+			def output input=nil
+				@input = input ? input : @input
+				sigmoid(@input * @parameters + @bias)
+			end
+
 			def initialize opts={}
 				@number_of_inputs  = opts[:input_size]
 				@number_of_outputs = opts[:output_size]
 				@input             = opts[:input]
+				@transposed        = opts[:transpose]
 				#@rng        = opts[:rng] || Shark::RNG.new # and set state...
 				@parameters = Shark::RealMatrix.new(@number_of_inputs, @number_of_outputs)
 				@bias       = Shark::RealVector.new(@number_of_outputs)
+				if @transpose then transpose_output() end
+			end
+
+			def transpose_output
+				def self.output(input=nil)
+					@input = input ? input : @input
+					sigmoid(@input * ~@parameters + @bias)
+				end
+			end
+
+			def untranspose_output
+				def self.output(input=nil)
+					@input = input ? input : @input
+					sigmoid(@input * @parameters + @bias)
+				end
+			end
+
+			def tranpose?
+				@transpose
+			end
+
+			def transpose=(val)
+				if val
+					@transpose = true
+					transpose_output
+				else
+					@transpose = false
+					untranspose_output
+				end
 			end
 
 			def sigmoid x
 				((-x).exp + 1.0).inverse
-			end
-
-			def output input=nil
-				@input = input ? input : @input
-				sigmoid(@input * ~@parameters + @bias)
 			end
 
 			def sample_h_given_v inputlayer=nil

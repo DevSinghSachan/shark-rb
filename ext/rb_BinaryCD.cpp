@@ -74,31 +74,6 @@ VALUE method_binarycd_get_number_of_variables (VALUE self) {
 	return INT2FIX(b->objective().numberOfVariables());
 }
 
-AverageEnergyGradient<RBM> empiricalAverage(mpe_rbm);
-AverageEnergyGradient<RBM> modelAverage(mpe_rbm);
-
-BOOST_FOREACH(RealMatrix const& batch,m_data.batches()) {
-	//create the batches for evaluation
-	typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
-	typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
-	
-	m_operator.createSample(hiddenBatch,visibleBatch,batch);
-	empiricalAverage.addVH(hiddenBatch,visibleBatch);
-	
-	for(std::size_t step = 0; step != m_k; ++step){
-		m_operator.precomputeVisible(hiddenBatch, visibleBatch);
-		m_operator.sampleVisible(visibleBatch);
-		m_operator.precomputeHidden(hiddenBatch, visibleBatch);
-		if( step != m_k-1){
-			m_operator.sampleHidden(hiddenBatch);
-		}
-	}
-	modelAverage.addVH(hiddenBatch,visibleBatch);
-}
-
-derivative.resize(mpe_rbm->numberOfParameters());
-noalias(derivative) = modelAverage.result() - empiricalAverage.result();
-
 template<class Obtype>
 static void raise_not_rbm_error() {
 	rb_raise(rb_eArgError, "%s requires an RBM to function", rb_class2name(Obtype::rb_class()));
@@ -113,11 +88,11 @@ VALUE method_binarycd_get_derivative(VALUE self, VALUE rb_rbm) {
 	rb_BinaryRBM * mpe_rbm;
 	Data_Get_Struct(rb_rbm, rb_BinaryRBM, mpe_rbm);
 
-	Obtype cd *;
+	Obtype * cd;
 	Data_Get_Struct(self, Obtype, cd);
 
 	rb_RealVector * derivative = new rb_RealVector();
-	cd->getData()->evalDerivative(mpe_rbm->getParameterVector(), *(derivative->getData()));
+	cd->getData()->evalDerivative(mpe_rbm->getModel()->parameterVector(), *(derivative->getData()));
 
 	return wrap_pointer<rb_RealVector>(
 		rb_RealVector::rb_class(),
@@ -153,7 +128,7 @@ VALUE method_binarycd_set_data (VALUE self, VALUE rb_data) {
 void Init_BinaryCD () {
 	rb_define_alloc_func(rb_optimizer_binarycd_klass, (rb_alloc_func_t) method_binarycd_allocate);
 	rb_define_method(rb_optimizer_binarycd_klass, "data=", (rb_method) method_binarycd_set_data, 1);
-	rb_define_method(rb_optimizer_binarycd_klass, "derivative", (rb_method), method_binarycd_get_derivative<rb_BinaryCD>, 1);
+	rb_define_method(rb_optimizer_binarycd_klass, "derivative", (rb_method) method_binarycd_get_derivative<rb_BinaryCD>, 1);
 	rb_define_method(rb_optimizer_binarycd_klass, "propose_starting_point", (rb_method) method_binarycd_propose_starting_point, 0);
 	rb_define_method(rb_optimizer_binarycd_klass, "initialize", (rb_method) method_binarycd_initialize, 1);
 	rb_define_method(rb_optimizer_binarycd_klass, "data=", (rb_method) method_binarycd_set_data, 1);

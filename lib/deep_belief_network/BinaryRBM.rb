@@ -10,12 +10,31 @@ class Optimizer
 				@input
 			end
 
+			def hbias
+				hidden_neurons.bias
+			end
+
+			def hbias=(val)
+				hidden_neurons.bias=val
+			end
+
+			def output
+			end
+
+			def vbias
+				visible_neurons.bias
+			end
+
+			def vbias=(val)
+				visible_neurons.bias=val
+			end
+
 			def sigmoid x
 				((-x).exp + 1.0).inverse
 			end
 
 			def initialize_random_uniform val=0.1
-				self.weight_matrix = Shark::RealMatrix.new(number_of_hidden_neurons, number_of_visible_neurons) do |i|
+				self.weight_matrix = Shark::RealMatrix.new(self.weight_matrix.size1, self.weight_matrix.size2) do |i|
 					Random.rand(2*val)-val
 				end
 			end

@@ -27,8 +27,6 @@ before 'install' do
 	end
 end
 
-
-
 desc 'Generate Header Files'
 task :header do
 	require './lib/header_file_generation/header_file_generation.rb'

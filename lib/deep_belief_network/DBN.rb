@@ -24,15 +24,16 @@ class Optimizer
 					@sigmoid_layers[k] = HiddenLayer.new input_size: input_size,
 														 output_size: layer_size,
 														 activation: :sigmoid,
-														 input: layer_input
+														 input: layer_input,
+														 tranpose: @rbm_type == Shark::RBM::BinaryRBM
 					# construct rbm_layer
-					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
+					@rbm_layers[k]       = @rbm_type.new
 					@rbm_layers[k].input = layer_input
 					@rbm_layers[k].set_structure hidden: layer_size,
 												 visible: input_size
 					@rbm_layers[k].initialize_random_uniform 1.0 / input_size
 					@sigmoid_layers[k].parameters = @rbm_layers[k].weight_matrix
-					@sigmoid_layers[k].bias       = @rbm_layers[k].hidden_neurons.bias
+					@sigmoid_layers[k].bias       = @rbm_layers[k].hbias
 				end
 			end
 
@@ -48,6 +49,7 @@ class Optimizer
 				@input_size     = opts[:input_size]
 				@output_size    = opts[:output_size]
 				@labels         = opts[:labels]
+				@rbm_type       = opts[:rbm_type] || Shark::RBM::BinaryRBM
 				create_rbms_from_layers opts[:hidden_layers]
 				create_logistic_regression_layer
 			end
@@ -58,8 +60,7 @@ class Optimizer
 				# prev_input = nil
 				@rbm_layers.each_with_index do |layer, l| # layer-wise
 					# initialize the layer
-					# cd = Optimizer::BinaryCD.new layer
-					# cd.k = opts[:k]
+
 					# collect previous activations, or input data
 					if l == 0
 						layer_input = @input
@@ -70,25 +71,26 @@ class Optimizer
 					# in the original this does not exist, yet the result is not inverted? why, who knows?
 					@sigmoid_layers[l].input = layer_input
 
-					# opts[:epochs].times do |epoch| # training epochs
-					# 	layer.contrastive_divergence input: layer_input,
-					# 								 k: opts[:k],
-					# 								 learning_rate: opts[:learning_rate],
-					# 								 verbose: opts[:verbose]
-					# end
-
-					cd = Optimizer::BinaryCD.new layer
-					cd.k = opts[:k]
-					cd.data = layer_input.to_unlabeled_data
-					# # optimize this layer:
-					optimizer = Shark::Algorithms::SteepestDescent.new
-					optimizer.momentum      = opts[:momentum] || 0.0
-					optimizer.learning_rate = opts[:learning_rate]
-					optimizer.init cd
-					opts[:epochs].times do |epoch| # training epochs
-						# replace by contrastive divergence
-						optimizer.step cd
-						# puts "Pre-training layer #{l}, epoch #{epoch}, cost #{layer.get_reconstruction_cross_entropy layer_input}"
+					if @rbm_type.is_a? Shark::RBM::BinaryRBM	
+						cd = Optimizer::BinaryCD.new layer
+						cd.k = opts[:k]
+						cd.data = layer_input.to_unlabeled_data
+						# # optimize this layer:
+						optimizer = Shark::Algorithms::SteepestDescent.new
+						optimizer.momentum      = opts[:momentum] || 0.0
+						optimizer.learning_rate = opts[:learning_rate]
+						optimizer.init cd
+						opts[:epochs].times do |epoch| # training epochs
+							optimizer.step cd
+							# puts "Pre-training layer #{l}, epoch #{epoch}, cost #{layer.get_reconstruction_cross_entropy layer_input}"
+						end
+					else
+						opts[:epochs].times do |epoch| # training epochs
+							layer.contrastive_divergence input: layer_input,
+														 k: opts[:k],
+														 learning_rate: opts[:learning_rate],
+														 verbose: opts[:verbose]
+						end
 					end
 				end
 			end

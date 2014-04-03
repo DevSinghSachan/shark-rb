@@ -2,14 +2,13 @@ class Optimizer
 	module RBM
 		class RBM
 			include Optimizer::RBM::RBMMethods
-			attr_accessor :weight_matrix
 			attr_accessor :hbias
 			attr_accessor :vbias
 
 			def initialize opts={}
-				@visible = opts[:visible]
-				@hidden = opts[:hidden]
-				a = 1.0 / opts[:visible]
+				@visible = opts[:visible] || 0
+				@hidden = opts[:hidden]   || 0
+				a = opts[:visible] ? (1.0 / opts[:visible]) : 0
 				@weight_matrix = opts[:weight_matrix] || Shark::RealMatrix.new(opts[:visible], opts[:hidden]) {|i| Random.rand(2*a)-a}
 				@hbias = opts[:hidden_bias]  || Shark::RealVector.new(opts[:hidden])
 				@vbias = opts[:visible_bias] || Shark::RealVector.new(opts[:visible])
@@ -17,7 +16,17 @@ class Optimizer
 			end
 
 			def hbias=(val)
-				@hbias = val.to_blas_type
+				@hbias.clear
+				@hbias << val.to_blas_type
+			end
+
+			def weight_matrix
+				@weight_matrix
+			end
+
+			def weight_matrix=(val)
+				@weight_matrix.clear
+				@weight_matrix << val
 			end
 
 			def hbias
@@ -29,7 +38,21 @@ class Optimizer
 			end
 
 			def vbias=(val)
-				@vbias = val.to_blas_type
+				@vbias.clear
+				@vbias << val.to_blas_type
+			end
+
+			def set_structure(*opts)
+				if opts.first.is_a? Hash
+					@visible = opts.first[:visible]
+					@hidden = opts.first[:hidden]
+				else
+					@visible = opts[0]
+					@hidden = opts[1]
+				end
+				@weight_matrix.resize @visible, @hidden
+				@hbias.resize @hidden
+				@vbias.resize @visible
 			end
 
 			def sigmoid_activation_hidden input
@@ -55,6 +78,14 @@ class Optimizer
 
 			def number_of_parameters
 				@visible * @hidden + @hidden + @visible
+			end
+
+			def number_of_hidden_neurons
+				@hidden
+			end
+
+			def number_of_visible_neurons
+				@visible
 			end
 
 			def propdown h
@@ -84,8 +115,8 @@ class Optimizer
 						((~@input) * ph_sample) -
 						((~nv_samples) * nh_means)
 					)
-				@vbias += lr * (@input - nv_samples).mean(axis:0)
-				@hbias += lr * (ph_sample - nh_means).mean(axis:0)
+				vbias << lr * (@input - nv_samples).mean(axis:0)
+				hbias << lr * (ph_sample - nh_means).mean(axis:0)
 				if opts[:verbose] then puts "Pre-training layer, cost = #{get_reconstruction_cross_entropy input}" end
 			end
 		end

@@ -146,7 +146,7 @@ describe 'Binary RBM (Shark-less)' do
 		end
 
 		it 'should estimate cross-entropy cost correctly' do
-			rbm = Shark::RBM::BinaryRBM.new
+			rbm = Shark::RBM::RBM.new
 			training_data = Shark::RealMatrix.new [
 				[1,1,1,0,0,0],
 				[1,1,1,0,0,0],
@@ -157,11 +157,11 @@ describe 'Binary RBM (Shark-less)' do
 				[0,0,1,1,1,0]
 			]
 			rbm.set_structure visible: 6, hidden: 3
-			rbm.weight_matrix = Shark::RealMatrix.new [
+			rbm.weight_matrix = ~(Shark::RealMatrix.new [
 				[-7.04423364,-5.71574815, 3.85495703, 6.54276807, 1.24076955,-4.26321733],
 				[ 3.05550762, 0.43632773, 2.51919426,-3.49456278,-4.12685438,-3.22315804],
 				[ 4.76580181, 1.86983584, 1.39850034,-5.46176108,-3.95184239,-2.84229769]
-			]
+			])
 			rbm.vbias = [-0.05714286,-0.51428571, 1.37142857, 0.22857143,-0.41428571,-1.04285714]
 			rbm.hbias = [-0.28860541,-0.13251746,-0.27677419]
 
@@ -236,7 +236,7 @@ describe 'Binary RBM (Shark-less)' do
 
 			lr = 0.1
 
-			rbm.weight_matrix   += lr * ~(
+			rbm.weight_matrix   += lr * (
 					((~training_data) * ph_sample) -
 					((~nv_samples) * nh_means)
 				)
