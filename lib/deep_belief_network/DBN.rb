@@ -1,147 +1,5 @@
 class Optimizer
 	module RBM
-		class BinaryRBM
-
-			def input=(input)
-				@input = input
-			end
-
-			def input
-				@input
-			end
-
-			def sigmoid x
-				((-x).exp + 1.0).inverse
-			end
-
-			def initialize_random_uniform val=0.1
-				weight_matrix = Shark::RealMatrix.new(number_of_hidden_neurons, number_of_visible_neurons) do |i|
-					Random.rand(2*val)-val
-				end
-			end
-
-			def sigmoid_activation_hidden input
-				pre_sigmoid_activation_h = input * ~weight_matrix + hidden_neurons.bias
-				sigmoid(pre_sigmoid_activation_h)
-			end
-
-			def sigmoid_activation_visible input
-				pre_sigmoid_activation_v = input * weight_matrix + visible_neurons.bias
-				sigmoid(pre_sigmoid_activation_v)
-			end
-
-			def get_reconstruction_cross_entropy input
-				sigmoid_activation_h     = sigmoid_activation_hidden input
-				sigmoid_activation_v     = sigmoid_activation_visible sigmoid_activation_h
-
-				- (
-						(
-							input.hadamard(sigmoid_activation_v.log) +
-						    (-input + 1.0).hadamard((-sigmoid_activation_v + 1.0).log)
-					    ).sum(axis:1)
-				).mean
-			end
-
-			def propup v
-				pre_sigmoid_activation = v * (~weight_matrix) + hidden_neurons.bias
-				return sigmoid(pre_sigmoid_activation)
-			end
-
-			def sample_h_given_v v0_sample
-				h1_mean   = propup v0_sample
-				binomial = Shark::RNG::Binomial.new
-				binomial.n = 1
-				# TODO: simplify Binomials (15th March 2014)
-				if h1_mean.is_a? Shark::RealMatrix
-					h1_sample = Shark::RealMatrix.new(h1_mean.size1, h1_mean.size2) do |i, j|
-						binomial.p = h1_mean[i,j]
-						binomial.sample
-					end
-					[h1_mean, h1_sample]
-				else
-					h1_sample = Shark::RealVector.new(h1_mean.size) do |i|
-						binomial.p = h1_mean[i]
-						binomial.sample
-					end
-					[h1_mean, h1_sample]
-				end
-			end
-
-			def sample_v_given_h h0_sample
-				v1_mean = self.propdown h0_sample
-				binomial = Shark::RNG::Binomial.new
-				binomial.n = 1
-				if v1_mean.is_a? Shark::RealMatrix
-					v1_sample = Shark::RealMatrix.new(v1_mean.size1, v1_mean.size2)
-					v1_mean.each_cell_with_index do |cell, i, j|
-						binomial.p = cell
-						v1_sample[i,j] = binomial.sample
-					end
-					[v1_mean, v1_sample]
-				else
-					v1_sample = Shark::RealVector.new(v1_mean.size)
-					v1_mean.each_with_index do |cell, i|
-						binomial.p = cell
-						v1_sample[i] = binomial.sample
-					end
-					[v1_mean, v1_sample]
-				end
-			end
-
-			def contrastive_divergence opts={}
-				if opts[:input] then @input = opts[:input] end
-				opts = {k: 1, learning_rate: 0.1}.merge opts
-				k, lr = opts[:k], opts[:learning_rate]
-				raise TrainingError.new "Cannot perform contrastive divergence without data. #contrastive_divergence {:input => <data>}" if @input.nil?
-				*, ph_sample = sample_h_given_v @input
-				chain_start = ph_sample
-
-				nv_means, nv_samples, nh_means, nh_samples = [nil, nil, nil, nil]
-
-				k.times do |step|
-					if step == 0
-						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh chain_start
-					else
-						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh nh_samples
-					end
-				end
-				
-				self.weight_matrix   += lr * ~(
-						((~@input) * ph_sample) -
-						((~nv_samples) * nh_means)
-					)
-				visible_neurons.bias += lr * (@input - nv_samples).mean(axis:0)
-				hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
-				if opts[:verbose] then puts "Pre-training layer, cost = #{get_reconstruction_cross_entropy input}" end
-			end
-
-			def propdown h
-				pre_sigmoid_activation = h * weight_matrix + visible_neurons.bias
-				sigmoid(pre_sigmoid_activation)
-			end
-
-			def gibbs_hvh h0_sample
-				v1_mean, v1_sample = sample_v_given_h h0_sample
-				h1_mean, h1_sample = sample_h_given_v v1_sample
-
-				[
-					v1_mean,
-					v1_sample,
-					h1_mean,
-					h1_sample
-				]
-			end
-
-			def reconstruct v
-				h = sigmoid( v * ~weight_matrix + hidden_neurons.bias)
-				reconstructed_v = sigmoid(h * weight_matrix + visible_neurons.bias)
-				return reconstructed_v
-			end
-
-			class TrainingError < ArgumentError
-			end
-		end
-
 		class DBN
 			class TrainingError < ArgumentError
 			end
@@ -212,26 +70,26 @@ class Optimizer
 					# in the original this does not exist, yet the result is not inverted? why, who knows?
 					@sigmoid_layers[l].input = layer_input
 
-					opts[:epochs].times do |epoch| # training epochs
-						layer.contrastive_divergence input: layer_input,
-													 k: opts[:k],
-													 learning_rate: opts[:learning_rate],
-													 verbose: opts[:verbose]
-					end
-
-					# cd = Optimizer::BinaryCD.new layer
-					# cd.k = opts[:k]
-					# cd.data = layer_input.to_unlabeled_data
-					# # # optimize this layer:
-					# optimizer = Shark::Algorithms::SteepestDescent.new
-					# optimizer.momentum      = opts[:momentum] || 0.0
-					# optimizer.learning_rate = opts[:learning_rate]
-					# optimizer.init cd
 					# opts[:epochs].times do |epoch| # training epochs
-					# 	# replace by contrastive divergence
-					# 	optimizer.step cd
-					# 	puts "Pre-training layer #{l}, epoch #{epoch}, cost #{layer.get_reconstruction_cross_entropy layer_input}"
+					# 	layer.contrastive_divergence input: layer_input,
+					# 								 k: opts[:k],
+					# 								 learning_rate: opts[:learning_rate],
+					# 								 verbose: opts[:verbose]
 					# end
+
+					cd = Optimizer::BinaryCD.new layer
+					cd.k = opts[:k]
+					cd.data = layer_input.to_unlabeled_data
+					# # optimize this layer:
+					optimizer = Shark::Algorithms::SteepestDescent.new
+					optimizer.momentum      = opts[:momentum] || 0.0
+					optimizer.learning_rate = opts[:learning_rate]
+					optimizer.init cd
+					opts[:epochs].times do |epoch| # training epochs
+						# replace by contrastive divergence
+						optimizer.step cd
+						# puts "Pre-training layer #{l}, epoch #{epoch}, cost #{layer.get_reconstruction_cross_entropy layer_input}"
+					end
 				end
 			end
 
@@ -293,37 +151,37 @@ def test_dbn pretrain_lr=0.1, pretraining_epochs=1000, k=1, finetune_lr=0.1, fin
 	x = Shark::RealMatrix.new [
 		[1,1,1,0,0,0],
 		[1,1,1,0,0,0],
-        [1,0,1,0,0,0],
-        [1,1,1,0,0,0],
-        [0,0,1,1,1,0],
-        [0,0,1,1,0,0],
-        [0,0,1,1,1,0]
-    ]
-    
-    y = Shark::RealMatrix.new [
-    	[1, 0],
-    	[1, 0],
-        [1, 0],
-        [1, 0],
-        [0, 1],
-        [0, 1],
-        [0, 1]
-    ]
+		[1,0,1,0,0,0],
+		[1,1,1,0,0,0],
+		[0,0,1,1,1,0],
+		[0,0,1,1,0,0],
+		[0,0,1,1,1,0]
+	]
+	
+	y = Shark::RealMatrix.new [
+		[1, 0],
+		[1, 0],
+		[1, 0],
+		[1, 0],
+		[0, 1],
+		[0, 1],
+		[0, 1]
+	]
 
-    dbn = Shark::RBM::DBN.new samples: x, labels: y, input_size:  x.size2, hidden_layers:  [3, 3], output_size: y.size2
-    # so support for RNG inputs yet
+	dbn = Shark::RBM::DBN.new samples: x, labels: y, input_size:  x.size2, hidden_layers:  [3, 3], output_size: y.size2
+	# so support for RNG inputs yet
 
-    # pre-training (TrainUnsupervisedDBN)
-    dbn.pretrain learning_rate: pretrain_lr, k: 1, epochs: pretraining_epochs, verbose: false
-    
-    # fine-tuning (DBNSupervisedFineTuning)
-    dbn.finetune learning_rate: finetune_lr, epochs: finetune_epochs, verbose: false
+	# pre-training (TrainUnsupervisedDBN)
+	dbn.pretrain learning_rate: pretrain_lr, k: 1, epochs: pretraining_epochs, verbose: false
+	
+	# fine-tuning (DBNSupervisedFineTuning)
+	dbn.finetune learning_rate: finetune_lr, epochs: finetune_epochs, verbose: false
 
-    # test
-    x = Shark::RealMatrix.new [
-    	[1, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0],
-        [1, 1, 1, 1, 1, 0]
-    ]
-    puts dbn.predict(x)
+	# test
+	x = Shark::RealMatrix.new [
+		[1, 1, 0, 0, 0, 0],
+	    [0, 0, 0, 1, 1, 0],
+	    [1, 1, 1, 1, 1, 0]
+	]
+	puts dbn.predict(x)
 end

@@ -8,6 +8,10 @@ module MatrixInspector
 	def to_s
 		"["+self.each_row.map {|i| i.to_s}.join("\n ")+"]"
 	end
+
+	def to_blas_type
+		self
+	end
 protected
 	def inspect_helper
 		["@data =","[" + self.to_a.map {|i| "["+i.join(", ") + "]"}.join(" ; ")+ "]"]
@@ -87,6 +91,10 @@ module ArrayInspector
 
 	def to_s
 		"["+self.each.map {|i| (i < 0 ? "" : " ") + sprintf("%.2f", i)}.join(" ")+"]"
+	end
+
+	def to_blas_type
+		self
 	end
 
 protected

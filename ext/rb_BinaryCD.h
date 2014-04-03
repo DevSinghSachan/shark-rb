@@ -17,6 +17,7 @@ class rb_BinaryCD {
 	public:
 		static VALUE rb_class();
 		BinaryCD& objective();
+		BinaryCD * getData();
 		rb_BinaryCD(BinaryRBM &);
 };
 
