@@ -69,6 +69,12 @@ You can now use it for predictions:
 We find that the sample `[1, 1, 0, 0, 0, 0]` seems to have come from the first 3 vectors rather than the last 3 :)
 
 
+Bugs
+----
+
+This implementation has a weight matrix *W* that has dimensions **hidden ⨉ visible**, thereby changing some of the learning that needs to happen. This effect is currently corrected by passing a full stochastic pass to the Logistic Regression layer, however this is an overfitting, and is not necessary typically. Thus by incremental changes we hope to make this additional fitting step dissapear.
+
+
 
 Tests
 -----
