@@ -8,9 +8,7 @@ module MatrixInspector
 	def to_s
 		"["+self.each_row.map {|i| i.to_s}.join("\n ")+"]"
 	end
-
 protected
-
 	def inspect_helper
 		["@data =","[" + self.to_a.map {|i| "["+i.join(", ") + "]"}.join(" ; ")+ "]"]
 	end

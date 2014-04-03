@@ -4,12 +4,15 @@ class Optimizer
 			# TODO: implement this in C++ perhaps?
 			attr_accessor :parameters
 			attr_accessor :bias
-
+			attr_accessor :input
+			
 			attr_reader   :number_of_inputs
 			alias :input_size :number_of_inputs
 			
 			attr_reader   :number_of_outputs
 			alias :output_size :number_of_outputs
+
+			alias :weight_matrix :parameters
 
 			def initialize opts={}
 				@number_of_inputs  = opts[:input_size]
@@ -25,16 +28,13 @@ class Optimizer
 			end
 
 			def output input=nil
-				sigmoid((input ? input : @input) * ~@parameters + @bias)
+				@input = input ? input : @input
+				sigmoid(@input * ~@parameters + @bias)
 			end
 
 			def sample_h_given_v inputlayer=nil
-				mean = nil
-				if inputlayer
-					mean = output inputlayer
-				else
-					mean = output
-				end
+				@input = inputlayer ? inputlayer : @input
+				mean = output()
 				binomial   = Shark::RNG::Binomial.new
 				binomial.n = 1
 				if mean.size.is_a? Array

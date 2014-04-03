@@ -20,6 +20,8 @@ class Optimizer
         attr_reader   :number_of_inputs
         attr_reader   :number_of_outputs
 
+        attr_accessor :input
+
         def initialize opts={}
             @input             = opts[:samples]
             @labels            = opts[:labels]
@@ -28,21 +30,6 @@ class Optimizer
             @parameters        = Shark::RealMatrix.new @number_of_inputs, @number_of_outputs
             @bias              = Shark::RealVector.new @number_of_outputs
         end
-
-        # deprecated Softmax, causes numerical errors... why? who knows. TODO: find out why. (March 5th 2014)
-        # def softmax x
-        #     if x.is_a?(Array) then return softmax(x.to_realvector) end
-        #     e = (x - x.max).exp
-        #     case e
-        #     when Shark::RealVector, Shark::RealVectorReference, Shark::RealMatrixColumn, Shark::RealMatrixRow
-        #         # if e.to_a.any? {|i| i.nan?} then raise StandardError.new "Has NaN, array case #{e.to_a}" end
-        #         e / e.sum  # sum columns...
-        #     else
-        #         # if e.to_a.flatten.any? {|i| i.nan?} then raise StandardError.new "e contains NaN, #{e.to_a}" end
-        #         # if e.sum(axis:1).to_a.any? {|i| i.nan?} then raise StandardError.new "e sum contains NaN, #{e.to_a}" end
-        #         e / e.sum(axis:1)
-        #     end
-        # end
 
         def output x
             if x.is_a?(Array)
@@ -61,15 +48,16 @@ class Optimizer
 
             p_y_given_x  = output @input
             d_y          = @labels - p_y_given_x
-            @parameters += (lr * (~@input * d_y) - (lr * l2_reg * @parameters))
-            @bias       += (lr * d_y.mean(axis:0))
+            @parameters += lr * ((~@input) * d_y) - lr * l2_reg * @parameters
+            @bias       += lr * d_y.mean(axis:0)
+            if opts[:verbose] then puts "Cost is #{negative_log_likelihood}" end
         end
 
         def negative_log_likelihood
             activation = output @input
             # cross entropy
-            (
-                -(
+            -(
+                (
                     @labels.hadamard(activation.log) +
                     (-@labels+1.0).hadamard((-activation + 1.0).log)
                 ).sum(axis:1)
@@ -110,10 +98,8 @@ def test_lr(learning_rate=0.01, n_epochs=10)
 
     # train
     n_epochs.times do |epoch|
-        classifier.train learning_rate: learning_rate
+        classifier.train learning_rate: learning_rate, verbose: false
         learning_rate *= 0.95
-        # cost = classifier.negative_log_likelihood
-        # print 'Training epoch %d, cost is %f' % [epoch, cost], "\n"
     end
 
     # test
@@ -123,8 +109,7 @@ def test_lr(learning_rate=0.01, n_epochs=10)
         [1, 1, 1, 1, 1, 0]
     ]
 
-    print "classifier.predict(x).to_a => \n", classifier.predict(x).to_s, "\n"
-    puts classifier.predict([1, 1, 0, 0, 0, 0].to_realvector)
+    print "classifier.predict(x) => \n", classifier.predict(x).to_s, "\n"
 end
 
 if __FILE__ == $0

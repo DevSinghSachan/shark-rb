@@ -1,6 +1,15 @@
 class Optimizer
 	module RBM
 		class BinaryRBM
+
+			def input=(input)
+				@input = input
+			end
+
+			def input
+				@input
+			end
+
 			def sigmoid x
 				((-x).exp + 1.0).inverse
 			end
@@ -11,17 +20,24 @@ class Optimizer
 				end
 			end
 
-			def get_reconstruction_cross_entropy input
+			def sigmoid_activation_hidden input
 				pre_sigmoid_activation_h = input * ~weight_matrix + hidden_neurons.bias
-				sigmoid_activation_h     = sigmoid(pre_sigmoid_activation_h)
-				
-				pre_sigmoid_activation_v = sigmoid_activation_h * weight_matrix + visible_neurons.bias
-				sigmoid_activation_v     = sigmoid(pre_sigmoid_activation_v)
+				sigmoid(pre_sigmoid_activation_h)
+			end
+
+			def sigmoid_activation_visible input
+				pre_sigmoid_activation_v = input * weight_matrix + visible_neurons.bias
+				sigmoid(pre_sigmoid_activation_v)
+			end
+
+			def get_reconstruction_cross_entropy input
+				sigmoid_activation_h     = sigmoid_activation_hidden input
+				sigmoid_activation_v     = sigmoid_activation_visible sigmoid_activation_h
 
 				- (
 						(
-							input * (~sigmoid_activation_v).log +
-						    (-input + 1.0) * ~(-sigmoid_activation_v + 1.0).log
+							input.hadamard(sigmoid_activation_v.log) +
+						    (-input + 1.0).hadamard((-sigmoid_activation_v + 1.0).log)
 					    ).sum(axis:1)
 				).mean
 			end
@@ -73,10 +89,11 @@ class Optimizer
 			end
 
 			def contrastive_divergence opts={}
+				if opts[:input] then @input = opts[:input] end
 				opts = {k: 1, learning_rate: 0.1}.merge opts
-				k, lr, input = opts[:k], opts[:learning_rate], opts[:input]
-				raise TrainingError.new "Cannot perform contrastive divergence without data. #contrastive_divergence {:input => <data>}" if input.nil?
-				*, ph_sample = sample_h_given_v opts[:input]
+				k, lr = opts[:k], opts[:learning_rate]
+				raise TrainingError.new "Cannot perform contrastive divergence without data. #contrastive_divergence {:input => <data>}" if @input.nil?
+				*, ph_sample = sample_h_given_v @input
 				chain_start = ph_sample
 
 				nv_means, nv_samples, nh_means, nh_samples = [nil, nil, nil, nil]
@@ -88,12 +105,14 @@ class Optimizer
 						nv_means, nv_samples, nh_means, nh_samples = gibbs_hvh nh_samples
 					end
 				end
-				self.weight_matrix   += lr * (
-						((~input) * ph_sample) -
+				
+				self.weight_matrix   += lr * ~(
+						((~@input) * ph_sample) -
 						((~nv_samples) * nh_means)
 					)
-				visible_neurons.bias += lr * (input - nv_samples).mean(axis:0)
+				visible_neurons.bias += lr * (@input - nv_samples).mean(axis:0)
 				hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
+				if opts[:verbose] then puts "Pre-training layer, cost = #{get_reconstruction_cross_entropy input}" end
 			end
 
 			def propdown h
@@ -138,27 +157,32 @@ class Optimizer
 					input_size         = k == 0 ? @input_size : hidden_layer_array[k-1]
 					# construct sigmoid_layer
 
+					if k==0
+						layer_input = @input
+					else
+						layer_input = @sigmoid_layers[k-1].sample_h_given_v()
+					end
+
 					@sigmoid_layers[k] = HiddenLayer.new input_size: input_size,
 														 output_size: layer_size,
 														 activation: :sigmoid,
-														 input: (k==0 ? @input : @sigmoid_layers[k-1].sample_h_given_v)
+														 input: layer_input
 					# construct rbm_layer
 					@rbm_layers[k]     = Shark::RBM::BinaryRBM.new
+					@rbm_layers[k].input = layer_input
 					@rbm_layers[k].set_structure hidden: layer_size,
 												 visible: input_size
+					@rbm_layers[k].initialize_random_uniform 1.0 / input_size
 					@sigmoid_layers[k].parameters = @rbm_layers[k].weight_matrix
 					@sigmoid_layers[k].bias       = @rbm_layers[k].hidden_neurons.bias
 				end
-
-				# TODO: add log layer too for logistic regression (Feb 13th 2014).
 			end
 
 			def create_logistic_regression_layer
-				@log_layer = LogisticRegression.new samples: @sigmoid_layers[-1].sample_h_given_v,
+				@log_layer = LogisticRegression.new samples: @sigmoid_layers[-1].sample_h_given_v(),
                                             		labels: @labels,
                                             		number_of_inputs: @sigmoid_layers.last.output_size,
                                             		number_of_outputs: @output_size
-
 			end
 
 			def initialize(opts={})
@@ -173,10 +197,11 @@ class Optimizer
 			def pretrain opts={}
 				data_present!
 				layer_input = nil
+				# prev_input = nil
 				@rbm_layers.each_with_index do |layer, l| # layer-wise
 					# initialize the layer
-					cd = Optimizer::BinaryCD.new layer
-					cd.k = opts[:k]
+					# cd = Optimizer::BinaryCD.new layer
+					# cd.k = opts[:k]
 					# collect previous activations, or input data
 					if l == 0
 						layer_input = @input
@@ -184,57 +209,48 @@ class Optimizer
 						layer_input = @sigmoid_layers[l-1].sample_h_given_v layer_input
 					end
 
+					# in the original this does not exist, yet the result is not inverted? why, who knows?
+					@sigmoid_layers[l].input = layer_input
+
 					opts[:epochs].times do |epoch| # training epochs
 						layer.contrastive_divergence input: layer_input,
-													 learning_rate: opts[:learning_rate]
+													 k: opts[:k],
+													 learning_rate: opts[:learning_rate],
+													 verbose: opts[:verbose]
 					end
 
+					# cd = Optimizer::BinaryCD.new layer
+					# cd.k = opts[:k]
 					# cd.data = layer_input.to_unlabeled_data
-					# # optimize this layer:
+					# # # optimize this layer:
 					# optimizer = Shark::Algorithms::SteepestDescent.new
 					# optimizer.momentum      = opts[:momentum] || 0.0
 					# optimizer.learning_rate = opts[:learning_rate]
-
-					# # print "l                        => ", l, "\n"
-					# # print "layer.weight_matrix.size => ", layer.weight_matrix.size, "\n"
-					# # print "layer_input.size         => ", layer_input.size, "\n"
-
-
 					# optimizer.init cd
-
-					# # may need to be modified...
-					# # costly methodology, should have unlabeleddata everywhere instead...
-					# # print "layer_input.size                => ", layer_input.size, "\n"
-					# # print "layer.number_of_visible_neurons => ", layer.number_of_visible_neurons, "\n"
-					# # print "layer.number_of_hidden_neurons  => ", layer.number_of_hidden_neurons, "\n"
-
 					# opts[:epochs].times do |epoch| # training epochs
 					# 	# replace by contrastive divergence
 					# 	optimizer.step cd
-					# 	# print "(#{epoch}, #{l}) layer.weight_matrix => \n", layer.weight_matrix.reduce([]) {|i,v| [v.to_a.map {|i| sprintf('%.2f', i).to_f}.inspect] + i}.join("\n"), "\n"
-					# 	# cost = layer.get_reconstruction_cross_entropy(layer_input)
-					# 	# print 'Pre-training layer %d, epoch %d, cost %f' % [l, epoch, cost], "\n"
+					# 	puts "Pre-training layer #{l}, epoch #{epoch}, cost #{layer.get_reconstruction_cross_entropy layer_input}"
 					# end
 				end
 			end
 
 			def predict x
 				layer_input = x
-				@sigmoid_layers.each_with_index do |layer, l|
+				@sigmoid_layers.each do |layer|
 					layer_input = layer.output layer_input
 				end
 				@log_layer.predict(layer_input)
 			end
 
 			def finetune opts={}
-				layer_input = @sigmoid_layers.last.sample_h_given_v
+				layer_input = @sigmoid_layers.last.sample_h_given_v()
 				# train prediction layer
 				lr = opts[:learning_rate] || 0.01
-				(opts[:epochs] || 200).times do |epoch|
-					@log_layer.train learning_rate: lr, input: layer_input
+				@log_layer.input = layer_input
+				(opts[:epochs] || 100).times do |epoch|
+					@log_layer.train learning_rate: lr, verbose: opts[:verbose]
 					lr *= 0.95
-					# cost = @log_layer.negative_log_likelihood
-			  #       print 'Training epoch %d, cost is %f' % [epoch, cost], "\n"
 				end
 			end
 
@@ -272,6 +288,7 @@ class Optimizer
 end
 
 def test_dbn pretrain_lr=0.1, pretraining_epochs=1000, k=1, finetune_lr=0.1, finetune_epochs=200
+	# Shark::RNG.seed 120
 
 	x = Shark::RealMatrix.new [
 		[1,1,1,0,0,0],
@@ -282,6 +299,7 @@ def test_dbn pretrain_lr=0.1, pretraining_epochs=1000, k=1, finetune_lr=0.1, fin
         [0,0,1,1,0,0],
         [0,0,1,1,1,0]
     ]
+    
     y = Shark::RealMatrix.new [
     	[1, 0],
     	[1, 0],
@@ -292,14 +310,14 @@ def test_dbn pretrain_lr=0.1, pretraining_epochs=1000, k=1, finetune_lr=0.1, fin
         [0, 1]
     ]
 
-    dbn = Shark::RBM::DBN.new samples: x, labels: y, input_size:  6, hidden_layers:  [3, 3], output_size: 2
+    dbn = Shark::RBM::DBN.new samples: x, labels: y, input_size:  x.size2, hidden_layers:  [3, 3], output_size: y.size2
     # so support for RNG inputs yet
 
     # pre-training (TrainUnsupervisedDBN)
-    dbn.pretrain learning_rate: pretrain_lr, k: 1, epochs: pretraining_epochs
+    dbn.pretrain learning_rate: pretrain_lr, k: 1, epochs: pretraining_epochs, verbose: false
     
     # fine-tuning (DBNSupervisedFineTuning)
-    dbn.finetune learning_rate: finetune_lr, epochs: finetune_epochs
+    dbn.finetune learning_rate: finetune_lr, epochs: finetune_epochs, verbose: false
 
     # test
     x = Shark::RealMatrix.new [
@@ -307,6 +325,5 @@ def test_dbn pretrain_lr=0.1, pretraining_epochs=1000, k=1, finetune_lr=0.1, fin
         [0, 0, 0, 1, 1, 0],
         [1, 1, 1, 1, 1, 0]
     ]
-
     puts dbn.predict(x)
 end

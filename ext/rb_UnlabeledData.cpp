@@ -268,8 +268,8 @@ void Init_UnlabeledData () {
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "length", (rb_method)method_unlabeleddata_length, 0);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "number_of_batches", (rb_method)method_unlabeleddata_batchlength, 0);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "empty?",     (rb_method)method_unlabeleddata_empty, 0);
-	rb_define_method(rb_optimizer_unlabeleddata_klass, "element",    (rb_method)method_unlabeleddata_query, 1);
-	rb_define_alias(rb_optimizer_unlabeleddata_klass, "[]", "element");
+	rb_define_method(rb_optimizer_unlabeleddata_klass, "[]",    (rb_method)method_unlabeleddata_query, 1);
+	rb_define_alias(rb_optimizer_unlabeleddata_klass, "element", "[]");
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "[]=",        (rb_method)method_unlabeleddata_insert, 2);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "fill",        (rb_method)method_unlabeleddata_fill, 1);
 	rb_define_method(rb_optimizer_unlabeleddata_klass, "remove_NaN", (rb_method)method_unlabeleddata_remove_NaN, -1);

@@ -25,8 +25,6 @@ describe 'Binary RBM' do
 			@rbm.contrastive_divergence input: @data,
 										learning_rate: @learning_rate,
 										k: @k
-			cost = @rbm.get_reconstruction_cross_entropy(@data)
-			print 'Pre-training epoch %d, cost %f' % [epoch, cost], "\n"
 		end
 
 		@v = Shark::RealMatrix.new [
@@ -98,7 +96,7 @@ describe 'Binary RBM' do
 		it 'should have the same sampling using hidden units on average' do
 			@hsample = Shark::RealMatrix.new [1,1]
 			@samples = Shark::RealMatrix.new 10000, 6
-			10000.times do |i|
+			10_000.times do |i|
 				@samples[i] = @rbm.sample_v_given_h(@hsample).last[0]
 			end
 			(
@@ -115,7 +113,7 @@ describe 'Binary RBM' do
 
 		it 'should have the same sampling using visible units on average' do
 			@samples = Shark::RealMatrix.new 10000, 2
-			10000.times do |i|
+			10_000.times do |i|
 				@samples[i] = @rbm.sample_h_given_v(@v[0]).last[0]
 			end
 			(
@@ -123,7 +121,7 @@ describe 'Binary RBM' do
 					0.9978,
 					0.0
 				]
-			).sum.should be_within(1e-03).of(0)
+			).sum.should be_within(1e-02).of(0)
 		end
 
 	end
@@ -177,6 +175,124 @@ describe 'Binary RBM' do
 					)**2
 				).sum
 			).should be_within(2e-02).of(0)
+		end
+
+		it 'should be able to update the bias' do
+			h_bias = @rbm.hidden_neurons.bias.deep_copy()
+			@rbm.hidden_neurons.bias += 2
+			@rbm.hidden_neurons.bias.should_not == h_bias
+			@rbm.hidden_neurons.bias.should == (h_bias + 2)
+			v_bias = @rbm.visible_neurons.bias.deep_copy()
+			@rbm.visible_neurons.bias += 2
+			@rbm.visible_neurons.bias.should_not == v_bias
+			@rbm.visible_neurons.bias.should == (v_bias + 2)
+		end
+
+		it 'should be able to update the weights' do
+			weight_matrix = @rbm.weight_matrix.deep_copy()
+			@rbm.weight_matrix += 2
+			@rbm.weight_matrix().should_not == weight_matrix
+			@rbm.weight_matrix().should == (weight_matrix + 2)
+		end
+
+		it 'should estimate cross-entropy cost correctly' do
+			rbm = Shark::RBM::BinaryRBM.new
+			training_data = Shark::RealMatrix.new [
+				[1,1,1,0,0,0],
+				[1,1,1,0,0,0],
+				[1,0,1,0,0,0],
+				[1,1,1,0,0,0],
+				[0,0,1,1,1,0],
+				[0,0,1,1,0,0],
+				[0,0,1,1,1,0]
+			]
+			rbm.set_structure visible: 6, hidden: 3
+			rbm.weight_matrix = Shark::RealMatrix.new [
+				[-7.04423364,-5.71574815, 3.85495703, 6.54276807, 1.24076955,-4.26321733],
+				[ 3.05550762, 0.43632773, 2.51919426,-3.49456278,-4.12685438,-3.22315804],
+				[ 4.76580181, 1.86983584, 1.39850034,-5.46176108,-3.95184239,-2.84229769]
+			]
+			rbm.visible_neurons.bias = [-0.05714286,-0.51428571, 1.37142857, 0.22857143,-0.41428571,-1.04285714]
+			rbm.hidden_neurons.bias = [-0.28860541,-0.13251746,-0.27677419]
+
+			sigmoid_activation_h = rbm.sigmoid_activation_hidden training_data
+			Math.sqrt(
+				(
+					(
+						sigmoid_activation_h -
+						Shark::RealMatrix.new(
+							[
+								[ 1.01674721e-04,  9.97208866e-01,  9.99572600e-01],
+								[ 1.01674721e-04,  9.97208866e-01,  9.99572600e-01],
+								[ 2.99481485e-02,  9.95688654e-01,  9.97233848e-01],
+								[ 1.01674721e-04,  9.97208866e-01,  9.99572600e-01],
+								[ 9.99988229e-01,  5.29996835e-03,  2.50480915e-04],
+								[ 9.99959295e-01,  2.48265216e-01,  1.28683205e-02],
+								[ 9.99988229e-01,  5.29996835e-03,  2.50480915e-04]
+							]
+						)
+					)**2
+				).sum
+			).should be_within(1e-06).of(0)
+			sigmoid_activation_v = rbm.sigmoid_activation_visible sigmoid_activation_h
+			Math.sqrt(
+				(
+					(
+						sigmoid_activation_v -
+						Shark::RealMatrix.new(
+							[
+								[9.99570683e-01, 8.56838942e-01, 9.94942869e-01, 1.64078901e-04, 2.07608525e-04, 8.25632134e-04],
+							    [9.99570683e-01, 8.56838942e-01, 9.94942869e-01, 1.64078901e-04, 2.07608525e-04, 8.25632134e-04],
+							    [9.99461857e-01, 8.33917298e-01, 9.95458031e-01, 2.03094855e-04, 2.18807355e-04, 7.35495803e-04],
+							    [9.99570683e-01, 8.56838942e-01, 9.94942869e-01, 1.64078901e-04, 2.07608525e-04, 8.25632134e-04],
+							    [8.37789327e-04, 1.97110939e-03, 9.94727909e-01, 9.98832093e-01, 6.90745560e-01, 4.85046293e-03],
+							    [1.86768596e-03, 2.24362884e-03, 9.97184100e-01, 9.97079894e-01, 4.38075890e-01, 2.14455883e-03],
+							    [8.37789327e-04, 1.97110939e-03, 9.94727909e-01, 9.98832093e-01, 6.90745560e-01, 4.85046293e-03]
+							]
+						)
+					)**2
+				).sum
+			).should be_within(1e-06).of(0)
+			cost = rbm.get_reconstruction_cross_entropy training_data
+			cost.should be_within(1e-06).of(0.520249097998)
+			# one step of contrastive divergence (probabilities ignored):
+			ph_sample = Shark::RealMatrix.new [
+				[0,1,1],
+				[0,1,1],
+				[0,1,1],
+				[0,1,1],
+				[1,0,0],
+				[1,1,0],
+				[1,0,0]
+			]
+ 			nh_means = Shark::RealMatrix.new [
+ 				[1.01674721e-04, 9.97208866e-01, 9.99572600e-01],
+				[1.01674721e-04, 9.97208866e-01, 9.99572600e-01],
+				[1.01674721e-04, 9.97208866e-01, 9.99572600e-01],
+				[1.01674721e-04, 9.97208866e-01, 9.99572600e-01],
+				[9.99988229e-01, 5.29996835e-03, 2.50480915e-04],
+				[9.99959295e-01, 2.48265216e-01, 1.28683205e-02],
+				[9.99959295e-01, 2.48265216e-01, 1.28683205e-02]
+			]
+			nv_samples = Shark::RealMatrix.new [
+				[1,1,1,0,0,0],
+				[1,1,1,0,0,0],
+				[1,1,1,0,0,0],
+				[1,1,1,0,0,0],
+				[0,0,1,1,1,0],
+				[0,0,1,1,0,0],
+				[0,0,1,1,0,0]
+			]
+			lr = 0.1
+			rbm.weight_matrix   += lr * ~(
+					((~training_data) * ph_sample) -
+					((~nv_samples) * nh_means)
+				)
+			rbm.visible_neurons.bias += lr * (training_data - nv_samples).mean(axis:0)
+			rbm.hidden_neurons.bias  += lr * (ph_sample - nh_means).mean(axis:0)
+			cost = rbm.get_reconstruction_cross_entropy training_data
+			cost.should be_within(1e-06).of(0.501913898573)
+
 		end
 	end
 

@@ -15,6 +15,21 @@ VALUE method_vector_get_sqrt (VALUE self) {
 }
 
 template<class Obtype>
+VALUE method_vector_repeat (VALUE self, VALUE rb_amount) {
+	Check_Type(rb_amount, T_FIXNUM);
+	int amount = NUM2INT(rb_amount);
+	if (amount < 0)
+		rb_raise(rb_eArgError, "Can only repeat a vector by a positive amount.");
+	Obtype *m;
+	Data_Get_Struct(self, Obtype, m);
+	// ideally this would be a more referential matrix...
+	return wrap_pointer<rb_RealMatrix>(
+		rb_RealMatrix::rb_class(),
+		new rb_RealMatrix(shark::blas::repeat(*(m->getData()), amount))
+		);
+}
+
+template<class Obtype>
 static shark::RealVector round(Obtype & _vec) {
 
     shark::RealVector _rounded(_vec);
@@ -853,7 +868,7 @@ VALUE method_vector_soft_eql(VALUE self, VALUE rb_other) {
 	if (TYPE(rb_other) == T_DATA) {
 		VALUE other_class = CLASS_OF(rb_other);
 		if (other_class == rb_RealVector::rb_class()) {
-			return method_vector_compare<Obtype, Obtype>(self, rb_other);
+			return method_vector_compare<Obtype, rb_RealVector>(self, rb_other);
 		} else if (other_class == rb_RealVectorReference::rb_class()) {
 			return method_vector_compare<Obtype, rb_RealVectorReference>(self, rb_other);
 		} else if (other_class == rb_RealMatrixColumn::rb_class()) {
@@ -887,6 +902,7 @@ void Init_VectorMinMethods () {
 	Init_VectorLength<Obtype>();
 	Init_DatatypeDeepCopy<Obtype, rb_RealVector>();
 	rb_define_method(Obtype::rb_class(), "to_pgm", (rb_method)method_vector_export_pgm<Obtype>,1);
+	rb_define_method(Obtype::rb_class(), "repeat", (rb_method)method_vector_repeat<Obtype>,1);
 	rb_define_method(Obtype::rb_class(), "sqrt", (rb_method)method_vector_get_sqrt<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "sum", (rb_method)method_vector_get_sum<Obtype>,0);
 	rb_define_method(Obtype::rb_class(), "mean", (rb_method)method_vector_get_mean<Obtype>,0);

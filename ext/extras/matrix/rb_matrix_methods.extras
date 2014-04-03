@@ -175,11 +175,6 @@ VALUE method_matrix_hadamard_product (VALUE self, VALUE rb_other) {
 				rb_RealMatrix::rb_class(),
 				new rb_RealMatrix(*(m->getData()) * other)
 			);
-		} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
-			return wrap_pointer<rb_RealMatrix>(
-				rb_RealMatrix::rb_class(),
-				new rb_RealMatrix(*(m->getData()) * trans(other))
-			);
 		} else {
 			rb_raise(rb_eArgError, "The %s you are hadamard producting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 		}
@@ -205,8 +200,6 @@ VALUE method_matrix_hadamard_product_equals (VALUE self, VALUE rb_other) {
 		RealMatrix other = rb_ary_to_realmatrix(rb_other);
 		if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
 			*(m->getData()) *= other;
-		} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
-			*(m->getData()) *= trans(other);
 		} else {
 			rb_raise(rb_eArgError, "The %s you are hadamard producting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 		}
@@ -678,11 +671,6 @@ static VALUE add_matrix_with_matrix(VALUE self, VALUE rb_other) {
 			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) + *(other->getData()))
 			);
-	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
-		return wrap_pointer<rb_RealMatrix>(
-			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) + trans(*(other->getData())))
-			);
 	} else {
 		rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
@@ -695,18 +683,13 @@ static VALUE add_matrix_with_vector(VALUE self, VALUE rb_other) {
 	Data_Get_Struct(self, Obtype, m);
 	vectorType *other;
 	Data_Get_Struct(rb_other, vectorType, other);
-	if (other->getData()->size() == m->getData()->size1()) {
-		return wrap_pointer<rb_RealMatrix>(
-			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) + trans(shark::blas::repeat(*(other->getData()), m->getData()->size2())))
-		);
-	} else if (other->getData()->size() == m->getData()->size2()) {
+	if (other->getData()->size() == m->getData()->size2()) {
 		return wrap_pointer<rb_RealMatrix>(
 			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) + shark::blas::repeat(*(other->getData()), m->getData()->size1()))
 		);
 	} else {
-		rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+		rb_raise(rb_eArgError, "The %s you are summing doesn't have the same dimensions (%lu) vs (%lu x %lu) as the 2nd dimension of %s, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
@@ -722,13 +705,8 @@ static VALUE subtract_matrix_with_matrix(VALUE self, VALUE rb_other) {
 			rb_RealMatrix::rb_class(),
 			new rb_RealMatrix(*(m->getData()) - *(other->getData()))
 			);
-	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
-		return wrap_pointer<rb_RealMatrix>(
-			rb_RealMatrix::rb_class(),
-			new rb_RealMatrix(*(m->getData()) - trans(*(other->getData())))
-			);
 	} else {
-		rb_raise(rb_eArgError, "The %s you are substracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+		rb_raise(rb_eArgError, "The %s you are substracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as %s, so their difference is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
@@ -750,7 +728,7 @@ static VALUE subtract_matrix_with_vector(VALUE self, VALUE rb_other) {
 			new rb_RealMatrix(*(m->getData()) - shark::blas::repeat(*(other->getData()), m->getData()->size1()))
 		);
 	} else {
-		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
+		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu) vs (%lu x %lu) as the 2nd dimension of %s dimension, so their difference is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
 	return Qnil;
 }
@@ -898,9 +876,6 @@ static VALUE add_equals_matrix_with_matrix(VALUE self, VALUE rb_other) {
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		*(m->getData()) += *(other->getData());
 		return self;
-	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
-		*(m->getData()) += trans(*(other->getData()));
-		return self;
 	} else {
 		rb_raise(rb_eArgError, "The %s you are adding doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 	}
@@ -913,10 +888,7 @@ static VALUE add_equals_matrix_with_vector(VALUE self, VALUE rb_other) {
 	Data_Get_Struct(self, Obtype, m);
 	vectorType *other;
 	Data_Get_Struct(rb_other, vectorType, other);
-	if (other->getData()->size() == m->getData()->size1()) {
-		*(m->getData()) += trans(shark::blas::repeat(*(other->getData()), m->getData()->size2()));
-		return self;
-	} else if (other->getData()->size() == m->getData()->size2()) {
+	if (other->getData()->size() == m->getData()->size2()) {
 		*(m->getData()) += shark::blas::repeat(*(other->getData()), m->getData()->size1());
 		return self;
 	} else {
@@ -933,9 +905,6 @@ static VALUE subtract_equals_matrix_with_matrix(VALUE self, VALUE rb_other) {
 	Data_Get_Struct(rb_other, matType, other);
 	if (other->getData()->size1() == m->getData()->size1() && other->getData()->size2() == m->getData()->size2()) {
 		*(m->getData()) -= *(other->getData());
-		return self;
-	} else if (other->getData()->size2() == m->getData()->size1() && other->getData()->size1() == m->getData()->size2()) {
-		*(m->getData()) -= trans(*(other->getData()));
 		return self;
 	} else {
 		rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other->getData()->size1(), other->getData()->size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
@@ -1036,8 +1005,6 @@ VALUE method_matrix_subtract_equals (VALUE self, VALUE rb_other) {
 			RealMatrix other = rb_ary_to_realmatrix(rb_other);
 			if (other.size1() == m->getData()->size1() && other.size2() == m->getData()->size2()) {
 				*(m->getData()) -= other;
-			} else if (other.size2() == m->getData()->size1() && other.size1() == m->getData()->size2()) {
-				*(m->getData()) -= trans(other);
 			} else {
 				rb_raise(rb_eArgError, "The %s you are subtracting doesn't have the same dimensions (%lu x %lu) vs (%lu x %lu) as either %s dimension, so their sum is infeasible using our current (human) technology.", rb_obj_classname(rb_other), other.size1(), other.size2(), m->getData()->size1(), m->getData()->size2(), rb_class2name(Obtype::rb_class()));
 			}
