@@ -1,6 +1,6 @@
 require_relative '../deep_belief_network'
 
-describe 'Binary RBM' do
+describe 'Binary Restricted Boltzmann Machine' do
 
 	before(:all) do
 

@@ -1,9 +1,6 @@
 class Optimizer
 	module RBM
 		class DBN
-			class TrainingError < ArgumentError
-			end
-
 			# Deep Belief Network.
 
 			def create_rbms_from_layers hidden_layer_array
@@ -25,7 +22,7 @@ class Optimizer
 														 output_size: layer_size,
 														 activation: :sigmoid,
 														 input: layer_input,
-														 tranpose: @rbm_type == Shark::RBM::BinaryRBM
+														 transpose: @rbm_type == Shark::RBM::BinaryRBM
 					# construct rbm_layer
 					@rbm_layers[k]       = @rbm_type.new
 					@rbm_layers[k].input = layer_input
@@ -49,7 +46,7 @@ class Optimizer
 				@input_size     = opts[:input_size]
 				@output_size    = opts[:output_size]
 				@labels         = opts[:labels]
-				@rbm_type       = opts[:rbm_type] || Shark::RBM::BinaryRBM
+				@rbm_type       = opts[:rbm_type] || Shark::RBM::RBM
 				create_rbms_from_layers opts[:hidden_layers]
 				create_logistic_regression_layer
 			end
@@ -115,7 +112,7 @@ class Optimizer
 			end
 
 			def data_present!
-				raise TrainingError.new "Cannot pretrain without data. #data=(data)" if @input.nil?
+				raise Shark::RBM::TrainingError.new "Cannot pretrain without data. #data=(data)" if @input.nil?
 			end
 
 			def data=(new_data)
@@ -125,6 +122,8 @@ class Optimizer
 			def data
 				@input
 			end
+
+			attr_reader :rbm_type
 
 			attr_reader :sigmoid_layers
 			attr_reader :rbm_layers

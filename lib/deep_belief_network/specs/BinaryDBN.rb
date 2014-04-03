@@ -1,6 +1,6 @@
 require_relative '../deep_belief_network'
 
-describe 'Deep Belief Network' do
+describe 'Binary Deep Belief Network' do
 
 	describe 'Prediction layer' do
 		before(:all) do
@@ -32,13 +32,14 @@ describe 'Deep Belief Network' do
 			@pretraining_epochs = 1000
 			@finetune_epochs    = 200
 
-			@rbm_type = Shark::RBM::RBM
+			@rbm_type = Shark::RBM::BinaryRBM
 
 			@dbn = Shark::RBM::DBN.new samples: @training_data,
 									   labels: @training_labels,
 									   input_size:  @training_data.size2,
 									   hidden_layers:  [3, 3],
-									   output_size: @training_labels.size2
+									   output_size: @training_labels.size2,
+									   rbm_type: @rbm_type
 
 		    # pre-training (TrainUnsupervisedDBN)
 		    @dbn.pretrain learning_rate: @pretrain_lr, k: @k, epochs: @pretraining_epochs, verbose: false
@@ -65,9 +66,9 @@ describe 'Deep Belief Network' do
 
 		it 'should label accordingly' do
 			@dbn.rbm_layers[0].weight_matrix.should       == @dbn.sigmoid_layers[0].weight_matrix.to_a
-			@dbn.rbm_layers[0].hbias.should               == @dbn.sigmoid_layers[0].bias
+			@dbn.rbm_layers[0].hidden_neurons.bias.should == @dbn.sigmoid_layers[0].bias
 			@dbn.rbm_layers[1].weight_matrix.should       == @dbn.sigmoid_layers[1].weight_matrix.to_a
-			@dbn.rbm_layers[1].hbias.should               == @dbn.sigmoid_layers[1].bias
+			@dbn.rbm_layers[1].hidden_neurons.bias.should == @dbn.sigmoid_layers[1].bias
 
 			@dbn.predict(@test_data[0])[0].round.should == [1.0, 0.0]
 			@dbn.predict(@test_data[1])[0].round.should == [0.0, 1.0]

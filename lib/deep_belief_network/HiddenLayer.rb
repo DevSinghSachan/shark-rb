@@ -23,7 +23,7 @@ class Optimizer
 				@number_of_inputs  = opts[:input_size]
 				@number_of_outputs = opts[:output_size]
 				@input             = opts[:input]
-				@transposed        = opts[:transpose]
+				@transpose         = opts[:transpose]
 				#@rng        = opts[:rng] || Shark::RNG.new # and set state...
 				@parameters = Shark::RealMatrix.new(@number_of_inputs, @number_of_outputs)
 				@bias       = Shark::RealVector.new(@number_of_outputs)

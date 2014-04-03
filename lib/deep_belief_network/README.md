@@ -17,6 +17,14 @@ This also introduces some new classes to the Shark namespace:
 The **DBN** class is a deep belief network: a series of stacked RBMs with a Logistic Regression step at the top.
 
 
+#### CDBN
+
+The **CDBN** class is a deep belief networ with continuous inputs. A series of stacked RBMs, with a Linear input RBM at the start.
+
+
+	dbn = Shark::RBM::CDBN input: training_data, labels: labels, layer_sizes: [5, 5]
+
+
 #### Logistic Regression
 
 The **Logisitc Regression** class is a classifier with a Softmax behavior. Here's how you set it up:
@@ -67,6 +75,10 @@ You can now use it for predictions:
 
 
 We find that the sample `[1, 1, 0, 0, 0, 0]` seems to have come from the first 3 vectors rather than the last 3 :)
+
+
+
+
 
 
 Bugs

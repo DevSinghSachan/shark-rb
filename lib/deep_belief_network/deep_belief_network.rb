@@ -5,6 +5,7 @@ require_relative 'BinaryRBM'
 require_relative 'RBM'
 require_relative 'DBN'
 require_relative 'CRBM'
+require_relative 'CDBN'
 
 if __FILE__ == $0
 	test_dbn()

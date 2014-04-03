@@ -1,25 +1,23 @@
 require_relative '../deep_belief_network'
 
-describe 'Deep Belief Network' do
+describe 'Continous Deep Belief Network' do
 
 	describe 'Prediction layer' do
 		before(:all) do
 			Shark::RNG.seed 120
 
 			@training_data = Shark::RealMatrix.new [
-				[1,1,1,0,0,0],
-				[1,1,1,0,0,0],
-				[1,0,1,0,0,0],
-				[1,1,1,0,0,0],
-				[0,0,1,1,1,0],
-				[0,0,1,1,0,0],
-				[0,0,1,1,1,0]
-			]
+				[0.4, 0.5, 0.5, 0.0, 0.0, 0.0],
+        		[0.5, 0.3, 0.5, 0.0, 0.0, 0.0],
+        		[0.4, 0.5, 0.5, 0.0, 0.0, 0.0],
+        		[0.0, 0.0, 0.5, 0.3, 0.5, 0.0],
+        		[0.0, 0.0, 0.5, 0.4, 0.5, 0.0],
+        		[0.0, 0.0, 0.5, 0.5, 0.5, 0.0]
+        	]
 
 		    @training_labels = Shark::RealMatrix.new [
 		    	[1, 0],
 		    	[1, 0],
-		        [1, 0],
 		        [1, 0],
 		        [0, 1],
 		        [0, 1],
@@ -34,10 +32,10 @@ describe 'Deep Belief Network' do
 
 			@rbm_type = Shark::RBM::RBM
 
-			@dbn = Shark::RBM::DBN.new samples: @training_data,
+			@dbn = Shark::RBM::CDBN.new samples: @training_data,
 									   labels: @training_labels,
 									   input_size:  @training_data.size2,
-									   hidden_layers:  [3, 3],
+									   hidden_layers:  [5, 5],
 									   output_size: @training_labels.size2
 
 		    # pre-training (TrainUnsupervisedDBN)
@@ -45,9 +43,9 @@ describe 'Deep Belief Network' do
 		    # fine-tuning (DBNSupervisedFineTuning)
 		    @dbn.finetune learning_rate: @finetune_lr, epochs: @finetune_epochs, verbose: false
 		    @test_data = Shark::RealMatrix.new [
-		    	[1, 1, 0, 0, 0, 0],
-		        [0, 0, 0, 1, 1, 0],
-		        [1, 1, 1, 1, 1, 0]
+				[0.5, 0.5, 0.0, 0.0, 0.0, 0.0],
+				[0.0, 0.0, 0.0, 0.5, 0.5, 0.0],
+				[0.5, 0.5, 0.5, 0.5, 0.5, 0.0]
 		    ]
 		end
 
@@ -71,8 +69,6 @@ describe 'Deep Belief Network' do
 
 			@dbn.predict(@test_data[0])[0].round.should == [1.0, 0.0]
 			@dbn.predict(@test_data[1])[0].round.should == [0.0, 1.0]
-			@dbn.predict(@test_data[0])[0][0].should > 0.8
-			@dbn.predict(@test_data[1])[0][1].should > 0.8
 		end
 
 	end
